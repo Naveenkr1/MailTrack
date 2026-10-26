@@ -47,10 +47,12 @@ router.get('/google', (req, res) => {
   authUrl.searchParams.append('redirect_uri', redirectUri);
   authUrl.searchParams.append('response_type', 'code');
 
-  // For public login: request standard non-sensitive scopes (openid email profile)
-  // This allows ANY Google account to log in freely without Google Restricted Scope verification block.
-  // Restricted scopes (gmail.modify) are only requested during mobile sync authorization.
-  const scope = 'openid email profile https://www.googleapis.com/auth/gmail.modify';
+  // For standard login: request standard non-sensitive scopes (openid email profile).
+  // This allows ANY Google user in the world to log in freely without verification blocks or test user restrictions.
+  // Restricted scopes (gmail.modify) are ONLY requested during explicit mobile sync authorization.
+  const scope = isMobileSync 
+    ? 'openid email profile https://www.googleapis.com/auth/gmail.modify'
+    : 'openid email profile';
   authUrl.searchParams.append('scope', scope);
   authUrl.searchParams.append('access_type', 'offline');
   authUrl.searchParams.append('prompt', 'consent select_account');

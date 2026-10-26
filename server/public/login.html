@@ -604,26 +604,19 @@
         </p>
       </div>
 
-      <!-- Instant Email Access (Testing / Sandbox) -->
-      <div class="instant-access-wrap">
-        <button type="button" class="instant-toggle-btn" id="toggleInstantBtn">
-          <span class="instant-toggle-text">Instant Email Access (Testing / Sandbox)</span>
-          <span class="instant-toggle-icon">
-            <svg preserveAspectRatio="none" overflow="visible" viewBox="0 0 14 14" fill="none"
-              xmlns="http://www.w3.org/2000/svg">
-              <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke-width="1.45833" stroke="#64748B" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-          </span>
-        </button>
+      <!-- OR Divider -->
+      <div style="display:flex;align-items:center;margin:22px 0 16px 0;gap:12px;width:100%;">
+        <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+        <span style="font-size:0.75rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">or sign in with email</span>
+        <div style="flex:1;height:1px;background:#e2e8f0;"></div>
+      </div>
 
-        <div class="instant-form-drawer" id="instantContainer">
-          <label for="devEmail" class="instant-label">Sign in directly with test email:</label>
-          <form id="devLoginForm" class="instant-row">
-            <input type="email" id="devEmail" class="instant-input" placeholder="e.g. user@gmail.com" required />
-            <button type="submit" class="instant-submit-btn">Sign in</button>
-          </form>
-        </div>
+      <!-- Direct Email Access -->
+      <div style="width:100%;">
+        <form id="devLoginForm" style="display:flex;gap:8px;width:100%;">
+          <input type="email" id="devEmail" class="instant-input" placeholder="e.g. name@gmail.com" required style="flex:1;padding:12px 14px;border:1px solid #cbd5e1;border-radius:12px;font-size:0.9rem;background:#f8fafc;outline:none;" />
+          <button type="submit" class="instant-submit-btn" style="background:#0f172a;color:#fff;border:none;border-radius:12px;padding:0 20px;font-weight:600;font-size:0.875rem;cursor:pointer;white-space:nowrap;transition:background 0.15s;">Continue →</button>
+        </form>
       </div>
 
     </main>
@@ -658,21 +651,6 @@
       noticeBanner.textContent = decodeURIComponent(notice);
       noticeBanner.style.display = 'flex';
     }
-
-    // Toggle Instant / Sandbox Login Drawer
-    const toggleInstantBtn = document.getElementById('toggleInstantBtn');
-    const instantContainer = document.getElementById('instantContainer');
-    toggleInstantBtn.addEventListener('click', () => {
-      const isVisible = instantContainer.classList.contains('visible');
-      if (isVisible) {
-        instantContainer.classList.remove('visible');
-        toggleInstantBtn.classList.remove('active');
-      } else {
-        instantContainer.classList.add('visible');
-        toggleInstantBtn.classList.add('active');
-        document.getElementById('devEmail').focus();
-      }
-    });
 
     // Handle Instant Email Login Submission
     document.getElementById('devLoginForm').onsubmit = async (e) => {
