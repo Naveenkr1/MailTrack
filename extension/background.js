@@ -531,37 +531,54 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === 'CREATE_TRACKED_EMAIL') {
-    const headers = { 'Content-Type': 'application/json' };
-    if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
+    (async () => {
+      await getActiveServerUrl();
+      const headers = { 'Content-Type': 'application/json' };
+      if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
+      if (request.payload && request.payload.sender && request.payload.sender.includes('@')) {
+        headers['X-MailTrack-User-Email'] = request.payload.sender;
+      }
 
-    fetch(`${activeServerUrl}/api/emails`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(request.payload)
-    })
-      .then(res => res.json())
-      .then(data => sendResponse({ success: true, data }))
-      .catch(err => sendResponse({ success: false, error: err.message }));
+      try {
+        const res = await fetch(`${activeServerUrl}/api/emails`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(request.payload)
+        });
+        const data = await res.json();
+        sendResponse({ success: true, data });
+      } catch (err) {
+        sendResponse({ success: false, error: err.message });
+      }
+    })();
     return true;
   }
 
   if (request.action === 'BIND_THREAD_ID') {
-    const headers = { 'Content-Type': 'application/json' };
-    if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
+    (async () => {
+      await getActiveServerUrl();
+      const headers = { 'Content-Type': 'application/json' };
+      if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
 
-    fetch(`${activeServerUrl}/api/emails/${encodeURIComponent(request.emailId)}/thread`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({ threadId: request.threadId, messageId: request.messageId })
-    })
-      .then(res => res.json())
-      .then(data => sendResponse(data))
-      .catch(err => sendResponse({ success: false, error: err.message }));
+      try {
+        const res = await fetch(`${activeServerUrl}/api/emails/${encodeURIComponent(request.emailId)}/thread`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ threadId: request.threadId, messageId: request.messageId })
+        });
+        const data = await res.json();
+        sendResponse(data);
+      } catch (err) {
+        sendResponse({ success: false, error: err.message });
+      }
+    })();
     return true;
   }
 
   if (request.action === 'GET_TRACKED_EMAILS') {
     (async () => {
+      await getActiveServerUrl();
+
       // 1. If cachedApiKey not in memory, await storage
       if (!cachedApiKey && typeof chrome !== 'undefined' && chrome.storage?.local) {
         await new Promise(resolve => {

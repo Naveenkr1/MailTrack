@@ -10,18 +10,28 @@
   let ws = null;
   let currentAuthUser = null;
 
+  function sanitizeServerUrl(url) {
+    if (!url || typeof url !== 'string' || url.includes('mailtrack.in')) {
+      return DEFAULT_PROD_URL;
+    }
+    return url.replace(/\/+$/, '');
+  }
+
   function getServerUrl() {
-    return publicTrackingUrl || DEFAULT_PROD_URL;
+    return sanitizeServerUrl(publicTrackingUrl);
   }
 
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url'], (items) => {
+    chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url'], (items) => {
       if (items.mt_server_mode === 'localhost') {
         publicTrackingUrl = 'http://localhost:4000';
-      } else if (items.mt_active_server_url) {
-        publicTrackingUrl = items.mt_active_server_url.replace(/\/+$/, '');
+      } else if (items.mt_custom_server_url) {
+        publicTrackingUrl = sanitizeServerUrl(items.mt_custom_server_url);
       } else {
         publicTrackingUrl = DEFAULT_PROD_URL;
+      }
+      if (items.mt_active_server_url && items.mt_active_server_url.includes('mailtrack.in')) {
+        chrome.storage.local.set({ mt_active_server_url: DEFAULT_PROD_URL });
       }
     });
   }
@@ -31,8 +41,11 @@
     try {
       chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, (res) => {
         if (res && res.success) {
-          if (res.activeServerUrl) publicTrackingUrl = res.activeServerUrl;
-          else if (res.config && res.config.publicUrl) publicTrackingUrl = res.config.publicUrl;
+          if (res.serverMode === 'localhost' || res.activeServerUrl?.includes('localhost')) {
+            publicTrackingUrl = 'http://localhost:4000';
+          } else {
+            publicTrackingUrl = sanitizeServerUrl(res.activeServerUrl || (res.config && res.config.publicUrl));
+          }
         }
       });
     } catch { }
@@ -40,8 +53,11 @@
     // Listen for live tunnel updates from server watchdog
     chrome.runtime.onMessage.addListener((msg) => {
       if (msg && msg.type === 'CONFIG_UPDATED') {
-        if (msg.activeServerUrl) publicTrackingUrl = msg.activeServerUrl;
-        else if (msg.config && msg.config.publicUrl) publicTrackingUrl = msg.config.publicUrl;
+        if (msg.serverMode === 'localhost' || msg.activeServerUrl?.includes('localhost')) {
+          publicTrackingUrl = 'http://localhost:4000';
+        } else {
+          publicTrackingUrl = sanitizeServerUrl(msg.activeServerUrl || (msg.config && msg.config.publicUrl));
+        }
         console.log('[Mail Track] Live public tracking URL synchronized:', publicTrackingUrl);
       }
     });
@@ -238,11 +254,21 @@
   }
 
   // Fetch full email list from background with direct local fallback
-  function fetchAllTrackedEmails() {
+  let isFetchingEmails = false;
+  let lastFetchEmailsTime = 0;
+
+  function fetchAllTrackedEmails(force = false) {
+    const now = Date.now();
+    if (isFetchingEmails && !force) return;
+    if (!force && now - lastFetchEmailsTime < 1800) return;
+
+    isFetchingEmails = true;
+    lastFetchEmailsTime = now;
     const activeEmail = getCurrentGmailUser() || (currentAuthUser && currentAuthUser.email) || null;
     fetchConfig();
 
     function applyEmailsData(data) {
+      isFetchingEmails = false;
       if (data && data.success && data.emails) {
         trackedEmails = data.emails;
         if (data.user) {
@@ -264,7 +290,7 @@
       fetch(`${getServerUrl()}/api/emails${q}`)
         .then(r => r.json())
         .then(applyEmailsData)
-        .catch(() => { });
+        .catch(() => { isFetchingEmails = false; });
     }
 
     if (isAlive()) {
@@ -612,12 +638,139 @@
   // -------------------------------------------------------------------------
   // 2. SYNCHRONOUS COMPOSE INJECTION WITH CLOUDFLARE BEACON
   // -------------------------------------------------------------------------
+  // Universal compose tracking injector (called on mouse click, touch, or Cmd+Enter / Ctrl+Enter)
+  function injectTrackingIntoCompose(dialog) {
+    if (!dialog) return;
+
+    // Check if tracking is explicitly disabled via toggle
+    const logoBtn = dialog.querySelector('.mt-compose-logo-btn');
+    if (logoBtn && logoBtn.classList.contains('disabled')) {
+      return;
+    }
+
+    const body = dialog.querySelector('div[role="textbox"][aria-label*="Message Body" i], div[contenteditable="true"]');
+    if (!body) return;
+
+    // Prevent duplicate injection
+    if (body.innerHTML.includes('/trace/mail/') || dialog.getAttribute('data-mt-injected') === 'true') {
+      return;
+    }
+    dialog.setAttribute('data-mt-injected', 'true');
+
+    // Extract subject (handles normal compose & inline replies)
+    const subjectEl = dialog.querySelector('input[name="subjectbox"]');
+    let subject = subjectEl ? subjectEl.value.trim() : '';
+    if (!subject || subject === 'No Subject') {
+      const threadHeading = document.querySelector('h2.hP');
+      if (threadHeading && threadHeading.textContent.trim()) {
+        subject = threadHeading.textContent.trim();
+      } else if (document.title) {
+        subject = document.title
+          .replace(/\s*-\s*[^@]+@[^-\s]+\s*-\s*Gmail$/i, '')
+          .replace(/\s*-\s*Gmail$/i, '')
+          .trim();
+      }
+    }
+    if (!subject) subject = 'No Subject';
+
+    const recipients = extractAllRecipients(dialog);
+    const recipient = recipients.join(', ');
+
+    // Extract sender email
+    let sender = getCurrentGmailUser();
+    if (!sender) {
+      const fromEl = dialog.querySelector('input[name="from"], [aria-label*="From" i]');
+      if (fromEl) {
+        const fromVal = fromEl.value || fromEl.getAttribute('aria-label') || fromEl.textContent || '';
+        const m = fromVal.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+        if (m) sender = m[1].toLowerCase();
+      }
+    }
+    if (!sender) sender = (currentAuthUser && currentAuthUser.email) || 'Me';
+
+    let trackingId = dialog.getAttribute('data-mt-tracking-id');
+    if (!trackingId) {
+      trackingId = generateId();
+      dialog.setAttribute('data-mt-tracking-id', trackingId);
+    }
+
+    const activeTrackingUrl = getServerUrl();
+
+    // Auto-wrap any existing links in the email body that aren't already tracked
+    const existingLinks = body.querySelectorAll('a[href]');
+    existingLinks.forEach(a => {
+      const href = a.getAttribute('href');
+      if (href && !href.includes('/trace/link/') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+        a.setAttribute('href', `${activeTrackingUrl}/trace/link/${trackingId}?url=${encodeURIComponent(href)}`);
+      }
+    });
+
+    const threadId = extractThreadIdFromContext(dialog);
+
+    // Pre-register locally with status 'sent' (Single Tick)
+    const localEmail = {
+      id: trackingId,
+      subject,
+      recipient,
+      recipients,
+      sender,
+      threadId,
+      createdAt: new Date().toISOString(),
+      status: 'sent',
+      opens: [],
+      clicks: [],
+      openCount: 0
+    };
+    trackedEmails.unshift(localEmail);
+
+    // Embed tracking pixel
+    const pixelHtml = `<img src="${activeTrackingUrl}/trace/mail/${trackingId}.png" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />`;
+    body.insertAdjacentHTML('beforeend', pixelHtml);
+    console.log(`[Mail Track] ⚡ Tracking injected for "${subject}" (${trackingId}) using ${activeTrackingUrl} to:`, recipients);
+
+    // Register with backend
+    if (isAlive()) {
+      try {
+        chrome.runtime.sendMessage({
+          action: 'CREATE_TRACKED_EMAIL',
+          payload: { id: trackingId, subject, recipient, recipients, sender, threadId }
+        }, (res) => {
+          if (res && res.success && res.data && res.data.email) {
+            const idx = trackedEmails.findIndex(e => e.id === trackingId);
+            if (idx !== -1) {
+              trackedEmails[idx] = res.data.email;
+            }
+            updateAllRows();
+          }
+        });
+
+        // Watch for Gmail's "Message sent. View message" toast to capture threadId
+        setTimeout(() => {
+          try {
+            const toastLink = document.querySelector('a#link_vmsg, a[href*="#sent/"], a[href*="#inbox/"]');
+            if (toastLink) {
+              const m = (toastLink.getAttribute('href') || '').match(/#(?:sent|inbox)\/([a-zA-Z0-9]{12,})/i);
+              if (m && m[1] && isAlive()) {
+                chrome.runtime.sendMessage({
+                  action: 'BIND_THREAD_ID',
+                  emailId: trackingId,
+                  threadId: m[1]
+                });
+              }
+            }
+          } catch { }
+        }, 2000);
+      } catch { }
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // 2. SYNCHRONOUS COMPOSE INJECTION & SEND BUTTON SETUP
+  // -------------------------------------------------------------------------
   function setupComposeButtons() {
     const dialogs = document.querySelectorAll('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An');
 
     dialogs.forEach((dialog) => {
-      if (dialog.getAttribute('data-mt-active')) return;
-
       const sendBtn = dialog.querySelector(
         'div[role="button"][data-tooltip*="Send" i], ' +
         'div[role="button"][aria-label*="Send" i], ' +
@@ -628,9 +781,18 @@
       );
       if (!sendBtn) return;
 
-      dialog.setAttribute('data-mt-active', 'true');
-      let isTracking = true;
+      // Attach send triggers (mousedown, pointerdown, click) to ensure injection runs regardless of speed
+      if (!sendBtn.getAttribute('data-mt-bound')) {
+        sendBtn.setAttribute('data-mt-bound', 'true');
+        sendBtn.addEventListener('mousedown', () => injectTrackingIntoCompose(dialog), true);
+        sendBtn.addEventListener('pointerdown', () => injectTrackingIntoCompose(dialog), true);
+        sendBtn.addEventListener('click', () => injectTrackingIntoCompose(dialog), true);
+      }
 
+      // Avoid injecting multiple logo buttons
+      if (dialog.querySelector('.mt-compose-logo-btn')) return;
+
+      let isTracking = true;
       const logoUrl = isAlive() && chrome.runtime?.getURL ? chrome.runtime.getURL('icons/logo-compose.png') : '';
 
       const logoBtn = document.createElement('div');
@@ -668,98 +830,24 @@
       } else {
         sendBtn.parentElement.appendChild(logoBtn);
       }
-
-      // Synchronous injection on mousedown before Gmail dispatches
-      sendBtn.addEventListener('mousedown', () => {
-        if (!isTracking) return;
-
-        const body = dialog.querySelector('div[role="textbox"][aria-label*="Message Body"], div[contenteditable="true"]');
-        if (!body) return;
-
-        if (body.innerHTML.includes('/trace/mail/')) return;
-
-        const subjectEl = dialog.querySelector('input[name="subjectbox"]');
-        const subject = subjectEl ? subjectEl.value.trim() : 'No Subject';
-
-        const recipients = extractAllRecipients(dialog);
-        const recipient = recipients.join(', ');
-        const sender = getCurrentGmailUser() || 'Me';
-
-        let trackingId = dialog.getAttribute('data-mt-tracking-id');
-        if (!trackingId) {
-          trackingId = generateId();
-          dialog.setAttribute('data-mt-tracking-id', trackingId);
-        }
-
-        // Auto-wrap any existing links in the email body that aren't already tracked
-        const existingLinks = body.querySelectorAll('a[href]');
-        existingLinks.forEach(a => {
-          const href = a.getAttribute('href');
-          if (href && !href.includes('/trace/link/') && !href.startsWith('mailto:')) {
-            a.setAttribute('href', `${publicTrackingUrl}/trace/link/${trackingId}?url=${encodeURIComponent(href)}`);
-          }
-        });
-
-        const threadId = extractThreadIdFromContext(dialog);
-
-        // Pre-register locally with status 'sent' (Single Tick)
-        const localEmail = {
-          id: trackingId,
-          subject,
-          recipient,
-          recipients,
-          sender,
-          threadId,
-          createdAt: new Date().toISOString(),
-          status: 'sent',
-          opens: [],
-          clicks: [],
-          openCount: 0
-        };
-        trackedEmails.unshift(localEmail);
-
-        // Embed tracking pixel
-        const pixelHtml = `<img src="${publicTrackingUrl}/trace/mail/${trackingId}.png" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />`;
-        body.insertAdjacentHTML('beforeend', pixelHtml);
-        console.log(`[Mail Track] Embedded public pixel: ${publicTrackingUrl}/trace/mail/${trackingId}.png for recipients:`, recipients);
-
-        // Register with backend (including threadId for Mobile Double Checkmarks sync)
-        if (isAlive()) {
-          try {
-            chrome.runtime.sendMessage({
-              action: 'CREATE_TRACKED_EMAIL',
-              payload: { id: trackingId, subject, recipient, recipients, sender, threadId }
-            }, (res) => {
-              if (res && res.success && res.data && res.data.email) {
-                const idx = trackedEmails.findIndex(e => e.id === trackingId);
-                if (idx !== -1) {
-                  trackedEmails[idx] = res.data.email;
-                }
-                updateAllRows();
-              }
-            });
-
-            // Watch for Gmail's "Message sent. View message" toast to capture threadId
-            setTimeout(() => {
-              try {
-                const toastLink = document.querySelector('a#link_vmsg, a[href*="#sent/"], a[href*="#inbox/"]');
-                if (toastLink) {
-                  const m = (toastLink.getAttribute('href') || '').match(/#(?:sent|inbox)\/([a-zA-Z0-9]{12,})/i);
-                  if (m && m[1] && isAlive()) {
-                    chrome.runtime.sendMessage({
-                      action: 'BIND_THREAD_ID',
-                      emailId: trackingId,
-                      threadId: m[1]
-                    });
-                  }
-                }
-              } catch { }
-            }, 2500);
-          } catch { }
-        }
-      }, true);
     });
   }
+
+  // Intercept keyboard shortcut sends (Cmd+Enter on Mac, Ctrl+Enter on Windows)
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
+      const activeEl = document.activeElement;
+      const dialog = activeEl ? activeEl.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An') : null;
+      if (dialog) {
+        injectTrackingIntoCompose(dialog);
+      } else {
+        const anyDialog = document.querySelector('div[role="dialog"], div.M9, div.AD, table.cf.An');
+        if (anyDialog) {
+          injectTrackingIntoCompose(anyDialog);
+        }
+      }
+    }
+  }, true);
 
   function extractThreadIdFromContext(dialog) {
     if (!dialog) return null;
@@ -1286,7 +1374,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 3. ZERO-OVERHEAD MUTATION LISTENER (Targeted ONLY to email table)
+  // 3. ZERO-OVERHEAD MUTATION LISTENER (Targeted to Gmail main + compose)
   // -------------------------------------------------------------------------
   let updateDebounceTimer = null;
   function triggerThrottledUpdate() {
@@ -1294,15 +1382,12 @@
     updateDebounceTimer = setTimeout(() => {
       updateDebounceTimer = null;
       if (isAlive()) {
-        if (trackedEmails.length === 0) {
-          fetchAllTrackedEmails();
-        }
         updateAllRows();
         updateOpenThreadHeader();
         setupComposeButtons();
         setupTopNavButton();
       }
-    }, 250);
+    }, 200);
   }
 
   // Intercept tracked link clicks to attach recipient identifier
@@ -1318,11 +1403,11 @@
     }
   }, true);
 
-  // Attach targeted observer only to main content area
+  // Attach observer to observe folder changes and compose window appearances
   function attachTargetedObserver() {
-    const mainContainer = document.querySelector('div[role="main"]') || document.querySelector('.AO') || document.body;
-    if (!mainContainer) {
-      setTimeout(attachTargetedObserver, 1000);
+    const target = document.body;
+    if (!target) {
+      setTimeout(attachTargetedObserver, 500);
       return;
     }
 
@@ -1339,28 +1424,24 @@
       }
     });
 
-    observer.observe(mainContainer, { childList: true, subtree: true });
+    observer.observe(target, { childList: true, subtree: true });
   }
 
   // Folder navigation listener (fast & zero overhead)
   window.addEventListener('hashchange', () => {
-    if (trackedEmails.length === 0) {
-      fetchAllTrackedEmails();
-    }
+    fetchAllTrackedEmails(true);
     triggerThrottledUpdate();
   });
 
-  // Background fallback check every 4s (only if tab visible)
+  // Background live sync polling every 3.5s (only if tab visible)
   setInterval(() => {
     if (!isAlive() || document.hidden) return;
-    if (trackedEmails.length === 0) {
-      fetchAllTrackedEmails();
-    }
+    fetchAllTrackedEmails();
     updateAllRows();
     updateOpenThreadHeader();
     setupComposeButtons();
     setupTopNavButton();
-  }, 4000);
+  }, 3500);
 
   // -------------------------------------------------------------------------
   // 4. HOVER TOOLTIP SYSTEM (Total Opens, Last Open Time, Dashboard CTA)

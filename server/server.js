@@ -699,14 +699,18 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
 
   // Determine user tenant
   let user = req.user;
-  if (!user && sender && sender.includes('@')) {
-    user = await db.findUserByEmail(sender);
+  const senderEmail = (sender && sender.includes('@')) ? sender.trim().toLowerCase() : (req.headers['x-mailtrack-user-email'] || '').trim().toLowerCase();
+  if (!user && senderEmail && senderEmail.includes('@')) {
+    user = await db.findUserByEmail(senderEmail);
+    if (!user) {
+      user = await db.createOrUpdateUser({ email: senderEmail, name: senderEmail.split('@')[0] });
+    }
   }
   if (!user) {
     user = (await db.findUserByEmail('nnaveen.8527@gmail.com')) || (await db.findUserById('usr_default'));
   }
   if (!user) {
-    user = await db.createOrUpdateUser({ email: sender || 'user@example.com', name: 'User' });
+    user = await db.createOrUpdateUser({ email: senderEmail || 'user@example.com', name: 'User' });
   }
 
   const senderIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').replace(/^.*:/, '');
@@ -782,9 +786,12 @@ app.post('/api/emails/:id/thread', optionalAuth, async (req, res) => {
 // List tracked emails for logged-in user
 app.get('/api/emails', optionalAuth, async (req, res) => {
   let user = req.user;
-  if (!user && (req.query.email || req.headers['x-mailtrack-user-email'])) {
-    const userEmail = req.query.email || req.headers['x-mailtrack-user-email'];
+  const userEmail = (req.query.email || req.headers['x-mailtrack-user-email'] || '').trim().toLowerCase();
+  if (!user && userEmail && userEmail.includes('@')) {
     user = await db.findUserByEmail(userEmail);
+    if (!user) {
+      user = await db.createOrUpdateUser({ email: userEmail, name: userEmail.split('@')[0] });
+    }
   }
   if (!user) {
     user = (await db.findUserByEmail('nnaveen.8527@gmail.com')) || (await db.findUserById('usr_default'));
@@ -793,12 +800,13 @@ app.get('/api/emails', optionalAuth, async (req, res) => {
     return res.status(401).json({ success: false, error: 'Unauthorized: Please log in to view tracked emails.' });
   }
 
+  const effectiveBaseUrl = getRequestBaseUrl(req);
   const emails = await db.getUserEmails(user.id);
   res.json({
     success: true,
     count: emails.length,
     emails,
-    publicUrl: publicBaseUrl,
+    publicUrl: effectiveBaseUrl,
     user: { id: user.id, email: user.email, name: user.name, apiKey: user.api_key }
   });
 });

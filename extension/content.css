@@ -1232,16 +1232,16 @@
    ========================================================================== */
 .av[title="✓"], .av[title="✓✓"],
 .ar[title="✓"], .ar[title="✓✓"],
-.at[title="✓"], .at[title="✓✓"],
-span[title="✓"], span[title="✓✓"],
+.at[title="✓"]:not(.mt-tick-container *), .at[title="✓✓"]:not(.mt-tick-container *),
+span[title="✓"]:not(.mt-tick-container *), span[title="✓✓"]:not(.mt-tick-container *),
 div[data-label-name="✓"], div[data-label-name="✓✓"],
-div[data-tooltip="✓"], div[data-tooltip="✓✓"],
+div[data-tooltip="✓"]:not(.mt-tick-container *), div[data-tooltip="✓✓"]:not(.mt-tick-container *),
 .aYF[data-label-name="✓"], .aYF[data-label-name="✓✓"],
-div[aria-label*="✓"], div[aria-label*="✓✓"],
-span[aria-label*="✓"], span[aria-label*="✓✓"],
+div[aria-label*="✓"]:not(.mt-tick-container):not(.mt-tick-container *), div[aria-label*="✓✓"]:not(.mt-tick-container):not(.mt-tick-container *),
+span[aria-label*="✓"]:not(.mt-tick-container):not(.mt-tick-container *), span[aria-label*="✓✓"]:not(.mt-tick-container):not(.mt-tick-container *),
 .ha [data-label-name="✓"], .ha [data-label-name="✓✓"],
 div[data-label-id="Label_7"], div[data-label-id="Label_8"],
-a[title="✓"], a[title="✓✓"] {
+a[title="✓"]:not(.mt-tick-container *), a[title="✓✓"]:not(.mt-tick-container *) {
   display: none !important;
 }
 
