@@ -9,4 +9,6 @@ inject_analysis.json
 Skills
 server/data/*.db*
 server/data/*.json
+.env*
+server/.env*
 scratch

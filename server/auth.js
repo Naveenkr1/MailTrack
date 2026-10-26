@@ -7,12 +7,19 @@ const { signUserToken, requireAuth } = require('./middleware/auth');
 const router = express.Router();
 
 function getEffectiveBaseUrl(req) {
-  if (process.env.BASE_URL && process.env.BASE_URL.startsWith('http')) {
+  if (process.env.BASE_URL && process.env.BASE_URL.startsWith('http') && (!process.env.VERCEL || !process.env.BASE_URL.includes('localhost'))) {
     return process.env.BASE_URL.replace(/\/+$/, '');
   }
-  const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
-  const host = req.headers['x-forwarded-host'] || req.headers.host || 'localhost:4000';
-  return `${protocol}://${host}`;
+  if (req) {
+    const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
+    const host = req.headers['x-forwarded-host'] || req.headers['host'];
+    if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
+      return `${protocol}://${host}`;
+    }
+  }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.VERCEL) return 'https://mail-track-pink.vercel.app';
+  return 'http://localhost:4000';
 }
 
 // -------------------------------------------------------------

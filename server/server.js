@@ -61,7 +61,9 @@ function getRequestBaseUrl(req) {
   if (customDomain) {
     return customDomain.startsWith('http') ? customDomain.replace(/\/+$/, '') : `https://${customDomain.replace(/\/+$/, '')}`;
   }
-  if (process.env.BASE_URL) return process.env.BASE_URL.replace(/\/+$/, '');
+  if (process.env.BASE_URL && (!process.env.VERCEL || !process.env.BASE_URL.includes('localhost'))) {
+    return process.env.BASE_URL.replace(/\/+$/, '');
+  }
   if (req) {
     const proto = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
     const host = req.headers['x-forwarded-host'] || req.headers['host'];
@@ -608,7 +610,22 @@ app.get('/api/config', (req, res) => {
 });
 
 app.get('/api/ping', (req, res) => {
-  res.json({ pong: true, time: Date.now(), publicUrl: getRequestBaseUrl(req) });
+  res.json({
+    pong: true,
+    time: Date.now(),
+    publicUrl: getRequestBaseUrl(req),
+    headers: {
+      host: req.headers.host,
+      'x-forwarded-host': req.headers['x-forwarded-host'],
+      'x-forwarded-proto': req.headers['x-forwarded-proto']
+    },
+    env: {
+      VERCEL: process.env.VERCEL,
+      VERCEL_URL: process.env.VERCEL_URL,
+      BASE_URL: process.env.BASE_URL,
+      NODE_ENV: process.env.NODE_ENV
+    }
+  });
 });
 
 // Update or disconnect personal custom domain
