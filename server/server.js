@@ -731,12 +731,16 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
   const pixelUrl = `${publicBaseUrl}/trace/mail/${id}.png`;
   const trackingPixelHtml = `<img src="${pixelUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />`;
 
-  broadcast('EMAIL_CREATED', { email: newEmail }, user.id);
+  if (newEmail) {
+    broadcast('EMAIL_CREATED', { email: newEmail }, user.id);
 
-  // Asynchronously trigger Gmail Mobile Sync to apply single checkmark (✓)
-  gmail.applySentLabel(user.id, newEmail.id, threadId).catch(err => {
-    console.warn('[GMAIL MOBILE SYNC] Non-blocking applySentLabel error:', err.message);
-  });
+    // Asynchronously trigger Gmail Mobile Sync to apply single checkmark (✓)
+    if (threadId && newEmail.id) {
+      gmail.applySentLabel(user.id, newEmail.id, threadId).catch(err => {
+        console.warn('[GMAIL MOBILE SYNC] Non-blocking applySentLabel error:', err.message);
+      });
+    }
+  }
 
   res.json({
     success: true,

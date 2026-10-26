@@ -9,3 +9,4 @@ server/data/*.json
 inject_analysis.json
 mailsuite.crx
 mailsuite.zip
+.vercel

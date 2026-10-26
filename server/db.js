@@ -528,7 +528,28 @@ async function createEmail(userId, emailData) {
     } catch {}
   }
 
-  return getEmailForBeacon(id);
+  const created = await getEmailForBeacon(id);
+  if (created) return created;
+  return {
+    id,
+    userId,
+    subject,
+    recipient,
+    recipients: Array.isArray(recipients) ? recipients : [recipient],
+    sender,
+    senderIp: senderIp || null,
+    senderPublicIp: senderPublicIp || null,
+    threadId,
+    gmailMessageId,
+    status: 'sent',
+    createdAt: now,
+    lastOpenedAt: null,
+    openCount: 0,
+    lastClickedAt: null,
+    clickCount: 0,
+    opens: [],
+    clicks: []
+  };
 }
 
 async function deleteEmail(emailId, userId) {
