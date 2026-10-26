@@ -5,6 +5,7 @@
   console.log('[Mail Track] ⚡ Activating Ultra-Fast Gmail Tracking...');
 
   const DEFAULT_PROD_URL = 'https://mail-track-pink.vercel.app';
+  let trackedEmails = [];
   let publicTrackingUrl = DEFAULT_PROD_URL;
   let ws = null;
   let currentAuthUser = null;
@@ -612,12 +613,19 @@
   // 2. SYNCHRONOUS COMPOSE INJECTION WITH CLOUDFLARE BEACON
   // -------------------------------------------------------------------------
   function setupComposeButtons() {
-    const dialogs = document.querySelectorAll('div[role="dialog"]');
+    const dialogs = document.querySelectorAll('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An');
 
     dialogs.forEach((dialog) => {
       if (dialog.getAttribute('data-mt-active')) return;
 
-      const sendBtn = dialog.querySelector('div[role="button"][data-tooltip*="Send"], div[aria-label*="Send"]');
+      const sendBtn = dialog.querySelector(
+        'div[role="button"][data-tooltip*="Send" i], ' +
+        'div[role="button"][aria-label*="Send" i], ' +
+        'div.T-I.J-J5-Ji.aoO.v7, ' +
+        'div.aoO, ' +
+        'div.T-I-atl, ' +
+        'div[data-tooltip*="Enter" i]'
+      );
       if (!sendBtn) return;
 
       dialog.setAttribute('data-mt-active', 'true');
@@ -1804,7 +1812,10 @@
     navBtn.title = 'Mail Track Activity & Notifications';
     navBtn.innerHTML = `
       <span class="mt-nav-icon">
-        ${iconUrl ? `<img src="${iconUrl}" class="mt-nav-img-icon" alt="Mail Track" width="22" height="22" />` : SVG_DOUBLE_CHECK}
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; display: inline-block;">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
       </span>
       <span class="mt-nav-text">Mail Track</span>
       <span class="mt-nav-badge" id="mtNavBadge" style="display:none">0</span>
