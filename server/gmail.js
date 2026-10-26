@@ -525,20 +525,33 @@ async function getConnectionStatus(userId) {
   try { userSettings = JSON.parse(user.settings || '{}'); } catch {}
 
   const hasTokens = !!(user.google_refresh_token || user.google_access_token);
+  let labelsExist = !!(user.gmail_single_label_id && user.gmail_double_label_id);
   let apiWorking = false;
 
   if (hasTokens) {
-    const token = await getValidAccessToken(userId);
-    apiWorking = !!token;
+    if (labelsExist) {
+      apiWorking = true;
+    } else {
+      // Test if user actually has granted gmail.modify scope by attempting to ensure labels
+      const labels = await ensureLabels(userId);
+      if (labels && labels.singleCheckId && labels.doubleCheckId) {
+        apiWorking = true;
+        labelsExist = true;
+      }
+    }
   }
 
+  // Refetch user if ensureLabels saved newly created labels
+  const freshUser = labelsExist && !user.gmail_single_label_id ? await db.findUserById(userId) : user;
+
   return {
-    connected: apiWorking,
-    email: user.email,
+    connected: apiWorking && labelsExist,
+    hasGmailScopes: apiWorking && labelsExist,
+    email: freshUser.email,
     mobileEnabled: userSettings.mobileAlerts !== false,
-    hasRefreshToken: !!user.google_refresh_token,
-    singleLabelId: user.gmail_single_label_id,
-    doubleLabelId: user.gmail_double_label_id
+    hasRefreshToken: !!freshUser.google_refresh_token,
+    singleLabelId: freshUser.gmail_single_label_id,
+    doubleLabelId: freshUser.gmail_double_label_id
   };
 }
 

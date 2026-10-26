@@ -151,6 +151,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const closePrivacyModalBtn = document.getElementById('closePrivacyModalBtn');
   const dismissPrivacyModalBtn = document.getElementById('dismissPrivacyModalBtn');
 
+  // Mobile Sync Prompt Modal & Banner
+  const mobileSyncPromptModal = document.getElementById('mobileSyncPromptModal');
+  const closeMobilePromptBtn = document.getElementById('closeMobilePromptBtn');
+  const dismissMobilePromptBtn = document.getElementById('dismissMobilePromptBtn');
+  const mobileSyncBanner = document.getElementById('mobileSyncBanner');
+  const closeMobileSyncBanner = document.getElementById('closeMobileSyncBanner');
+
   // Danger Zone: Delete Account Modal
   const deleteAccountBtn = document.getElementById('deleteAccountBtn');
   const deleteConfirmModal = document.getElementById('deleteConfirmModal');
@@ -509,6 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (privacyNoticeModal) privacyNoticeModal.classList.remove('open');
       if (deleteConfirmModal) deleteConfirmModal.classList.remove('open');
       if (detailsModal) detailsModal.classList.remove('open');
+      if (mobileSyncPromptModal) mobileSyncPromptModal.classList.remove('open');
     }
   });
 
@@ -582,6 +590,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           if (connectMobileGmailBtn) connectMobileGmailBtn.style.display = 'none';
           if (syncExistingMobileBtn) syncExistingMobileBtn.style.display = 'inline-flex';
+          if (mobileSyncBanner) mobileSyncBanner.style.display = 'none';
         } else {
           if (mobileSyncStatusBadge) {
             mobileSyncStatusBadge.textContent = 'Connection Required';
@@ -594,11 +603,45 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           if (connectMobileGmailBtn) connectMobileGmailBtn.style.display = 'inline-flex';
           if (syncExistingMobileBtn) syncExistingMobileBtn.style.display = 'none';
+
+          // Show callout banner if not dismissed in this session
+          if (mobileSyncBanner && sessionStorage.getItem('mt_dismissed_mobile_banner') !== 'true') {
+            mobileSyncBanner.style.display = 'flex';
+          }
+
+          // First-time prompt modal: ask user to Enable Mobile Checkmarks on first login
+          if (mobileSyncPromptModal && !localStorage.getItem('mt_dismissed_mobile_modal')) {
+            setTimeout(() => {
+              mobileSyncPromptModal.classList.add('open');
+            }, 700);
+          }
         }
       }
     } catch (e) {
       console.warn('Failed to fetch mobile sync status:', e);
     }
+  }
+
+  // Dismiss mobile banner handler
+  if (closeMobileSyncBanner) {
+    closeMobileSyncBanner.addEventListener('click', () => {
+      if (mobileSyncBanner) mobileSyncBanner.style.display = 'none';
+      sessionStorage.setItem('mt_dismissed_mobile_banner', 'true');
+    });
+  }
+
+  // Dismiss first-time mobile prompt modal handlers
+  const dismissMobilePrompt = () => {
+    if (mobileSyncPromptModal) mobileSyncPromptModal.classList.remove('open');
+    localStorage.setItem('mt_dismissed_mobile_modal', 'true');
+  };
+
+  if (closeMobilePromptBtn) closeMobilePromptBtn.addEventListener('click', dismissMobilePrompt);
+  if (dismissMobilePromptBtn) dismissMobilePromptBtn.addEventListener('click', dismissMobilePrompt);
+  if (mobileSyncPromptModal) {
+    mobileSyncPromptModal.addEventListener('click', (e) => {
+      if (e.target === mobileSyncPromptModal) dismissMobilePrompt();
+    });
   }
 
   if (syncExistingMobileBtn) {

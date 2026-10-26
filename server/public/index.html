@@ -280,6 +280,25 @@
       <div class="figma-content-area">
         <!-- TAB 1: EMAIL TRACKING -->
         <section class="tab-panel active" id="tabContentEmailTracking">
+
+          <!-- Mobile Checkmarks Callout Banner -->
+          <div id="mobileSyncBanner" class="mobile-sync-callout-banner" style="display:none;">
+            <div class="ms-banner-left">
+              <span class="ms-banner-icon">📱</span>
+              <div class="ms-banner-text">
+                <div class="ms-banner-title">
+                  <span>Enable Mobile Checkmarks</span>
+                  <span class="preview-chip green" style="font-size:10.5px;padding:1px 6px;">✓✓</span>
+                </div>
+                <div class="ms-banner-desc">See delivery and read checkmarks directly in the official Gmail mobile app on your phone.</div>
+              </div>
+            </div>
+            <div class="ms-banner-actions">
+              <a href="/auth/google/mobile-sync" class="btn-figma-primary btn-sm ms-connect-btn">Connect Mobile Gmail</a>
+              <button class="ms-banner-close" id="closeMobileSyncBanner" type="button" aria-label="Dismiss banner">&times;</button>
+            </div>
+          </div>
+
           <!-- 1A: TABLE VIEW -->
           <div class="figma-table-card" id="emailTableView">
             <!-- Mobile Horizontal Filter Chips Bar -->
@@ -840,6 +859,47 @@
 
           <div class="modal-actions-footer">
             <button class="btn-figma-primary" id="dismissPrivacyModalBtn">I Understand</button>
+          </div>
+        </div>
+    </div>
+
+    <!-- FIRST-TIME / CONNECT MOBILE CHECKMARKS MODAL -->
+    <div class="modal-backdrop" id="mobileSyncPromptModal">
+      <div class="modal-window">
+        <div class="modal-window-header">
+          <div class="modal-headline">
+            <span style="font-size: 20px; line-height: 1;">📱</span>
+            <h3>Enable Mobile Checkmarks (✓✓)</h3>
+          </div>
+          <button class="modal-close-button" id="closeMobilePromptBtn" type="button" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-window-body">
+          <p style="font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 16px;">
+            Would you like to see delivery and read receipts directly inside your official <strong>Gmail mobile app</strong> on iPhone & Android?
+          </p>
+
+          <div class="mobile-preview-box" style="margin-bottom: 16px;">
+            <div class="mp-title">How checkmarks appear in your phone's Gmail:</div>
+            <div class="mp-items">
+              <div class="mp-item">
+                <span class="preview-chip grey">✓</span>
+                <span class="mp-label">Delivered / Unread (Grey Single Tick)</span>
+              </div>
+              <div class="mp-item">
+                <span class="preview-chip green">✓✓</span>
+                <span class="mp-label">Recipient Opened Email (Green Double Tick)</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.22); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 12px; color: #065f46; line-height: 1.45;">
+            <strong>Google OAuth Notice:</strong><br/>
+            Google will request permission to modify email labels. If you see <em>"Google hasn't verified this app"</em>, simply click <strong>"Advanced"</strong> → <strong>"Go to mail-track-pink.vercel.app (unsafe)"</strong> to confirm.
+          </div>
+
+          <div class="modal-actions-footer">
+            <a href="/auth/google/mobile-sync" class="btn-figma-primary" id="enableMobilePromptBtn" style="text-decoration:none;">Connect Mobile Gmail</a>
+            <button class="btn-modal-cancel" id="dismissMobilePromptBtn" type="button">Maybe Later</button>
           </div>
         </div>
       </div>
