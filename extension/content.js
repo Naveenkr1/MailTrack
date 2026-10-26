@@ -11,7 +11,11 @@
   let currentAuthUser = null;
 
   function sanitizeServerUrl(url) {
-    if (!url || typeof url !== 'string' || url.includes('mailtrack.in')) {
+    if (!url || typeof url !== 'string' || 
+        url.includes('mailtrack.in') || 
+        url.includes('trycloudflare.com') || 
+        url.includes('loca.lt') || 
+        url.includes('ngrok')) {
       return DEFAULT_PROD_URL;
     }
     return url.replace(/\/+$/, '');
@@ -25,13 +29,13 @@
     chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url'], (items) => {
       if (items.mt_server_mode === 'localhost') {
         publicTrackingUrl = 'http://localhost:4000';
-      } else if (items.mt_custom_server_url) {
+      } else if (items.mt_custom_server_url && !items.mt_custom_server_url.includes('trycloudflare.com') && !items.mt_custom_server_url.includes('mailtrack.in')) {
         publicTrackingUrl = sanitizeServerUrl(items.mt_custom_server_url);
       } else {
         publicTrackingUrl = DEFAULT_PROD_URL;
       }
-      if (items.mt_active_server_url && items.mt_active_server_url.includes('mailtrack.in')) {
-        chrome.storage.local.set({ mt_active_server_url: DEFAULT_PROD_URL });
+      if (items.mt_active_server_url && (items.mt_active_server_url.includes('mailtrack.in') || items.mt_active_server_url.includes('trycloudflare.com'))) {
+        chrome.storage.local.set({ mt_active_server_url: DEFAULT_PROD_URL, mt_custom_server_url: '' });
       }
     });
   }
@@ -723,8 +727,13 @@
     };
     trackedEmails.unshift(localEmail);
 
-    // Embed tracking pixel
-    const pixelHtml = `<img src="${activeTrackingUrl}/trace/mail/${trackingId}.png" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />`;
+    // Embed tracking pixel with metadata query parameters
+    const qs = new URLSearchParams();
+    if (subject && subject !== 'No Subject') qs.set('s', subject);
+    if (recipient && recipient !== 'Recipient') qs.set('r', recipient);
+    if (sender && sender.includes('@')) qs.set('from', sender);
+    const qsStr = qs.toString() ? `?${qs.toString()}` : '';
+    const pixelHtml = `<img src="${activeTrackingUrl}/trace/mail/${trackingId}.png${qsStr}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />`;
     body.insertAdjacentHTML('beforeend', pixelHtml);
     console.log(`[Mail Track] ⚡ Tracking injected for "${subject}" (${trackingId}) using ${activeTrackingUrl} to:`, recipients);
 
@@ -857,6 +866,33 @@
       }
     }
   }, true);
+
+  // Global capture listeners to intercept clicks on ANY Send button across Gmail
+  function handleUniversalSendCapture(e) {
+    if (!e || !e.target) return;
+    const target = e.target;
+    const sendBtn = target.closest(
+      'div[role="button"][data-tooltip*="Send" i], ' +
+      'div[role="button"][aria-label*="Send" i], ' +
+      'div.T-I.J-J5-Ji.aoO, ' +
+      'div.aoO, ' +
+      'div.T-I-atl, ' +
+      'div[data-tooltip*="Enter" i], ' +
+      '[aria-label*="Send ‪("], ' +
+      '[aria-label*="Send ("]'
+    );
+    if (sendBtn) {
+      const dialog = sendBtn.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An') ||
+                     document.querySelector('div[role="dialog"], div.M9, div.AD, table.cf.An');
+      if (dialog) {
+        injectTrackingIntoCompose(dialog);
+      }
+    }
+  }
+
+  document.addEventListener('pointerdown', handleUniversalSendCapture, true);
+  document.addEventListener('mousedown', handleUniversalSendCapture, true);
+  document.addEventListener('click', handleUniversalSendCapture, true);
 
   function extractThreadIdFromContext(dialog) {
     if (!dialog) return null;

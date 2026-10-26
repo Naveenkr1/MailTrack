@@ -17,9 +17,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function getServerUrl() {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
       const items = await chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url']);
-      if (items.mt_custom_server_url) return items.mt_custom_server_url.replace(/\/+$/, '');
+      if (items.mt_custom_server_url && !items.mt_custom_server_url.includes('trycloudflare.com') && !items.mt_custom_server_url.includes('mailtrack.in')) {
+        return items.mt_custom_server_url.replace(/\/+$/, '');
+      }
       if (items.mt_server_mode === 'localhost') return LOCAL_URL;
-      if (items.mt_active_server_url) return items.mt_active_server_url.replace(/\/+$/, '');
+      if (items.mt_active_server_url && !items.mt_active_server_url.includes('trycloudflare.com') && !items.mt_active_server_url.includes('mailtrack.in')) {
+        return items.mt_active_server_url.replace(/\/+$/, '');
+      }
     }
     return DEFAULT_PROD_URL;
   }

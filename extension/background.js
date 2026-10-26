@@ -16,7 +16,17 @@ let cachedConfig = {
 async function getActiveServerUrl() {
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
     const stored = await chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url']);
-    if (stored.mt_custom_server_url) {
+    
+    // Purge dead ephemeral tunnels or invalid domains from local storage
+    if (stored.mt_active_server_url && (stored.mt_active_server_url.includes('trycloudflare.com') || stored.mt_active_server_url.includes('mailtrack.in'))) {
+      chrome.storage.local.set({ mt_active_server_url: PROD_SERVER_URL });
+    }
+    if (stored.mt_custom_server_url && (stored.mt_custom_server_url.includes('trycloudflare.com') || stored.mt_custom_server_url.includes('mailtrack.in'))) {
+      chrome.storage.local.set({ mt_custom_server_url: '' });
+      stored.mt_custom_server_url = '';
+    }
+
+    if (stored.mt_custom_server_url && !stored.mt_custom_server_url.includes('trycloudflare.com') && !stored.mt_custom_server_url.includes('mailtrack.in')) {
       activeServerUrl = stored.mt_custom_server_url.replace(/\/+$/, '');
       return activeServerUrl;
     }
@@ -46,6 +56,7 @@ async function probeAndSetActiveServer() {
       return activeServerUrl;
     }
   } catch (e) {}
+  activeServerUrl = PROD_SERVER_URL;
   return activeServerUrl;
 }
 
@@ -540,14 +551,32 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       }
 
       try {
-        const res = await fetch(`${activeServerUrl}/api/emails`, {
+        let res = await fetch(`${activeServerUrl}/api/emails`, {
           method: 'POST',
           headers,
           body: JSON.stringify(request.payload)
         });
+        if (!res.ok && activeServerUrl !== PROD_SERVER_URL) {
+          res = await fetch(`${PROD_SERVER_URL}/api/emails`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(request.payload)
+          });
+        }
         const data = await res.json();
         sendResponse({ success: true, data });
       } catch (err) {
+        if (activeServerUrl !== PROD_SERVER_URL) {
+          try {
+            const fallbackRes = await fetch(`${PROD_SERVER_URL}/api/emails`, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(request.payload)
+            });
+            const data = await fallbackRes.json();
+            return sendResponse({ success: true, data });
+          } catch {}
+        }
         sendResponse({ success: false, error: err.message });
       }
     })();
@@ -561,14 +590,31 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
 
       try {
-        const res = await fetch(`${activeServerUrl}/api/emails/${encodeURIComponent(request.emailId)}/thread`, {
+        let res = await fetch(`${activeServerUrl}/api/emails/${encodeURIComponent(request.emailId)}/thread`, {
           method: 'POST',
           headers,
           body: JSON.stringify({ threadId: request.threadId, messageId: request.messageId })
         });
+        if (!res.ok && activeServerUrl !== PROD_SERVER_URL) {
+          res = await fetch(`${PROD_SERVER_URL}/api/emails/${encodeURIComponent(request.emailId)}/thread`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ threadId: request.threadId, messageId: request.messageId })
+          });
+        }
         const data = await res.json();
         sendResponse(data);
       } catch (err) {
+        if (activeServerUrl !== PROD_SERVER_URL) {
+          try {
+            const fbRes = await fetch(`${PROD_SERVER_URL}/api/emails/${encodeURIComponent(request.emailId)}/thread`, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({ threadId: request.threadId, messageId: request.messageId })
+            });
+            return sendResponse(await fbRes.json());
+          } catch {}
+        }
         sendResponse({ success: false, error: err.message });
       }
     })();

@@ -335,14 +335,26 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
 
   let email = await db.getEmailForBeacon(emailId);
 
-  // If email was not yet registered, register it under fallback user
+  // If email was not yet registered, register it under real sender user or fallback user
   if (!email) {
-    const defaultUser = (await db.findUserByEmail('nnaveen.8527@gmail.com')) || (await db.findUserById('usr_default')) || { id: 'usr_default', email: 'nnaveen.8527@gmail.com' };
-    email = await db.createEmail(defaultUser.id, {
+    const fromEmail = (req.query.from || '').trim().toLowerCase();
+    let senderUser = fromEmail ? await db.findUserByEmail(fromEmail) : null;
+    if (!senderUser && fromEmail && fromEmail.includes('@')) {
+      senderUser = await db.createOrUpdateUser({ email: fromEmail, name: fromEmail.split('@')[0] });
+    }
+    if (!senderUser) {
+      senderUser = (await db.findUserByEmail('nnaveen.8527@gmail.com')) || 
+                   (await db.findUserById('usr_default')) || 
+                   { id: 'usr_default', email: 'nnaveen.8527@gmail.com' };
+    }
+    const decodedSubject = req.query.s ? decodeURIComponent(req.query.s) : 'Tracked Email';
+    const decodedRecipient = req.query.r ? decodeURIComponent(req.query.r) : 'Recipient';
+    email = await db.createEmail(senderUser.id, {
       id: emailId,
-      subject: req.query.s ? decodeURIComponent(req.query.s) : 'Tracked Email',
-      recipient: req.query.r ? decodeURIComponent(req.query.r) : 'Recipient',
-      sender: defaultUser.email || 'nnaveen.8527@gmail.com'
+      subject: decodedSubject,
+      recipient: decodedRecipient,
+      recipients: [decodedRecipient],
+      sender: fromEmail || senderUser.email || 'Me'
     });
   }
 
