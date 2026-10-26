@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terms of Service — Mail Track</title>
+  <link rel="icon" type="image/png" href="/icons/icon-48.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
+    .header-bar {
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #e2e8f0;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 100;
+    }
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+    }
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      background: #10b981;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 800;
+      font-size: 17px;
+      letter-spacing: -1px;
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+    .header-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .btn-nav-outline {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #475569;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      transition: all 0.15s ease;
+    }
+    .btn-nav-outline:hover {
+      background: #f1f5f9;
+      color: #0f172a;
+    }
+    .container {
+      max-width: 860px;
+      margin: 40px auto 80px auto;
+      padding: 0 20px;
+    }
+    .policy-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(15, 23, 42, 0.04);
+      padding: 48px;
+    }
+    .hero-meta {
+      margin-bottom: 32px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 24px;
+    }
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59, 130, 246, 0.1);
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.25;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+    .last-updated {
+      font-size: 13.5px;
+      color: #64748b;
+    }
+    .highlight-box {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.06) 0%, rgba(37, 99, 235, 0.02) 100%);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin: 28px 0;
+    }
+    .highlight-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e40af;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .highlight-text {
+      font-size: 14px;
+      color: #1e3a8a;
+      line-height: 1.6;
+    }
+    h2 {
+      font-size: 21px;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.4px;
+      margin: 36px 0 14px 0;
+      padding-top: 20px;
+      border-top: 1px solid #f1f5f9;
+    }
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 20px 0 8px 0;
+    }
+    p {
+      font-size: 14.5px;
+      color: #334155;
+      margin-bottom: 14px;
+      line-height: 1.7;
+    }
+    ul, ol {
+      margin: 10px 0 18px 24px;
+      color: #334155;
+      font-size: 14.5px;
+      line-height: 1.7;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    a {
+      color: #059669;
+      text-decoration: underline;
+      text-underline-position: from-font;
+    }
+    a:hover {
+      color: #047857;
+    }
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 40px;
+    }
+    @media (max-width: 640px) {
+      .policy-card {
+        padding: 24px 20px;
+        border-radius: 16px;
+      }
+      h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header-bar">
+    <a href="/" class="brand-wrap">
+      <div class="brand-icon">✓✓</div>
+      <span class="brand-title">Mail Track</span>
+    </a>
+    <div class="header-links">
+      <a href="/privacy" class="btn-nav-outline">Privacy Policy</a>
+      <a href="/login" class="btn-nav-outline">Sign In</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <article class="policy-card">
+      <div class="hero-meta">
+        <span class="badge-pill">📋 User Agreement</span>
+        <h1>Terms of Service</h1>
+        <p class="last-updated">Last Updated: October 26, 2026 • Effective Date: October 26, 2026</p>
+      </div>
+
+      <div class="highlight-box">
+        <div class="highlight-title">
+          <span>📜</span> Summary of Your Agreement
+        </div>
+        <div class="highlight-text">
+          By signing in to Mail Track, installing the browser extension, or connecting your Google Account, you agree to these Terms. Mail Track provides real-time email delivery and read receipts for personal and professional communications. You agree to use the service ethically, without sending spam, phishing, or unsolicited mass mailings.
+        </div>
+      </div>
+
+      <h2>1. Acceptance of Terms</h2>
+      <p>
+        These Terms of Service ("Terms") constitute a legally binding agreement between you ("User", "you", or "your") and Mail Track ("we", "us", or "our"), governing your access to and use of our web application at <a href="https://mail-track-pink.vercel.app">https://mail-track-pink.vercel.app</a>, <a href="https://www.mailtrack.in">https://www.mailtrack.in</a>, browser extensions, and related APIs (collectively, the "Service").
+      </p>
+      <p>
+        If you do not agree to these Terms, you must not access or use the Service.
+      </p>
+
+      <h2>2. Description of the Service</h2>
+      <p>
+        Mail Track offers email tracking and delivery confirmation tools for users of Gmail and Google Workspace:
+      </p>
+      <ul>
+        <li><strong>Read Receipts (Pixel Tracking):</strong> A 1x1 transparent tracking pixel embedded into outgoing emails to record when, how many times, and from what client device an email is opened.</li>
+        <li><strong>Link Click Tracking:</strong> Optional link redirection to notify you when links inside your tracked messages are clicked.</li>
+        <li><strong>Gmail Checkmarks Integration:</strong> Automated creation and assignment of Gmail thread labels ("✓" for delivered, "✓✓" for read) allowing check status visualization directly in official desktop and mobile Gmail applications.</li>
+        <li><strong>Web Analytics Dashboard:</strong> Real-time reporting on delivery timestamps, recipient read activity, and historical telemetry.</li>
+      </ul>
+
+      <h2>3. Google Account Integration & Permissions</h2>
+      <p>
+        To deliver checkmark synchronization inside your official Gmail applications, Mail Track requests permission via Google OAuth 2.0 to manage Gmail labels (<code>gmail.modify</code>):
+      </p>
+      <ul>
+        <li>You authorize Mail Track to create two custom labels in your Gmail account: <code>✓</code> and <code>✓✓</code>.</li>
+        <li>You authorize Mail Track to modify thread labels on emails you send to indicate their delivery and open status.</li>
+        <li><strong>No Email Body Access:</strong> Mail Track never reads, copies, analyzes, or stores your private message content, subject lines of un-tracked messages, or attachments.</li>
+        <li>You may disconnect Mail Track at any time by revoking access through your <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener noreferrer">Google Account Security Settings</a>.</li>
+      </ul>
+
+      <h2>4. Acceptable Use Policy</h2>
+      <p>
+        You agree to use Mail Track only for lawful, legitimate communications. You agree NOT to use the Service:
+      </p>
+      <ul>
+        <li>To send unsolicited mass commercial email (spam) in violation of the CAN-SPAM Act, GDPR, CASL, or other anti-spam regulations.</li>
+        <li>To harass, stalk, threaten, defraud, or unlawfully surveil any person.</li>
+        <li>To conduct phishing attacks, distribute malware, spyware, or malicious links.</li>
+        <li>To attempt to reverse engineer, decompile, disable, or tamper with Mail Track’s infrastructure, security mechanisms, or rate limiters.</li>
+        <li>To resell, lease, or sub-license access to the Service without our express prior written permission.</li>
+      </ul>
+      <p>
+        We reserve the right to immediately suspend or permanently terminate any account that violates this Acceptable Use Policy.
+      </p>
+
+      <h2>5. User Accounts & Security</h2>
+      <p>
+        When you log in through Google OAuth, your account is provisioned automatically with a secure personal API key. You are solely responsible for:
+      </p>
+      <ul>
+        <li>Maintaining the confidentiality of your API key and account session credentials.</li>
+        <li>All activities that occur under your account.</li>
+        <li>Promptly notifying us if you suspect unauthorized access or compromise of your account.</li>
+      </ul>
+
+      <h2>6. Intellectual Property Rights</h2>
+      <p>
+        All rights, title, and interest in and to the Service—including software code, user interface designs, visual layouts, branding, and logos—are and will remain the exclusive property of Mail Track. Except as expressly provided, nothing in these Terms grants you any right, title, or interest in or to our intellectual property.
+      </p>
+
+      <h2>7. Privacy & Data Handling</h2>
+      <p>
+        Your privacy is paramount. Our collection and handling of your information is governed by our <a href="/privacy">Privacy Policy</a>, which is incorporated into these Terms by reference.
+      </p>
+
+      <h2>8. Disclaimer of Warranties</h2>
+      <p>
+        THE SERVICE IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS, WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, OR NON-INFRINGEMENT.
+      </p>
+      <p>
+        WE DO NOT GUARANTEE THAT EMAIL TRACKING WILL BE 100% ACCURATE IN EVERY CIRCUMSTANCE. RECIPIENT PRIVACY TOOLS, IMAGE-BLOCKING SETTINGS, CORPORATE FIREWALLS, OR AUTOMATED EMAIL SCANNERS (SUCH AS APPLE MAIL PRIVACY PROTECTION OR GOOGLE PROXY CACHES) MAY PREVENT OR ARTIFICIALLY TRIGGER READ RECEIPTS.
+      </p>
+
+      <h2>9. Limitation of Liability</h2>
+      <p>
+        TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL MAIL TRACK, ITS OPERATORS, AFFILIATES, OR DIRECTORS BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF PROFITS, DATA, USE, GOODWILL, OR OTHER INTANGIBLE LOSSES, ARISING OUT OF OR IN CONNECTION WITH YOUR ACCESS TO OR USE OF (OR INABILITY TO USE) THE SERVICE.
+      </p>
+
+      <h2>10. Account Termination & Data Erasure</h2>
+      <p>
+        You may terminate these Terms at any time by ceasing to use the Service and deleting your account. In your dashboard Settings tab, clicking <strong>"Delete Account & Permanent Data Removal"</strong> will immediately and irrevocably delete your user record, linked Google tokens, and all email logs from our database.
+      </p>
+      <p>
+        We reserve the right to suspend or terminate your account at our discretion, without prior notice, if you breach any provision of these Terms.
+      </p>
+
+      <h2>11. Modifications to Terms</h2>
+      <p>
+        We reserve the right to modify or replace these Terms at any time. When modifications occur, we will update the "Last Updated" date at the top of this page. Your continued use of the Service following the posting of any changes indicates your acceptance of those modifications.
+      </p>
+
+      <h2>12. Contact Information</h2>
+      <p>
+        For inquiries regarding these Terms of Service, please contact:
+      </p>
+      <ul>
+        <li><strong>Email:</strong> <a href="mailto:support@mailtrack.in">support@mailtrack.in</a></li>
+        <li><strong>Developer:</strong> Naveen Kumar (<a href="mailto:nnaveen.8527@gmail.com">nnaveen.8527@gmail.com</a>)</li>
+        <li><strong>Website:</strong> <a href="https://mail-track-pink.vercel.app">https://mail-track-pink.vercel.app</a> • <a href="https://www.mailtrack.in">https://www.mailtrack.in</a></li>
+      </ul>
+
+      <div class="footer">
+        © 2026 Mail Track. All rights reserved.
+      </div>
+    </article>
+  </main>
+
+</body>
+</html>

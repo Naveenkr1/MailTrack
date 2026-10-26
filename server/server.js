@@ -143,6 +143,16 @@ app.get('/landing', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
 
+// Official Privacy Policy Page (Google OAuth Compliance)
+app.get(['/privacy', '/privacy-policy'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+
+// Official Terms of Service Page
+app.get(['/terms', '/terms-of-service', '/tos'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'terms.html'));
+});
+
 // Root: Dashboard for authenticated users, Landing Page for unauthenticated visitors
 app.get('/', optionalAuth, (req, res) => {
   if (req.user) {
