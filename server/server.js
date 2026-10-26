@@ -610,22 +610,7 @@ app.get('/api/config', (req, res) => {
 });
 
 app.get('/api/ping', (req, res) => {
-  res.json({
-    pong: true,
-    time: Date.now(),
-    publicUrl: getRequestBaseUrl(req),
-    headers: {
-      host: req.headers.host,
-      'x-forwarded-host': req.headers['x-forwarded-host'],
-      'x-forwarded-proto': req.headers['x-forwarded-proto']
-    },
-    env: {
-      VERCEL: process.env.VERCEL,
-      VERCEL_URL: process.env.VERCEL_URL,
-      BASE_URL: process.env.BASE_URL,
-      NODE_ENV: process.env.NODE_ENV
-    }
-  });
+  res.json({ pong: true, time: Date.now(), publicUrl: getRequestBaseUrl(req) });
 });
 
 // Update or disconnect personal custom domain
