@@ -709,13 +709,18 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
   if (recArray.length === 0) recArray = ['Recipient'];
   const fullRecipientStr = recArray.join(', ');
 
-  // Determine user tenant
+  // Determine user tenant - prioritize the actual sender email of this email!
   let user = req.user;
-  const senderEmail = (sender && sender.includes('@')) ? sender.trim().toLowerCase() : (req.headers['x-mailtrack-user-email'] || '').trim().toLowerCase();
-  if (!user && senderEmail && senderEmail.includes('@')) {
-    user = await db.findUserByEmail(senderEmail);
-    if (!user) {
-      user = await db.createOrUpdateUser({ email: senderEmail, name: senderEmail.split('@')[0] });
+  const senderEmail = (sender && sender.includes('@')) 
+    ? sender.trim().toLowerCase() 
+    : (req.headers['x-mailtrack-user-email'] || '').trim().toLowerCase();
+
+  if (senderEmail && senderEmail.includes('@')) {
+    if (!user || user.email.toLowerCase() !== senderEmail) {
+      user = await db.findUserByEmail(senderEmail);
+      if (!user) {
+        user = await db.createOrUpdateUser({ email: senderEmail, name: senderEmail.split('@')[0] });
+      }
     }
   }
   if (!user) {
@@ -799,10 +804,14 @@ app.post('/api/emails/:id/thread', optionalAuth, async (req, res) => {
 app.get('/api/emails', optionalAuth, async (req, res) => {
   let user = req.user;
   const userEmail = (req.query.email || req.headers['x-mailtrack-user-email'] || '').trim().toLowerCase();
-  if (!user && userEmail && userEmail.includes('@')) {
-    user = await db.findUserByEmail(userEmail);
-    if (!user) {
-      user = await db.createOrUpdateUser({ email: userEmail, name: userEmail.split('@')[0] });
+
+  // If a specific user email is requested by the active tab or client, resolve to that exact user
+  if (userEmail && userEmail.includes('@')) {
+    if (!user || user.email.toLowerCase() !== userEmail) {
+      user = await db.findUserByEmail(userEmail);
+      if (!user) {
+        user = await db.createOrUpdateUser({ email: userEmail, name: userEmail.split('@')[0] });
+      }
     }
   }
   if (!user) {

@@ -27,7 +27,7 @@ function getEffectiveBaseUrl(req) {
 // -------------------------------------------------------------
 router.get('/google', (req, res) => {
   const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
-  const isExtension = req.query.flow === 'extension';
+  const isExtension = req.query.flow === 'extension' || req.query.ext === '1';
   const isMobileSync = req.query.flow === 'mobile_sync';
 
   // If Google OAuth credentials are not yet set up, provide the Setup / Dev Login view

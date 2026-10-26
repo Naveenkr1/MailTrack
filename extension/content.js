@@ -181,18 +181,37 @@
     const titleMatch = document.title.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
     if (titleMatch) return titleMatch[1].toLowerCase();
 
-    // 2. From top-right Google Account button
-    const accBtn = document.querySelector('a[aria-label*="@"], a[data-identifier*="@"]');
-    if (accBtn) {
-      const text = accBtn.getAttribute('aria-label') || accBtn.getAttribute('data-identifier') || '';
-      const m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+    // 2. From top-right Google Account button / profile links
+    const accSelectors = [
+      'a[aria-label*="Google Account:"]',
+      'a[aria-label*="@"]',
+      'a[data-identifier*="@"]',
+      'a.gb_A[aria-label*="@"]',
+      'div[aria-label*="Google Account:"]',
+      'div[aria-label*="@"]',
+      'header [aria-label*="@"]'
+    ];
+    for (const sel of accSelectors) {
+      const el = document.querySelector(sel);
+      if (el) {
+        const text = el.getAttribute('aria-label') || el.getAttribute('data-identifier') || el.title || '';
+        const m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+        if (m) return m[1].toLowerCase();
+      }
+    }
+
+    // 3. From profile avatar image alt or title
+    const avatar = document.querySelector('img[alt*="@"], img[title*="@"]');
+    if (avatar) {
+      const m = (avatar.getAttribute('alt') || avatar.getAttribute('title') || '').match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
       if (m) return m[1].toLowerCase();
     }
 
-    // 3. Fallback: check profile avatar image alt
-    const avatar = document.querySelector('img[alt*="@"]');
-    if (avatar) {
-      const m = (avatar.getAttribute('alt') || '').match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+    // 4. From any active compose dialog 'from' element
+    const fromEl = document.querySelector('input[name="from"], [aria-label*="From" i], .aoD.hl, tr.GS [email]');
+    if (fromEl) {
+      const val = fromEl.value || fromEl.getAttribute('email') || fromEl.getAttribute('aria-label') || fromEl.textContent || '';
+      const m = val.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
       if (m) return m[1].toLowerCase();
     }
 
@@ -680,16 +699,15 @@
     const recipients = extractAllRecipients(dialog);
     const recipient = recipients.join(', ');
 
-    // Extract sender email
-    let sender = getCurrentGmailUser();
-    if (!sender) {
-      const fromEl = dialog.querySelector('input[name="from"], [aria-label*="From" i]');
-      if (fromEl) {
-        const fromVal = fromEl.value || fromEl.getAttribute('aria-label') || fromEl.textContent || '';
-        const m = fromVal.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-        if (m) sender = m[1].toLowerCase();
-      }
+    // Extract sender email - check the dialog's own "From" field FIRST for multi-account accuracy!
+    let sender = null;
+    const fromEl = dialog.querySelector('input[name="from"], [aria-label*="From" i], .aoD.hl, [data-hovercard-id*="@"], tr.GS [email]');
+    if (fromEl) {
+      const fromVal = fromEl.value || fromEl.getAttribute('email') || fromEl.getAttribute('data-hovercard-id') || fromEl.getAttribute('aria-label') || fromEl.textContent || '';
+      const m = fromVal.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+      if (m) sender = m[1].toLowerCase();
     }
+    if (!sender) sender = getCurrentGmailUser();
     if (!sender) sender = (currentAuthUser && currentAuthUser.email) || 'Me';
 
     let trackingId = dialog.getAttribute('data-mt-tracking-id');
@@ -1797,9 +1815,12 @@
       <div class="mt-dropdown-list">
         ${itemsHtml}
       </div>
-      <div class="mt-dropdown-footer">
-        <a href="${getServerUrl()}" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta">
-          <span>Open Full Dashboard</span>
+      <div class="mt-dropdown-footer" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+        <a href="${getServerUrl()}/auth/google/mobile-sync" target="_blank" rel="noopener noreferrer" style="font-size:11.5px;font-weight:600;color:#059669;text-decoration:none;display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);" title="Enable green checkmarks in official Gmail mobile app">
+          <span>📱 Mobile (✓✓)</span>
+        </a>
+        <a href="${getServerUrl()}" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta" style="flex:1;justify-content:center;">
+          <span>Open Dashboard</span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
             <polyline points="15 3 21 3 21 9"></polyline>

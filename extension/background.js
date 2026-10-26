@@ -545,9 +545,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     (async () => {
       await getActiveServerUrl();
       const headers = { 'Content-Type': 'application/json' };
-      if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
-      if (request.payload && request.payload.sender && request.payload.sender.includes('@')) {
-        headers['X-MailTrack-User-Email'] = request.payload.sender;
+      const sender = request.payload && request.payload.sender;
+      if (sender && sender.includes('@')) {
+        headers['X-MailTrack-User-Email'] = sender;
+      }
+      if (cachedApiKey && (!sender || (currentUser && currentUser.email === sender))) {
+        headers['X-API-Key'] = cachedApiKey;
       }
 
       try {
@@ -639,7 +642,9 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       // 2. Prepare headers & query
       const activeEmail = request.email || (currentUser && currentUser.email) || null;
       const headers = {};
-      if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
+      if (cachedApiKey && (!activeEmail || (currentUser && currentUser.email === activeEmail))) {
+        headers['X-API-Key'] = cachedApiKey;
+      }
       if (activeEmail) headers['X-MailTrack-User-Email'] = activeEmail;
 
       const url = activeEmail 

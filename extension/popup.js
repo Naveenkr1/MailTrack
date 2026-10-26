@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (loginBtn) {
     loginBtn.onclick = async () => {
       const sUrl = await getServerUrl();
-      chrome.tabs.create({ url: `${sUrl}/login` });
+      chrome.tabs.create({ url: `${sUrl}/login?flow=extension` });
       window.close();
     };
   }
