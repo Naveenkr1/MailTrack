@@ -2,7 +2,7 @@
   "name": "mail-track",
   "version": "1.0.0",
   "description": "Mail Track multi-user email analytics server & dashboard",
-  "main": "api/index.js",
+  "main": "index.js",
   "scripts": {
     "start": "node server/server.js",
     "dev": "node server/server.js"
