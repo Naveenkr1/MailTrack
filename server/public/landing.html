@@ -1,0 +1,1851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mail Track — Know the moment your email gets read</title>
+  <meta name="description" content="Know the moment your email gets read. Everything you need to close deals and follow up smarter with live open tracking and link tracking in Gmail.">
+  <link rel="icon" type="image/png" href="/icons/icon-48.png">
+
+  <!-- Google Fonts: Geist, Plus Jakarta Sans, Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;450;500;600;700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Lottie Player -->
+  <script src="/assets/lottie.min.js"></script>
+
+  <style>
+    /* CSS Reset & Variables */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-display: 'Plus Jakarta Sans', 'Geist', -apple-system, sans-serif;
+      --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+
+      --color-dark: #090b0c;
+      --color-dark-subtle: rgba(9, 11, 12, 0.7);
+      --color-border-subtle: rgba(9, 11, 12, 0.2);
+      --color-grid-border: rgba(0, 0, 0, 0.06);
+      --color-text-muted: #737373;
+      --color-text-slate: #475569;
+      --color-blue: #0084d1;
+      --color-primary: #059669;
+      --color-primary-hover: #047857;
+      --color-card-bg: #f5f5f5;
+      --color-white: #ffffff;
+      
+      --radius-lottie: 11.2px;
+      --radius-hero: 33.6px;
+      --radius-cta: 22.4px;
+      --radius-pill: 9999px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: #ffffff;
+      color: var(--color-dark);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    /* Outer Wrapper */
+    .landing-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      background: #ffffff;
+    }
+
+    .page-container {
+      width: 100%;
+      max-width: 1472px;
+      padding: 0 16px;
+      margin: 0 auto;
+    }
+
+    /* ---------------------------------------------------- */
+    /* HERO CONTAINER (Node 116:910)                         */
+    /* ---------------------------------------------------- */
+    .hero-wrapper {
+      width: 100%;
+      max-width: 1472px;
+      padding: 16px 16px 0 16px;
+      margin: 0 auto;
+    }
+
+    .hero-card {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius-hero);
+      overflow: hidden;
+      background-color: #f5f5f5;
+      box-shadow: 0px 20px 25px -5px rgba(0,0,0,0.1), 0px 8px 10px -6px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      border-radius: var(--radius-hero);
+      z-index: 1;
+    }
+
+    /* Navigation Inside Hero (Node 116:1309) */
+    .hero-navbar {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 24px 32px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+
+    .nav-brand-icon {
+      width: 25.45px;
+      height: 25.45px;
+      background-color: var(--color-primary);
+      border-radius: 5.78px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+    }
+
+    .nav-brand-icon img {
+      width: 17.45px;
+      height: 17.45px;
+      display: block;
+    }
+
+    .nav-brand-text {
+      font-family: var(--font-inter);
+      font-weight: 600;
+      font-size: 16.39px;
+      line-height: 26.2px;
+      letter-spacing: -0.33px;
+      color: #081e17;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 40px;
+    }
+
+    .nav-link {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 20px;
+      color: var(--color-dark);
+      transition: opacity 0.15s ease;
+    }
+
+    .nav-link:hover {
+      opacity: 0.7;
+    }
+
+    .nav-download-btn {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-dark);
+      border-radius: 16.8px;
+      height: 36px;
+      padding-left: 14px;
+      padding-right: 8px;
+      color: #fafafa;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      overflow: hidden;
+      transition: transform 0.15s ease, background-color 0.2s ease;
+    }
+
+    .nav-download-btn:hover {
+      background: #1e293b;
+      transform: translateY(-1px);
+    }
+
+    .nav-btn-divider {
+      width: 1px;
+      height: 20px;
+      background: rgba(250, 250, 250, 0.2);
+      margin: 0 8px;
+    }
+
+    .nav-btn-caret {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Hero Center Header (Node 116:913) */
+    .hero-header-content {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 48px;
+      padding-bottom: 24px;
+      text-align: center;
+    }
+
+    .hero-badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      height: 26px;
+      padding: 0 12px;
+      border: 1px solid var(--color-border-subtle);
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      margin-bottom: 24px;
+    }
+
+    .hero-badge-pill span {
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 450;
+      color: var(--color-dark-subtle);
+      letter-spacing: 0.12px;
+    }
+
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: 48px;
+      line-height: 52px;
+      font-weight: 400;
+      letter-spacing: -0.48px;
+      color: var(--color-dark);
+      max-width: 600px;
+      margin: 0 auto 28px auto;
+      text-wrap: balance;
+    }
+
+    .hero-cta-btn {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-dark);
+      border-radius: var(--radius-pill);
+      height: 40px;
+      padding-left: 12px;
+      padding-right: 8px;
+      color: #fafafa;
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 450;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hero-cta-btn:hover {
+      background: #1e293b;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+    }
+
+    .hero-cta-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero-cta-icon img {
+      width: 16px;
+      height: 16px;
+    }
+
+    .hero-cta-text {
+      padding-right: 6px;
+    }
+
+    /* Hero Dashboard Image (Node 116:5127) */
+    .hero-image-wrap {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 1380px;
+      margin: 20px auto 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: center;
+      transform-origin: center bottom;
+      transition: transform 0.1s ease-out;
+    }
+
+    .hero-dashboard-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      box-shadow: 0 -8px 24px -4px rgba(0, 0, 0, 0.05);
+    }
+
+    /* ---------------------------------------------------- */
+    /* SECTION 1: 3 LOTTIE CARDS (Node 116:1363)             */
+    /* ---------------------------------------------------- */
+    .feature-section {
+      width: 100%;
+      border-bottom: 1px solid var(--color-grid-border);
+      background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+    }
+
+    .feature-container {
+      width: 100%;
+      max-width: 1472px;
+      margin: 0 auto;
+      padding: 0 96px;
+    }
+
+    .feature-inner {
+      border-left: 1px solid var(--color-grid-border);
+      border-right: 1px solid var(--color-grid-border);
+      width: 100%;
+    }
+
+    .feature-header-wrap {
+      padding: 96px 144px 24px 144px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .feature-badge-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-blue);
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      margin-bottom: 20px;
+      transition: opacity 0.15s ease;
+    }
+
+    .feature-badge-link:hover {
+      opacity: 0.8;
+    }
+
+    .feature-badge-link img {
+      width: 16px;
+      height: 16px;
+    }
+
+    .feature-heading-2 {
+      font-family: var(--font-display);
+      font-size: 44px;
+      line-height: 48px;
+      font-weight: 400;
+      color: var(--color-dark);
+      max-width: 600px;
+      margin: 0 auto;
+      text-wrap: balance;
+    }
+
+    .feature-lead-text-wrap {
+      padding: 40px 144px 56px 144px;
+      text-align: center;
+    }
+
+    .feature-lead-text {
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 28px;
+      font-weight: 400;
+      color: var(--color-dark);
+      max-width: 748px;
+      margin: 0 auto;
+    }
+
+    /* 3 LOTTIE CARDS GRID (Node 116:1390) */
+    .lottie-grid-wrap {
+      padding: 0 24px 96px 24px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
+    .lottie-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 393.33px);
+      gap: 24px;
+      justify-content: center;
+      width: 100%;
+      max-width: 1228px;
+    }
+
+    .lottie-card-col {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      width: 393.33px;
+    }
+
+    /* Exact Figma dimensions for Lottie containers: 393.33px x 320px */
+    .lottie-container-box {
+      width: 393.33px;
+      height: 320px;
+      background-color: var(--color-card-bg);
+      border-radius: var(--radius-lottie);
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .lottie-container-box:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .lottie-player-target {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .lottie-card-info {
+      padding: 20px 16px;
+      width: 100%;
+    }
+
+    .lottie-card-text {
+      font-size: 16px;
+      line-height: 24px;
+      color: var(--color-dark);
+      word-break: break-word;
+    }
+
+    .lottie-card-title {
+      font-weight: 500;
+      color: var(--color-dark);
+    }
+
+    .lottie-card-desc {
+      font-weight: 400;
+      color: var(--color-text-muted);
+    }
+
+    /* ---------------------------------------------------- */
+    /* SECTION 2: MEMORY SECTION (Node 116:1603)             */
+    /* ---------------------------------------------------- */
+    .memory-section {
+      width: 100%;
+      background: linear-gradient(180deg, #ffffff 18%, #fafafa 100%);
+      border-bottom: 1px dashed var(--color-grid-border);
+    }
+
+    .memory-header-wrap {
+      padding: 64px 264px 32px 264px;
+    }
+
+    .memory-heading-3 {
+      font-family: var(--font-display);
+      font-size: 30px;
+      line-height: 40px;
+      font-weight: 500;
+      color: var(--color-dark);
+      margin-bottom: 12px;
+    }
+
+    .memory-heading-mute {
+      color: #94a3b8;
+    }
+
+    .memory-desc {
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 28px;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      max-width: 748px;
+    }
+
+    .memory-desc a {
+      color: var(--color-blue);
+      text-decoration: underline;
+      font-weight: 500;
+    }
+
+    .memory-visual-wrap {
+      height: 384px;
+      overflow: hidden;
+      padding: 0 64px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin-top: 24px;
+    }
+
+    .memory-visual-grid {
+      display: grid;
+      grid-template-columns: 436px 436px;
+      gap: 24px;
+      width: 896px;
+      height: 384px;
+      overflow: hidden;
+    }
+
+    .memory-prompt-box {
+      background: var(--color-card-bg);
+      padding: 14px 18px;
+      border-radius: 16.8px;
+      max-width: 340px;
+      margin-top: 24px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .memory-prompt-box p {
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      color: var(--color-dark);
+    }
+
+    .memory-mockup-stack {
+      position: relative;
+      height: 384px;
+    }
+
+    .memory-mockup-card-back {
+      position: absolute;
+      top: 40px;
+      left: -80px;
+      width: 432px;
+      height: 384px;
+      border-top-left-radius: 16.8px;
+      border-top-right-radius: 16.8px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: none;
+      box-shadow: 0px 20px 25px -5px rgba(0,0,0,0.1);
+      overflow: hidden;
+      opacity: 0.6;
+    }
+
+    .memory-mockup-card-back img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .memory-mockup-card-front {
+      position: absolute;
+      top: 0;
+      left: 10px;
+      width: 432px;
+      height: 384px;
+      border-top-left-radius: 16.8px;
+      border-top-right-radius: 16.8px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-bottom: none;
+      box-shadow: 0px 20px 25px -5px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .memory-mockup-card-front img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ---------------------------------------------------- */
+    /* SECTION 3: PASSWORD MANAGER SECTION (Node 116:1625)   */
+    /* ---------------------------------------------------- */
+    .pm-section {
+      width: 100%;
+      border-bottom: 1px solid var(--color-grid-border);
+      background: #ffffff;
+    }
+
+    .pm-header-wrap {
+      padding: 96px 144px 32px 144px;
+    }
+
+    .pm-tag-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--color-blue);
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 24px;
+      margin-bottom: 16px;
+    }
+
+    .pm-tag-link img {
+      width: 16px;
+      height: 16px;
+    }
+
+    .pm-heading-2 {
+      font-family: var(--font-display);
+      font-size: 44px;
+      line-height: 48px;
+      font-weight: 400;
+      color: var(--color-dark);
+      margin-bottom: 16px;
+    }
+
+    .pm-lead-text {
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 28px;
+      font-weight: 400;
+      color: var(--color-text-muted);
+      max-width: 988px;
+    }
+
+    .pm-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 393.33px);
+      gap: 24px;
+      justify-content: center;
+      width: 100%;
+      padding: 32px 24px 96px 24px;
+    }
+
+    .pm-card-col {
+      display: flex;
+      flex-direction: column;
+      width: 393.33px;
+    }
+
+    .pm-img-box {
+      width: 393.33px;
+      height: 320px;
+      background: var(--color-card-bg);
+      border-radius: var(--radius-lottie);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .pm-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .pm-card-info {
+      padding: 20px 16px;
+      width: 100%;
+    }
+
+    /* ---------------------------------------------------- */
+    /* SECTION 4: FAQ ACCORDION SECTION (Node 132:7879)      */
+    /* ---------------------------------------------------- */
+    .faq-section {
+      width: 100%;
+      padding: 80px 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #ffffff;
+    }
+
+    .faq-header-wrap {
+      max-width: 680px;
+      text-align: center;
+      margin-bottom: 48px;
+      padding: 0 16px;
+    }
+
+    .faq-heading-2 {
+      font-family: var(--font-display);
+      font-size: 44px;
+      line-height: 48px;
+      font-weight: 400;
+      color: var(--color-dark);
+      margin-bottom: 14px;
+    }
+
+    .faq-subheading {
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 28px;
+      color: var(--color-text-muted);
+    }
+
+    .faq-list-wrap {
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding: 0 16px;
+    }
+
+    .faq-accordion-item {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .faq-accordion-item:hover {
+      border-color: #cbd5e1;
+    }
+
+    .faq-question-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 24px;
+      text-align: left;
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .faq-chevron {
+      color: #94a3b8;
+      font-size: 12px;
+      transition: transform 0.25s ease, color 0.2s ease;
+      display: inline-block;
+    }
+
+    .faq-accordion-item.active .faq-chevron {
+      transform: rotate(180deg);
+      color: var(--color-primary);
+    }
+
+    .faq-answer-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 24px;
+    }
+
+    .faq-accordion-item.active .faq-answer-panel {
+      max-height: 240px;
+      padding: 0 24px 20px 24px;
+    }
+
+    .faq-answer-text {
+      font-family: var(--font-body);
+      font-size: 14.5px;
+      line-height: 23.2px;
+      color: #475569;
+    }
+
+    /* ---------------------------------------------------- */
+    /* SECTION 5: CTA BANNER (Node 116:1771)                 */
+    /* ---------------------------------------------------- */
+    .cta-banner-section {
+      width: 100%;
+      max-width: 1472px;
+      padding: 48px 96px 96px 96px;
+      margin: 0 auto;
+    }
+
+    .cta-banner-card {
+      position: relative;
+      border-radius: var(--radius-cta);
+      overflow: hidden;
+      padding: 110px 32px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 16px 36px -8px rgba(0, 132, 209, 0.15);
+    }
+
+    .cta-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      border-radius: var(--radius-cta);
+      z-index: 1;
+    }
+
+    .cta-content-wrap {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cta-heading-2 {
+      font-family: var(--font-display);
+      font-size: 44px;
+      line-height: 48px;
+      font-weight: 400;
+      color: var(--color-dark);
+      max-width: 640px;
+      margin-bottom: 32px;
+      text-wrap: balance;
+    }
+
+    .cta-chrome-btn {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-dark);
+      border-radius: 16.8px;
+      height: 44px;
+      padding: 0 16px 0 14px;
+      color: #fafafa;
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 500;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    .cta-chrome-btn:hover {
+      background: #1e293b;
+      transform: translateY(-2px);
+    }
+
+    .cta-chrome-icon {
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cta-chrome-icon img {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ---------------------------------------------------- */
+    /* SECTION 6: FOOTER (Node 116:1789 / 132:8837)          */
+    /* ---------------------------------------------------- */
+    .landing-footer {
+      width: 100%;
+      background: rgba(245, 248, 252, 0.33);
+      border-top: 1px solid #e2e8f0;
+      padding: 48px 0 32px 0;
+    }
+
+    .footer-inner-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .footer-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+      padding-bottom: 32px;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .footer-badge-check {
+      width: 32px;
+      height: 32px;
+      background-color: var(--color-primary);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0px 4px 5px rgba(5, 150, 105, 0.3);
+      color: #ffffff;
+      font-family: var(--font-inter);
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: -1px;
+    }
+
+    .footer-brand-title {
+      font-family: var(--font-inter);
+      font-weight: 800;
+      font-size: 17.6px;
+      line-height: 28px;
+      letter-spacing: -0.35px;
+      color: #0f172a;
+    }
+
+    .footer-links-list {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      list-style: none;
+      flex-wrap: wrap;
+    }
+
+    .footer-links-list a {
+      font-family: var(--font-inter);
+      font-size: 14px;
+      line-height: 22.4px;
+      color: #475569;
+      transition: color 0.15s ease;
+    }
+
+    .footer-links-list a:hover {
+      color: var(--color-primary);
+    }
+
+    .footer-bottom-divider {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 24px;
+      text-align: center;
+    }
+
+    .footer-copyright {
+      font-family: var(--font-inter);
+      font-size: 13px;
+      line-height: 20.8px;
+      color: #64748b;
+    }
+
+    /* ---------------------------------------------------- */
+    /* INSTALL EXTENSION MODAL                              */
+    /* ---------------------------------------------------- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 540px;
+      box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+      border: 1px solid #e2e8f0;
+      padding: 32px;
+      position: relative;
+      transform: scale(0.96) translateY(8px);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-backdrop.open .modal-card {
+      transform: scale(1) translateY(0);
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #64748b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      line-height: 1;
+      transition: all 0.15s ease;
+    }
+
+    .modal-close-btn:hover {
+      background: #e2e8f0;
+      color: #0f172a;
+    }
+
+    .modal-header-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      color: var(--color-primary);
+      font-size: 24px;
+    }
+
+    .modal-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 8px;
+    }
+
+    .modal-desc {
+      font-size: 14.5px;
+      color: #64748b;
+      margin-bottom: 24px;
+      line-height: 1.5;
+    }
+
+    .modal-step-item {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      align-items: flex-start;
+    }
+
+    .modal-step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #f1f5f9;
+      color: #0f172a;
+      font-weight: 700;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .modal-step-content {
+      font-size: 14px;
+      color: #334155;
+      line-height: 1.5;
+    }
+
+    .modal-step-content strong {
+      color: #0f172a;
+    }
+
+    .code-box-wrap {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .code-box-text {
+      font-family: monospace;
+      font-size: 12.5px;
+      color: #38bdf8;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-copy-code {
+      background: #1e293b;
+      color: #ffffff;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+
+    .btn-copy-code:hover {
+      background: #334155;
+    }
+
+    .modal-action-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .modal-btn-primary {
+      flex: 1;
+      height: 42px;
+      background: var(--color-primary);
+      color: #ffffff;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .modal-btn-primary:hover {
+      background: var(--color-primary-hover);
+    }
+
+    .modal-btn-secondary {
+      flex: 1;
+      height: 42px;
+      background: #f1f5f9;
+      color: #334155;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .modal-btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    /* ---------------------------------------------------- */
+    /* RESPONSIVE BREAKPOINTS                               */
+    /* ---------------------------------------------------- */
+    @media (max-width: 1280px) {
+      .feature-container,
+      .cta-banner-section {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .feature-header-wrap,
+      .feature-lead-text-wrap,
+      .pm-header-wrap,
+      .memory-header-wrap {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .lottie-grid,
+      .pm-cards-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .lottie-card-col,
+      .lottie-container-box,
+      .pm-card-col,
+      .pm-img-box {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 992px) {
+      .lottie-grid,
+      .pm-cards-grid {
+        grid-template-columns: 1fr;
+        max-width: 480px;
+      }
+
+      .lottie-card-col,
+      .pm-card-col {
+        width: 100%;
+      }
+
+      .lottie-container-box,
+      .pm-img-box {
+        width: 100%;
+        max-width: 393.33px;
+        margin: 0 auto;
+      }
+
+      .memory-visual-grid {
+        grid-template-columns: 1fr;
+        width: 100%;
+        height: auto;
+      }
+
+      .memory-visual-wrap {
+        height: auto;
+        padding-bottom: 32px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .hero-title,
+      .feature-heading-2,
+      .pm-heading-2,
+      .faq-heading-2,
+      .cta-heading-2 {
+        font-size: 34px;
+        line-height: 40px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .hero-navbar {
+        padding: 16px;
+      }
+
+      .hero-header-content {
+        padding-top: 24px;
+      }
+
+      .hero-title {
+        font-size: 28px;
+        line-height: 34px;
+      }
+
+      .cta-banner-card {
+        padding: 64px 20px;
+      }
+
+      .footer-top-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="landing-page" data-node-id="116:906">
+
+    <!-- HERO SECTION (Node 116:910) -->
+    <section class="hero-wrapper">
+      <div class="hero-card">
+        <!-- Cloud Texture Background -->
+        <img alt="Hero Clouds Background" class="hero-bg-img" src="/landing-assets/596620ee7b6f1de2cb903b8b6e7d8e1eb8d5bbd3.png">
+
+        <!-- Navigation Bar (Node 116:1309) -->
+        <header class="hero-navbar">
+          <!-- Logo -->
+          <a href="/" class="nav-brand">
+            <div class="nav-brand-icon">
+              <img src="/landing-assets/656e19691fe2bd18efffb785e9262fe27a886c62.svg" alt="Mail Track Icon">
+            </div>
+            <span class="nav-brand-text">Mail Track</span>
+          </a>
+
+          <!-- Nav Links (Node 116:1319) -->
+          <nav class="nav-links">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="#features" class="nav-link">Use cases</a>
+            <a href="#faq" class="nav-link">Resources</a>
+            <a href="/login" class="nav-link">Pricing</a>
+          </nav>
+
+          <!-- Download Button (Node 116:1333) -->
+          <button type="button" class="nav-download-btn" onclick="openInstallModal()" title="Download Chrome Extension">
+            <span>Download</span>
+            <div class="nav-btn-divider"></div>
+            <div class="nav-btn-caret">
+              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Caret Icon">
+            </div>
+          </button>
+        </header>
+
+        <!-- Hero Header Content (Node 116:913) -->
+        <div class="hero-header-content">
+          <!-- Chrome Extension v1.0 Badge (Node 116:914) -->
+          <div class="hero-badge-pill">
+            <span>Chrome Extension v1.0</span>
+          </div>
+
+          <!-- Hero H1 Title (Node 116:921) -->
+          <h1 class="hero-title">
+            Know the moment your email gets read.
+          </h1>
+
+          <!-- Add to Your Chrome CTA (Node 116:925) -->
+          <button type="button" class="hero-cta-btn" onclick="openInstallModal()">
+            <div class="hero-cta-icon">
+              <img src="/landing-assets/7923f66be7e33e1ac10934b9b6bf8c5fdd0bda43.svg" alt="Chrome Logo">
+            </div>
+            <span class="hero-cta-text">Add to Your Chrome</span>
+            <div class="nav-btn-divider"></div>
+            <div class="nav-btn-caret">
+              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown">
+            </div>
+          </button>
+        </div>
+
+        <!-- Dashboard Preview Image (Node 116:5127) -->
+        <div class="hero-image-wrap" id="heroBannerImage">
+          <img src="/landing-assets/2c52f713023431b3ecffd59afc26a0686339c0c5.png" alt="Mail Track Live Dashboard" class="hero-dashboard-img">
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 1: 3 LOTTIE CARDS (Node 116:1363) -->
+    <section class="feature-section" id="features">
+      <div class="feature-container">
+        <div class="feature-inner">
+
+          <!-- Header & Tag -->
+          <div class="feature-header-wrap">
+            <a href="#features" class="feature-badge-link">
+              <span>Unlimited capability</span>
+              <img src="/landing-assets/a96d4a9409d73ae000b7b22401d693c2c2783147.svg" alt="Arrow">
+            </a>
+            <h2 class="feature-heading-2">
+              Everything you need to close deals and follow up smarter
+            </h2>
+          </div>
+
+          <!-- Subtitle -->
+          <div class="feature-lead-text-wrap">
+            <p class="feature-lead-text">
+              A seamless extension designed for founders, salespeople, recruiters, and consultants.
+            </p>
+          </div>
+
+          <!-- 3 LOTTIE CARDS GRID -->
+          <div class="lottie-grid-wrap">
+            <div class="lottie-grid">
+
+              <!-- CARD 1: Live open tracking (Node 116:1391) -->
+              <div class="lottie-card-col">
+                <div class="lottie-container-box" id="lottieContainer1" data-name="Lottie 1 (Use here)" data-node-id="132:7871">
+                  <div class="lottie-player-target" id="lottie-1"></div>
+                </div>
+                <div class="lottie-card-info">
+                  <p class="lottie-card-text">
+                    <span class="lottie-card-title">Live open tracking</span>
+                    <span class="lottie-card-desc"> See which recipient opened your email, at what time, and how many times they came back to it.</span>
+                  </p>
+                </div>
+              </div>
+
+              <!-- CARD 2: Unlimited and free (Node 116:1406) -->
+              <div class="lottie-card-col">
+                <div class="lottie-container-box" id="lottieContainer2" data-name="Lottie 2 (Use here)" data-node-id="116:1407">
+                  <div class="lottie-player-target" id="lottie-2"></div>
+                </div>
+                <div class="lottie-card-info">
+                  <p class="lottie-card-text">
+                    <span class="lottie-card-title">Unlimited and free</span>
+                    <span class="lottie-card-desc"> Track as many emails as you send. No limits, no payment, no credit card.</span>
+                  </p>
+                </div>
+              </div>
+
+              <!-- CARD 3: Link click tracking (Node 116:1399) -->
+              <div class="lottie-card-col">
+                <div class="lottie-container-box" id="lottieContainer3" data-name="Lottie 3 (Use here)" data-node-id="116:1400">
+                  <div class="lottie-player-target" id="lottie-3"></div>
+                </div>
+                <div class="lottie-card-info">
+                  <p class="lottie-card-text">
+                    <span class="lottie-card-title">Link click tracking</span>
+                    <span class="lottie-card-desc"> Count every click on every link, and see exactly who clicked it.</span>
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: MEMORY SECTION (Node 116:1603) -->
+    <section class="memory-section">
+      <div class="feature-container">
+        <div class="feature-inner">
+
+          <div class="memory-header-wrap">
+            <h3 class="memory-heading-3">
+              <span class="memory-heading-mute">Memory</span> that knows what you’re working on.
+            </h3>
+            <p class="memory-desc">
+              Aside knows which sites to use for which work. It turns your browsing history into memory, so you don’t have to repeat context every time. All memory stays local on your device and is never shared with anyone.
+              <a href="#">Learn more</a>
+            </p>
+          </div>
+
+          <div class="memory-visual-wrap">
+            <div class="memory-visual-grid">
+              <div class="memory-prompt-box">
+                <p>Find the candidate I opened yesterday and prep interview notes</p>
+              </div>
+
+              <div class="memory-mockup-stack">
+                <div class="memory-mockup-card-back">
+                  <img src="/landing-assets/d16a3f665ef290f40b18618051fa493d4347fb08.png" alt="Candidate notes preview">
+                </div>
+                <div class="memory-mockup-card-front">
+                  <img src="/landing-assets/beb4da6ebcb80ec5cb3ab4b0a556e62f10be91e1.png" alt="Candidate notes active card">
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: PASSWORD MANAGER SECTION (Node 116:1625) -->
+    <section class="pm-section">
+      <div class="feature-container">
+        <div class="feature-inner">
+
+          <div class="pm-header-wrap">
+            <div class="pm-tag-link">
+              <span>Password Manager</span>
+              <img src="/landing-assets/a96d4a9409d73ae000b7b22401d693c2c2783147.svg" alt="Arrow">
+            </div>
+            <h2 class="pm-heading-2">
+              Password that works with AI.
+            </h2>
+            <p class="pm-lead-text">
+              AI agents stop at login screen and ask you to log in every time. Aside lets agents sign in through autofill, without ever exposing your credentials to the AI.
+            </p>
+          </div>
+
+          <div class="pm-cards-grid">
+            <!-- PM Card 1 -->
+            <div class="pm-card-col">
+              <div class="pm-img-box">
+                <img src="/landing-assets/e60966a84cad8457ebf2f4970758caca6d473b82.png" alt="Secrets stay invisible to AI">
+              </div>
+              <div class="pm-card-info">
+                <p class="lottie-card-text">
+                  <span class="lottie-card-title">Secrets stay invisible to AI</span>
+                  <span class="lottie-card-desc"> Credentials are autofilled into websites, not exposed to the agent.</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- PM Card 2 -->
+            <div class="pm-card-col">
+              <div class="pm-img-box">
+                <img src="/landing-assets/fceaf1c40f58d58b5ce28a18f6495123948ed67b.png" alt="Human approval at the edge">
+              </div>
+              <div class="pm-card-info">
+                <p class="lottie-card-text">
+                  <span class="lottie-card-title">Human approval at the edge</span>
+                  <span class="lottie-card-desc"> Sensitive actions like payments, posts, and messages always wait for your confirmation.</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- PM Card 3 -->
+            <div class="pm-card-col">
+              <div class="pm-img-box">
+                <img src="/landing-assets/211775414bdcb4d887aa582ff6a8372d7b253be3.png" alt="A record of every access">
+              </div>
+              <div class="pm-card-info">
+                <p class="lottie-card-text">
+                  <span class="lottie-card-title">A record of every access</span>
+                  <span class="lottie-card-desc"> Every credential use is logged, so you know exactly what the agent touched.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: FAQ ACCORDION SECTION (Node 132:7879) -->
+    <section class="faq-section" id="faq">
+      <div class="faq-header-wrap">
+        <h2 class="faq-heading-2">Frequently Asked Questions</h2>
+        <p class="faq-subheading">Everything you need to know about Mail Track and how it operates.</p>
+      </div>
+
+      <div class="faq-list-wrap">
+        <!-- Question 1 (Open by default) -->
+        <div class="faq-accordion-item active">
+          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+            <span>Does the recipient know that I am tracking the email?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer-panel">
+            <p class="faq-answer-text">
+              No. Mail Track uses a transparent 1×1 pixel web beacon and clean redirect links that render silently in the background. We never append embarrassing "Sent with Mailtrack" promotional badges or footer signatures to your outgoing messages.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="faq-accordion-item">
+          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+            <span>How does tracking work on mobile Gmail (iPhone & Android)?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer-panel">
+            <p class="faq-answer-text">
+              Tracking pixels and links are standard email components embedded at send time. When your recipient opens the email on mobile Gmail, Apple Mail, or any smartphone client, the open signal is sent instantly to your Mail Track dashboard and push alerts.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="faq-accordion-item">
+          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+            <span>Can I turn tracking off for specific emails?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer-panel">
+            <p class="faq-answer-text">
+              Yes! The Mail Track toggle button sits right next to the Send button in your Gmail compose box. You can enable or disable tracking for any individual email or link with a single click.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="faq-accordion-item">
+          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+            <span>Is my personal email data safe and private?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer-panel">
+            <p class="faq-answer-text">
+              Absolutely. Mail Track never reads, stores, or analyzes the body text or attachments of your emails. Only the recipient email address, subject line, and tracking IDs are processed for status verification.
+            </p>
+          </div>
+        </div>
+
+        <!-- Question 5 -->
+        <div class="faq-accordion-item">
+          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+            <span>How do I install the extension right now?</span>
+            <span class="faq-chevron">▼</span>
+          </button>
+          <div class="faq-answer-panel">
+            <p class="faq-answer-text">
+              Click "Add to Your Chrome" at the top or bottom of this page. You will be guided to load the unpacked extension into Chrome in developer mode in under 30 seconds.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: CTA BANNER (Node 116:1771) -->
+    <section class="cta-banner-section">
+      <div class="cta-banner-card">
+        <img src="/landing-assets/51ace833ac9ed381049171f0f14f8a589c128e09.png" alt="Cyan Gradient Mesh" class="cta-bg-img">
+        <div class="cta-content-wrap">
+          <h2 class="cta-heading-2">
+            Start tracking your emails in under 30 seconds
+          </h2>
+          <button type="button" class="cta-chrome-btn" onclick="openInstallModal()">
+            <div class="cta-chrome-icon">
+              <img src="/landing-assets/a1c756bddf8eca99fd5c27c5fadbd0f1081b10ab.svg" alt="Chrome Logo">
+            </div>
+            <span>Add to Chrome</span>
+            <div class="nav-btn-divider"></div>
+            <div class="nav-btn-caret">
+              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown">
+            </div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 6: FOOTER (Node 116:1789 / 132:8837) -->
+    <footer class="landing-footer">
+      <div class="footer-inner-container">
+        <div class="footer-top-row">
+          <a href="/" class="footer-brand">
+            <div class="footer-badge-check">✓✓</div>
+            <span class="footer-brand-title">Mail Track</span>
+          </a>
+
+          <ul class="footer-links-list">
+            <li><a href="/login">Dashboard Sign In</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-bottom-divider">
+          <p class="footer-copyright">
+            © 2026 Mailtrack by Mailsuite. All rights reserved. Gmail and Chrome are trademarks of Google LLC.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- INSTALL EXTENSION MODAL -->
+  <div class="modal-backdrop" id="installModal" onclick="closeModalOnBackdrop(event)">
+    <div class="modal-card">
+      <button type="button" class="modal-close-btn" onclick="closeInstallModal()" title="Close">&times;</button>
+
+      <div class="modal-header-icon">🚀</div>
+      <h3 class="modal-title">Load Mail Track Extension</h3>
+      <p class="modal-desc">Follow these 3 quick steps to load the Chrome extension in Developer Mode:</p>
+
+      <div class="modal-step-item">
+        <div class="modal-step-num">1</div>
+        <div class="modal-step-content">
+          Open a new Chrome tab and go to <strong>chrome://extensions</strong>.
+        </div>
+      </div>
+
+      <div class="modal-step-item">
+        <div class="modal-step-num">2</div>
+        <div class="modal-step-content">
+          Enable the <strong>Developer mode</strong> toggle switch in the top-right corner.
+        </div>
+      </div>
+
+      <div class="modal-step-item">
+        <div class="modal-step-num">3</div>
+        <div class="modal-step-content">
+          Click <strong>Load unpacked</strong> and select this extension folder:
+          <div class="code-box-wrap">
+            <span class="code-box-text" id="extensionPathText">/Users/naveen/Mail Track/extension</span>
+            <button type="button" class="btn-copy-code" onclick="copyExtensionPath()">Copy Path</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-action-row">
+        <a href="https://mail.google.com" target="_blank" class="modal-btn-primary">
+          Open Gmail to Test
+        </a>
+        <a href="/login" class="modal-btn-secondary">
+          Go to Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT: LOTTIE INITIALIZATION & SCROLL-DRIVEN SCRUBBING -->
+  <script>
+    // FAQ Accordion Toggle
+    function toggleFaq(btn) {
+      const item = btn.closest('.faq-accordion-item');
+      const wasActive = item.classList.contains('active');
+      document.querySelectorAll('.faq-accordion-item').forEach(i => i.classList.remove('active'));
+      if (!wasActive) {
+        item.classList.add('active');
+      }
+    }
+
+    // Modal Helpers
+    function openInstallModal() {
+      document.getElementById('installModal').classList.add('open');
+    }
+
+    function closeInstallModal() {
+      document.getElementById('installModal').classList.remove('open');
+    }
+
+    function closeModalOnBackdrop(e) {
+      if (e.target.id === 'installModal') closeInstallModal();
+    }
+
+    function copyExtensionPath() {
+      const path = document.getElementById('extensionPathText').textContent;
+      navigator.clipboard.writeText(path).then(() => {
+        const btn = document.querySelector('.btn-copy-code');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = orig, 1800);
+      });
+    }
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeInstallModal();
+    });
+
+    // -------------------------------------------------------------------------
+    // LOTTIE ANIMATIONS SETUP & SCROLL INTERACTIONS
+    // -------------------------------------------------------------------------
+    const lottieConfigs = [
+      {
+        id: 'lottie-1',
+        containerId: 'lottieContainer1',
+        path: '/icons/Lottie/Live-open-tracking.json',
+        anim: null,
+        currentFrame: 0,
+        targetFrame: 0,
+        loaded: false
+      },
+      {
+        id: 'lottie-2',
+        containerId: 'lottieContainer2',
+        path: '/icons/Lottie/Unlimited-and-free.json',
+        anim: null,
+        currentFrame: 0,
+        targetFrame: 0,
+        loaded: false
+      },
+      {
+        id: 'lottie-3',
+        containerId: 'lottieContainer3',
+        path: '/icons/Lottie/Link-click-tracking.json',
+        anim: null,
+        currentFrame: 0,
+        targetFrame: 0,
+        loaded: false
+      }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Initialize Lottie Web Players
+      lottieConfigs.forEach(item => {
+        const container = document.getElementById(item.id);
+        if (!container) return;
+
+        item.anim = lottie.loadAnimation({
+          container: container,
+          renderer: 'svg',
+          loop: false,
+          autoplay: false,
+          path: item.path,
+          rendererSettings: {
+            preserveAspectRatio: 'xMidYMid meet',
+            progressiveLoad: true,
+            hideOnTransparent: true
+          }
+        });
+
+        item.anim.addEventListener('DOMLoaded', () => {
+          item.loaded = true;
+          // Set initial frame
+          item.anim.goToAndStop(0, true);
+        });
+
+        // Hover effect: smooth play / scrub interaction
+        const cardBox = document.getElementById(item.containerId);
+        if (cardBox) {
+          cardBox.addEventListener('mouseenter', () => {
+            if (item.loaded && item.anim) {
+              item.isHovering = true;
+              item.anim.play();
+            }
+          });
+
+          cardBox.addEventListener('mouseleave', () => {
+            if (item.loaded && item.anim) {
+              item.isHovering = false;
+              item.anim.pause();
+            }
+          });
+        }
+      });
+
+      // 2. Smooth Scroll Scrubbing Loop
+      let isScrolling = false;
+
+      function updateLottieFrames() {
+        const windowHeight = window.innerHeight;
+
+        lottieConfigs.forEach(item => {
+          if (!item.loaded || !item.anim || item.isHovering) return;
+
+          const container = document.getElementById(item.containerId);
+          if (!container) return;
+
+          const rect = container.getBoundingClientRect();
+
+          // Calculate visible progress when card enters bottom and exits top
+          // Range: enter bottom (vh) to center/exit (0.2 * vh)
+          const enterPoint = windowHeight * 0.95;
+          const exitPoint = windowHeight * 0.05;
+          const currentY = rect.top;
+
+          // Normalized progress 0 to 1
+          const rawProgress = (enterPoint - currentY) / (enterPoint - exitPoint);
+          const progress = Math.max(0, Math.min(1, rawProgress));
+
+          const totalFrames = item.anim.totalFrames || 240;
+          item.targetFrame = progress * (totalFrames - 1);
+
+          // Smooth lerp (linear interpolation) for silky 60fps scrubbing
+          item.currentFrame += (item.targetFrame - item.currentFrame) * 0.12;
+
+          if (Math.abs(item.currentFrame - item.targetFrame) > 0.05) {
+            item.anim.goToAndStop(item.currentFrame, true);
+          }
+        });
+
+        // Keep loop running
+        requestAnimationFrame(updateLottieFrames);
+      }
+
+      requestAnimationFrame(updateLottieFrames);
+
+      // 3. Hero Banner 3D Scroll Perspective Effect
+      const heroBanner = document.getElementById('heroBannerImage');
+      if (heroBanner) {
+        window.addEventListener('scroll', () => {
+          const scrollY = window.scrollY || window.pageYOffset;
+          const maxScroll = 400;
+          const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
+          
+          // Starts with subtle 14deg tilt at top of page, flattens cleanly on scroll
+          const tilt = (14 * (1 - progress)).toFixed(2);
+          const scale = (0.97 + 0.03 * progress).toFixed(3);
+          heroBanner.style.transform = `perspective(1200px) rotateX(${tilt}deg) scale(${scale})`;
+        }, { passive: true });
+      }
+    });
+  </script>
+
+</body>
+</html>

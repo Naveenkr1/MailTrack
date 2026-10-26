@@ -1,0 +1,11 @@
+{
+    "appName": {
+        "message": "Mailtrack® – Email Tracker para Gmail"
+    },
+    "appDescription": {
+        "message": "El Mailtrack® original: email tracker gratuito e ilimitado en Gmail. Confiado por millones, cumple el RGPD, auditado por Google."
+    },
+    "loadingLists": {
+        "message": "Cargando listas..."
+    }
+}

@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mail Track — Email Intelligence Dashboard</title>
+  <link rel="icon" type="image/png" href="/icons/icon-48.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=mobile_v4_perfect">
+</head>
+
+<body>
+  <div class="figma-app-layout">
+    <!-- ======================================================================
+         FIGMA SIDEBAR (Node 60:3759)
+         ====================================================================== -->
+    <aside class="figma-sidebar" id="sideDrawer">
+      <!-- 1. Header: Logo + PRO Badge + Collapse Button (Node 60:3760) -->
+      <div class="sidebar-header">
+        <div class="brand-group">
+          <div class="brand-badge-icon">
+            <svg class="check-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+            <svg class="check-secondary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <div class="brand-title-wrap">
+            <span class="brand-name">MailTrack</span>
+            <span class="pro-tag">PRO</span>
+          </div>
+        </div>
+        <!-- <button class="btn-drawer-collapse" id="drawerCollapseBtn" title="Toggle Sidebar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button> -->
+      </div>
+
+      <!-- 2. Navigation Tabs (Node 60:3775) -->
+      <nav class="sidebar-nav">
+        <button class="nav-button active" data-tab="email-tracking">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+          </span>
+          <span class="nav-label">Email Tracking</span>
+          <span class="nav-counter" id="tabEmailCount" style="display:none;"></span>
+        </button>
+
+        <button class="nav-button" data-tab="activity">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+            </svg>
+          </span>
+          <span class="nav-label">Activity Feed</span>
+          <span class="tab-pulse-dot" id="activityPulseDot" style="display:none;"></span>
+        </button>
+
+        <button class="nav-button" data-tab="settings">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+              </path>
+            </svg>
+          </span>
+          <span class="nav-label">Settings</span>
+        </button>
+
+        <button class="nav-button" data-tab="help">
+          <span class="nav-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+          </span>
+          <span class="nav-label">Help & Support</span>
+        </button>
+      </nav>
+
+      <!-- 3. Sidebar Footer: User Card (Node 60:3802) + Theme Switcher -->
+      <!-- 3. Sidebar Footer: User Card with Upward Popover Menu -->
+      <div class="sidebar-footer">
+        <!-- Upward Dropdown Menu -->
+        <div class="user-profile-dropdown" id="userProfileDropdown">
+          <!-- Option 1: Dark Mode Toggle Switch -->
+          <button class="user-dropdown-item" id="dropdownThemeToggle" type="button" role="switch" aria-checked="false" aria-label="Toggle dark mode">
+            <span class="dropdown-item-icon">
+              <svg class="theme-icon light-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+              </svg>
+              <svg class="theme-icon dark-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+              </svg>
+            </span>
+            <span class="dropdown-item-label" id="dropdownThemeText">Dark Mode</span>
+            <span class="dropdown-toggle-switch" id="dropdownThemeSwitch" aria-hidden="true">
+              <span class="dropdown-toggle-thumb"></span>
+            </span>
+          </button>
+
+          <!-- Option 2: Get Started -->
+          <button class="user-dropdown-item" id="dropdownGetStarted" type="button">
+            <span class="dropdown-item-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="10 8 16 12 10 16 10 8"></polygon>
+              </svg>
+            </span>
+            <span class="dropdown-item-label">Get Started</span>
+          </button>
+
+          <!-- Option 3: Privacy Notice -->
+          <button class="user-dropdown-item" id="dropdownPrivacyNotice" type="button">
+            <span class="dropdown-item-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+              </svg>
+            </span>
+            <span class="dropdown-item-label">Privacy Notice</span>
+          </button>
+
+          <div class="user-dropdown-divider"></div>
+
+          <!-- Option 4: Logout -->
+          <a href="/auth/logout" class="user-dropdown-item logout-item" id="dropdownLogout">
+            <span class="dropdown-item-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </span>
+            <span class="dropdown-item-label">Logout</span>
+          </a>
+        </div>
+
+        <!-- User Profile Box with Arrow (Down by default, Up when active) -->
+        <div class="user-profile-box" id="userProfileBox" role="button" tabindex="0" title="Click for account options">
+          <img src="" id="userAvatar" class="user-avatar-image" alt="" style="display: none;" />
+          <span class="user-avatar-initial" id="userInitial">N</span>
+          <div class="user-meta-info">
+            <span class="user-full-name" id="userNameDisplay">Naveen Kumar</span>
+            <span class="user-email-address full-email" id="userEmailDisplay"
+              title="nnaveen.8527@gmail.com">nnaveen.8527@gmail.com</span>
+          </div>
+          <button class="user-menu-arrow-btn" id="userMenuArrowBtn" type="button" aria-label="Toggle user options">
+            <svg class="chevron-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+    <!-- ======================================================================
+         MAIN VIEWPORT
+         ====================================================================== -->
+    <main class="figma-main-content">
+      <!-- 1. Header (Node 60:3830) -->
+      <header class="figma-top-header">
+        <div class="header-left">
+          <button class="mobile-toggle-btn" id="mobileMenuBtn" aria-label="Open Navigation">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="header-title-group" id="headerTitleGroup">
+            <h1 class="header-title" id="pageTitleHeading">Email Tracking</h1>
+            <p class="header-subtitle" id="pageSubtitle">Real-time open & link click analytics</p>
+          </div>
+          <!-- Figma node 82:5666 Back Button -->
+          <button class="btn-back-to-list" id="backToTrackingListBtn" style="display:none;"
+            title="Back to Tracked Email">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <line x1="19" y1="12" x2="5" y2="12"></line>
+              <polyline points="12 19 5 12 12 5"></polyline>
+            </svg>
+            <span>Back to Tracked Email</span>
+          </button>
+        </div>
+
+        <div class="header-right" id="headerRightActions">
+          <!-- Search Box (Node 60:3841) -->
+          <div class="figma-search-box" id="headerSearchBox">
+            <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="emailSearchInput" placeholder="Search by recipient, subject, or email..." />
+            <button class="btn-clear-search" id="clearSearchBtn" style="display:none;" title="Clear search">✕</button>
+          </div>
+
+          <!-- Filter Button (Node 60:3854) -->
+          <div class="filter-dropdown-container" id="headerFilterContainer">
+            <button class="figma-filter-btn" id="filterDropdownToggle">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+              </svg>
+              <span>Filter</span>
+              <span class="active-filter-badge" id="activeFilterBadge">All</span>
+            </button>
+
+            <!-- Filter Dropdown Menu -->
+            <div class="filter-menu-popover" id="filterMenuPopover">
+              <button class="filter-menu-item active" data-filter="all">
+                <span>All Emails</span>
+                <span class="filter-item-count" id="countAll">0</span>
+              </button>
+              <button class="filter-menu-item" data-filter="opened">
+                <span>Opened</span>
+                <span class="filter-item-count" id="countOpened">0</span>
+              </button>
+              <button class="filter-menu-item" data-filter="unopened">
+                <span>Unread</span>
+                <span class="filter-item-count" id="countUnread">0</span>
+              </button>
+              <button class="filter-menu-item" data-filter="clicked">
+                <span>Clicked Links</span>
+                <span class="filter-item-count" id="countClicked">0</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Mobile User Profile Avatar Button (Visible on mobile) -->
+          <button class="mobile-profile-btn" id="mobileProfileBtn" type="button" aria-label="Account Options" title="Account Options">
+            <span class="user-avatar-initial" id="mobileUserInitial">N</span>
+          </button>
+
+          <!-- Live Connection Status
+         <div class="ws-status" id="wsStatus">
+            <span class="status-dot"></span>
+            <span class="status-label">Live Connected</span>
+          </div> -->
+        </div>
+      </header>
+
+      <!-- 2. Main Work Area Container (Node 60:4548) -->
+      <div class="figma-content-area">
+        <!-- TAB 1: EMAIL TRACKING -->
+        <section class="tab-panel active" id="tabContentEmailTracking">
+          <!-- 1A: TABLE VIEW -->
+          <div class="figma-table-card" id="emailTableView">
+            <!-- Mobile Horizontal Filter Chips Bar -->
+            <div class="mobile-filter-chips-bar" id="mobileFilterChipsBar">
+              <button class="mobile-filter-chip active" data-filter="all" type="button">
+                <span>All</span>
+                <span class="chip-count" id="mobileCountAll">0</span>
+              </button>
+              <button class="mobile-filter-chip" data-filter="opened" type="button">
+                <span>Opened</span>
+                <span class="chip-count" id="mobileCountOpened">0</span>
+              </button>
+              <button class="mobile-filter-chip" data-filter="unopened" type="button">
+                <span>Unread</span>
+                <span class="chip-count" id="mobileCountUnread">0</span>
+              </button>
+              <button class="mobile-filter-chip" data-filter="clicked" type="button">
+                <span>Clicked</span>
+                <span class="chip-count" id="mobileCountClicked">0</span>
+              </button>
+            </div>
+
+            <div class="table-scroll-container">
+              <table class="figma-data-table">
+                <thead>
+                  <tr class="figma-table-head-row">
+                    <th class="th-subject">Subject & Recipient</th>
+                    <th class="th-sent">Sent At</th>
+                    <th class="th-opens">Opens</th>
+                    <th class="th-clicks">Link Clicks</th>
+                    <th class="th-last">Last Opened</th>
+                  </tr>
+                </thead>
+                <tbody id="emailsTableBody">
+                  <!-- Dynamically populated from emails array -->
+                </tbody>
+              </table>
+
+              <!-- Empty State -->
+              <div class="figma-empty-state" id="emptyState" style="display:none;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                  <polyline points="22,6 12,13 2,6"></polyline>
+                </svg>
+                <h4 id="emptyTitle">No tracked emails yet</h4>
+                <p id="emptyDesc">Send an email from Gmail with Mail Track enabled to view real-time tracking receipts
+                  here.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 1B: EMAIL TRACKING DETAILS VIEW (Exact Figma Node 82:4805) -->
+          <div class="email-details-page-view" id="emailTrackingDetailsView" style="display: none;">
+            <!-- Hero Subject & Opens Pill (Node 82:5676) -->
+            <div class="details-hero-header">
+              <div class="details-subject-line">
+                <h2 class="details-subject-title" id="detEmailSubject">It's a testing email</h2>
+                <span class="details-opens-pill" id="detEmailOpensPill">0 opens</span>
+              </div>
+            </div>
+
+            <!-- Metrics Bar (Node 82:5677) -->
+            <div class="details-metrics-bar">
+              <div class="details-metric-item">
+                <span class="det-metric-label">Sent Time</span>
+                <span class="det-metric-value" id="detSentTime">-</span>
+              </div>
+              <div class="details-metric-divider"></div>
+              <div class="details-metric-item">
+                <span class="det-metric-label">Sender</span>
+                <span class="det-metric-value" id="detSender">-</span>
+              </div>
+              <div class="details-metric-divider"></div>
+              <div class="details-metric-item">
+                <span class="det-metric-label">Total Open</span>
+                <span class="det-metric-value" id="detTotalOpen">0</span>
+              </div>
+              <div class="details-metric-divider"></div>
+              <div class="details-metric-item">
+                <span class="det-metric-label">Total Click</span>
+                <span class="det-metric-value" id="detTotalClick">0</span>
+              </div>
+            </div>
+
+            <!-- Recipient Activity Section (Node 82:6072) -->
+            <div class="details-section-block">
+              <div class="details-section-header">
+                <h3 class="details-section-title">Recipient Activity</h3>
+                <p class="details-section-desc" id="detRecipientSummary">0 of 0 recipients opened this email.</p>
+              </div>
+              <div class="figma-table-card details-table-card">
+                <div class="table-scroll-container">
+                  <table class="figma-data-table details-data-table">
+                    <thead>
+                      <tr class="figma-table-head-row">
+                        <th style="width: 32%;">RECIPIENT</th>
+                        <th style="width: 20%;">STATUS</th>
+                        <th style="width: 14%;">OPENS</th>
+                        <th style="width: 14%;">LINK CLICKS</th>
+                        <th style="width: 20%;">LAST ACTIVITY</th>
+                      </tr>
+                    </thead>
+                    <tbody id="detRecipientsTableBody">
+                      <!-- Dynamically rendered -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- Open Activity Timeline Section (Node 82:6952) -->
+            <div class="details-section-block">
+              <div class="details-section-header details-section-header-split">
+                <div>
+                  <h3 class="details-section-title">Open Activity Timeline</h3>
+                  <p class="details-section-desc">See the chronological activity for this email.</p>
+                </div>
+                <div class="timeline-filter-wrap">
+                  <select class="figma-select timeline-recipient-select" id="timelineRecipientFilter">
+                    <option value="all">All Recipients</option>
+                  </select>
+                </div>
+              </div>
+              <div class="figma-table-card timeline-table-card">
+                <div class="timeline-stream-container" id="detTimelineList">
+                  <!-- Dynamically rendered -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Link Click Activity Section (Node 90:7240) -->
+            <div class="details-section-block">
+              <div class="details-section-header">
+                <h3 class="details-section-title">Link Click Activity</h3>
+                <p class="details-section-desc">See when recipients click on the link in this email</p>
+              </div>
+              <div class="figma-table-card details-table-card">
+                <div class="table-scroll-container">
+                  <table class="figma-data-table details-data-table">
+                    <thead>
+                      <tr class="figma-table-head-row">
+                        <th style="width: 35%;">RECIPIENT</th>
+                        <th style="width: 35%;">LINK</th>
+                        <th style="width: 30%;">CLICKED AT</th>
+                      </tr>
+                    </thead>
+                    <tbody id="detClicksTableBody">
+                      <!-- Dynamically rendered -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 2: ACTIVITY FEED -->
+        <section class="tab-panel" id="tabContentActivity">
+          <div class="figma-table-card">
+            <div class="panel-inner-header">
+              <div>
+                <h3 class="panel-section-title">Live Activity Stream</h3>
+                <p class="panel-section-desc">Chronological timeline of recipient email reads and link clicks as they
+                  occur.</p>
+              </div>
+
+            </div>
+            <div class="figma-activity-list" id="activityFeedList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: SETTINGS -->
+        <!-- TAB 3: SETTINGS (Single Unified Settings Form) -->
+        <section class="tab-panel" id="tabContentSettings">
+          <div class="settings-card-stack">
+            <!-- 1. Single Unified Settings Card -->
+            <div class="figma-table-card">
+              <div class="panel-inner-header">
+                <div>
+                  <h3 class="panel-section-title">Settings &amp; Preferences</h3>
+                  <p class="panel-section-desc">Manage your account profile, timezone preferences, and mobile Gmail
+                    tracking in one place.</p>
+                </div>
+              </div>
+
+              <div class="panel-inner-body">
+                <form id="unifiedSettingsForm" class="figma-form">
+                  <!-- Section A: Account Information -->
+                  <div class="settings-form-section">
+                    <h4 class="settings-section-subtitle">Account Profile</h4>
+                    <div class="form-row-grid">
+                      <div class="form-group">
+                        <label for="settingUserName">Full Name</label>
+                        <input type="text" id="settingUserName" class="figma-input" placeholder="Your name" required />
+                      </div>
+                      <div class="form-group">
+                        <label for="settingUserEmail">Gmail Address</label>
+                        <input type="email" id="settingUserEmail" class="figma-input" disabled readonly />
+                        <span class="field-caption">Linked via Google OAuth</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="settings-section-divider"></div>
+
+                  <!-- Section B: Time & Localization -->
+                  <div class="settings-form-section">
+                    <h4 class="settings-section-subtitle">Time &amp; Localization</h4>
+                    <div class="form-row-grid">
+                      <div class="form-group">
+                        <label for="settingTimezone">Time Zone</label>
+                        <select id="settingTimezone" class="figma-select">
+                          <option value="auto">Auto-detect from browser</option>
+                          <option value="UTC">UTC (Coordinated Universal Time)</option>
+                          <option value="America/New_York">Eastern Time (US & Canada)</option>
+                          <option value="America/Chicago">Central Time (US & Canada)</option>
+                          <option value="America/Denver">Mountain Time (US & Canada)</option>
+                          <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
+                          <option value="Europe/London">London (GMT / BST)</option>
+                          <option value="Europe/Paris">Paris, Berlin, Rome (CET)</option>
+                          <option value="Asia/Kolkata">India Standard Time (IST)</option>
+                          <option value="Asia/Tokyo">Tokyo, Seoul (JST)</option>
+                          <option value="Australia/Sydney">Sydney, Melbourne (AEST)</option>
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="settingTimeFormat">Time Format</label>
+                        <select id="settingTimeFormat" class="figma-select">
+                          <option value="12h">12-hour (e.g., 2:30 PM)</option>
+                          <option value="24h">24-hour (e.g., 14:30)</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="settings-section-divider"></div>
+
+                  <!-- Section C: Mobile Features — Checkmarks (✓✓) Status -->
+                  <div class="settings-form-section">
+                    <h4 class="settings-section-subtitle">Mobile Features — Checkmarks (✓✓) Status</h4>
+                    <div class="mobile-sync-card">
+                      <div class="sync-info-wrap">
+                        <div class="sync-title-line">
+                          <span class="sync-title">Mobile Double Checkmarks Sync</span>
+                          <span class="sync-active-badge" id="mobileSyncStatusBadge">Checking...</span>
+                        </div>
+                        <p class="sync-description" id="mobileSyncDesc">
+                          Mail Track automatically synchronizes read checkmarks into your Gmail account so you can see
+                          delivered (<span class="preview-chip grey">✓</span>) and read (<span
+                            class="preview-chip green">✓✓</span>) statuses in the official Gmail mobile app without
+                          installing extra apps.
+                        </p>
+                        <div class="mobile-sync-actions-row" id="mobileSyncActionsRow">
+                          <a href="/auth/google/mobile-sync" class="btn-figma-primary btn-sm" id="connectMobileGmailBtn"
+                            style="display:none; text-decoration:none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2">
+                              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg>
+                            <span>Connect Gmail for Mobile Checkmarks</span>
+                          </a>
+                          <button type="button" class="btn-figma-secondary btn-sm" id="syncExistingMobileBtn"
+                            style="display:none;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                              stroke-width="2">
+                              <polyline points="23 4 23 10 17 10"></polyline>
+                              <polyline points="1 20 1 14 7 14"></polyline>
+                              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                            <span>Sync Tracked Emails to Mobile</span>
+                          </button>
+                        </div>
+                      </div>
+                      <label class="figma-switch-toggle" title="Toggle Mobile Double Checkmarks Sync">
+                        <input type="checkbox" id="mobileCheckmarksToggle" checked />
+                        <span class="switch-slider"></span>
+                      </label>
+                    </div>
+
+                    <div class="mobile-preview-box">
+                      <div class="mp-title">How it appears in the Gmail mobile app:</div>
+                      <div class="mp-items">
+                        <div class="mp-item">
+                          <span class="preview-chip grey">✓</span>
+                          <span class="mp-label">Delivered / Unread (Grey Single Tick)</span>
+                        </div>
+                        <div class="mp-item">
+                          <span class="preview-chip green">✓✓</span>
+                          <span class="mp-label">Recipient Opened Email (Vibrant Green Double Tick)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="sync-tip-note">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                      </svg>
+                      <span><strong>Important:</strong> Ensure <strong>Conversation View</strong> is turned
+                        <strong>ON</strong> in your Gmail settings so checkmark labels show directly on sent threads on
+                        phone.</span>
+                    </div>
+                  </div>
+
+                  <!-- SINGLE SAVE BUTTON -->
+                  <div class="form-actions-bar settings-single-save-bar">
+                    <button type="submit" class="btn-figma-save" id="saveUnifiedSettingsBtn">Save Settings</button>
+                    <span class="save-status-indicator" id="unifiedSaveStatus"></span>
+                  </div>
+                </form>
+              </div>
+            </div>
+
+            <!-- 2. Danger Zone: Delete Account & All Data -->
+            <div class="figma-table-card danger-card">
+              <div class="panel-inner-header">
+                <div>
+                  <h3 class="panel-section-title danger-heading">Delete Account &amp; Permanent Data Removal</h3>
+                  <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and
+                    all account data.</p>
+                </div>
+              </div>
+              <div class="panel-inner-body">
+                <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails,
+                  open logs, clicks, and API credentials will be permanently erased from both local storage and cloud
+                  database.</p>
+                <button class="btn-figma-danger" id="deleteAccountBtn" type="button">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  </svg>
+                  <span>Delete My Account &amp; All Data</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 4: HELP & SUPPORT -->
+        <section class="tab-panel" id="tabContentHelp">
+          <div class="figma-table-card">
+            <div class="panel-inner-header">
+              <div>
+                <h3 class="panel-section-title">Help & Support</h3>
+                <p class="panel-section-desc">Learn how Mail Track operates, troubleshooting tips, and how tracking
+                  beacons function.</p>
+              </div>
+            </div>
+            <div class="figma-faq-grid">
+              <div class="faq-tile">
+                <h4>How does email tracking work?</h4>
+                <p>When you send an email with Mail Track, a transparent 1x1 tracking beacon image is securely embedded.
+                  When the recipient views the email, their email client fetches the beacon, registering a real-time
+                  read receipt.</p>
+              </div>
+              <div class="faq-tile">
+                <h4>Are self-opens counted?</h4>
+                <p>No. Mail Track uses intelligent sender IP filtering, user-agent verification, and a 10-second grace
+                  window to automatically filter out your own sent preview reads.</p>
+              </div>
+              <div class="faq-tile">
+                <h4>How do link clicks track?</h4>
+                <p>Tracked links route through your custom tracking redirector. When clicked, the redirector records the
+                  recipient and timestamp before instantaneously forwarding to the destination URL.</p>
+              </div>
+              <div class="faq-tile">
+                <h4>How do double checkmarks (✓✓) work?</h4>
+                <p>A single check (✓) indicates the email has been sent and registered. A double check (✓✓) indicates
+                  the recipient has opened and read your email.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <!-- Details Modal -->
+    <div class="modal-backdrop" id="detailsModal">
+      <div class="modal-window">
+        <div class="modal-window-header">
+          <div class="modal-headline">
+            <span class="modal-badge-status" id="modalStatusBadge">✓✓ Opened</span>
+            <h3 id="modalSubject">Email Details</h3>
+          </div>
+          <button class="modal-close-button" id="closeDetailsModalBtn">&times;</button>
+        </div>
+        <div class="modal-window-body" id="modalDetailsBody"></div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-backdrop" id="deleteConfirmModal">
+      <div class="modal-window danger-modal">
+        <div class="modal-window-header">
+          <h3 class="danger-heading">Permanently Delete Account?</h3>
+          <button class="modal-close-button" id="closeDeleteModalBtn">&times;</button>
+        </div>
+        <div class="modal-window-body">
+          <p>Are you sure you want to delete your account? This action cannot be undone. All your tracked emails,
+            recipient open histories, and API access will be permanently deleted immediately.</p>
+          <div class="modal-actions-footer">
+            <button class="btn-modal-cancel" id="cancelDeleteBtn">Cancel</button>
+            <button class="btn-modal-delete" id="confirmDeleteAccountBtn">Yes, Permanently Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GET STARTED MODAL -->
+    <div class="modal-backdrop" id="getStartedModal">
+      <div class="modal-window">
+        <div class="modal-window-header">
+          <div class="modal-headline">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="10 8 16 12 10 16 10 8"></polygon>
+            </svg>
+            <h3>Get Started with Mail Track</h3>
+          </div>
+          <button class="modal-close-button" id="closeGetStartedModalBtn">&times;</button>
+        </div>
+        <div class="modal-window-body">
+          <div class="get-started-steps">
+            <div class="gs-step">
+              <div class="gs-step-num">1</div>
+              <div class="gs-step-content">
+                <h4>Pin the Mail Track Extension</h4>
+                <p>Click the Chrome puzzle piece icon <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                  </svg> in your browser toolbar and pin <strong>Mail Track</strong> for easy access.</p>
+              </div>
+            </div>
+
+            <div class="gs-step">
+              <div class="gs-step-num">2</div>
+              <div class="gs-step-content">
+                <h4>Compose an Email in Gmail</h4>
+                <p>Open <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer"
+                    style="color:var(--color-green);text-decoration:underline;">Gmail</a> and click
+                  <strong>Compose</strong>. You'll see the sleek green <strong>Track ON</strong> badge active in the
+                  send bar.
+                </p>
+              </div>
+            </div>
+
+            <div class="gs-step">
+              <div class="gs-step-num">3</div>
+              <div class="gs-step-content">
+                <h4>Send to Any Recipient</h4>
+                <p>Send your message normally. Delivered emails show a grey single checkmark (<span
+                    class="preview-chip grey" style="padding:1px 6px;">✓</span>) in your Sent list.</p>
+              </div>
+            </div>
+
+            <div class="gs-step">
+              <div class="gs-step-num">4</div>
+              <div class="gs-step-content">
+                <h4>Track Opens on Desktop &amp; Mobile!</h4>
+                <p>The instant your recipient opens the message, checkmarks flip to green double ticks (<span
+                    class="preview-chip green" style="padding:1px 6px;">✓✓</span>) on both desktop Gmail and your
+                  official Gmail mobile app!</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions-footer">
+            <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer" class="btn-figma-primary"
+              style="text-decoration:none;">Open Gmail</a>
+            <button class="btn-modal-cancel" id="dismissGetStartedBtn">Got It</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIVACY NOTICE MODAL -->
+    <div class="modal-backdrop" id="privacyNoticeModal">
+      <div class="modal-window">
+        <div class="modal-window-header">
+          <div class="modal-headline">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            <h3>Mail Track Privacy Notice</h3>
+          </div>
+          <button class="modal-close-button" id="closePrivacyModalBtn">&times;</button>
+        </div>
+        <div class="modal-window-body">
+          <div class="privacy-notice-content">
+            <div class="privacy-item">
+              <div class="privacy-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)"
+                  stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+              </div>
+              <div class="privacy-item-text">
+                <h4>Zero Email Content Stored</h4>
+                <p>Mail Track never reads, parses, or stores your private message content or attachments. Only minimal
+                  delivery and read beacon timestamps are recorded.</p>
+              </div>
+            </div>
+
+            <div class="privacy-item">
+              <div class="privacy-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)"
+                  stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                  <path d="M2 17l10 5 10-5"></path>
+                  <path d="M2 12l10 5 10-5"></path>
+                </svg>
+              </div>
+              <div class="privacy-item-text">
+                <h4>Google API Limited Use Compliance</h4>
+                <p>Mail Track's use of information received from Google APIs adheres to the Google API Services User
+                  Data Policy, including Limited Use requirements.</p>
+              </div>
+            </div>
+
+            <div class="privacy-item">
+              <div class="privacy-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)"
+                  stroke-width="2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                </svg>
+              </div>
+              <div class="privacy-item-text">
+                <h4>No Data Selling or Advertising</h4>
+                <p>We do not monetize your data, sell telemetry to advertisers, or inject tracking cookies across the
+                  web.</p>
+              </div>
+            </div>
+
+            <div class="privacy-item">
+              <div class="privacy-item-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)"
+                  stroke-width="2">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+              </div>
+              <div class="privacy-item-text">
+                <h4>Complete 1-Click Data Erasure</h4>
+                <p>You can permanently delete your linked Google credentials and all historical tracking logs at any
+                  time from the Settings tab.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions-footer">
+            <button class="btn-figma-primary" id="dismissPrivacyModalBtn">I Understand</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile Bottom App Navigation Bar (Visible only on mobile devices) -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+      <button class="nav-button mobile-nav-btn active" data-tab="email-tracking" type="button" aria-label="Email Tracking Tab">
+        <div class="mobile-nav-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          <span class="mobile-nav-badge" id="mobileTabEmailCount" style="display:none;"></span>
+        </div>
+        <span class="mobile-nav-label">Emails</span>
+      </button>
+
+      <button class="nav-button mobile-nav-btn" data-tab="activity" type="button" aria-label="Activity Feed Tab">
+        <div class="mobile-nav-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="mobile-pulse-dot" id="mobileActivityPulseDot" style="display:none;"></span>
+        </div>
+        <span class="mobile-nav-label">Activity</span>
+      </button>
+
+      <button class="nav-button mobile-nav-btn" data-tab="settings" type="button" aria-label="Settings Tab">
+        <div class="mobile-nav-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </div>
+        <span class="mobile-nav-label">Settings</span>
+      </button>
+
+      <button class="nav-button mobile-nav-btn" data-tab="help" type="button" aria-label="Help Tab">
+        <div class="mobile-nav-icon-wrap">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </div>
+        <span class="mobile-nav-label">Help</span>
+      </button>
+    </nav>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script src="app.js?v=mobile_v4_perfect"></script>
+</body>
+
+</html>

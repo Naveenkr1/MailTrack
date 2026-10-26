@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Getting started — Mail Track</title>
+  <link rel="icon" type="image/png" href="/icons/icon-48.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      zoom: 0.9;
+      min-height: 100vh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f8fafc;
+      background-image:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0) 70%),
+        radial-gradient(ellipse 50% 50% at 85% 100%, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0) 70%);
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: #0f172a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 580px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* Main Card */
+    .card {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
+      box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.02), 0px 12px 36px 0px rgba(15, 23, 42, 0.08);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      position: relative;
+    }
+
+    /* Gmail Icon Container */
+    .icon-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .icon-box-outer {
+      width: 80px;
+      height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .icon-box-inner {
+      width: 68px;
+      height: 68px;
+      background: #ffffff;
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      border-radius: 20px;
+      box-shadow: 0px 8px 10px rgba(0, 0, 0, 0.06);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .icon-box-inner:hover {
+      transform: translateY(-2px);
+      box-shadow: 0px 10px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .gmail-logo {
+      width: 40.25px;
+      height: 32px;
+      object-fit: contain;
+      display: block;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* Title */
+    .heading-title {
+      font-size: 24px;
+      font-weight: 800;
+      line-height: 35.52px;
+      letter-spacing: -0.888px;
+      color: #0f172a;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    /* Alerts / Banners */
+    .alert-banner {
+      padding: 12px 16px;
+      border-radius: 12px;
+      font-size: 13.6px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+    }
+
+    .alert-banner.error {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+    }
+
+    .alert-banner.success {
+      background: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      color: #047857;
+    }
+
+    /* Trust Permissions Container */
+    .trust-container {
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .trust-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .trust-item.bordered {
+      border-top: 1px solid #edf2f7;
+      padding-top: 14px;
+    }
+
+    .trust-icon-box {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: #059669;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .trust-icon-box svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .trust-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .trust-title {
+      font-size: 15.2px;
+      font-weight: 700;
+      line-height: normal;
+      letter-spacing: -0.152px;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    .trust-desc {
+      font-size: 13.6px;
+      font-weight: 400;
+      line-height: 19.72px;
+      color: #64748b;
+      word-break: break-word;
+    }
+
+    /* Google Button */
+    .btn-google {
+      width: 100%;
+      height: 56px;
+      background: #059669;
+      border: 1px solid transparent;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 16px 28px;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(5, 150, 105, 0.1);
+      transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      outline: none;
+    }
+
+    .btn-google:hover {
+      background: #047857;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+    }
+
+    .btn-google:active {
+      transform: translateY(0);
+      background: #065f46;
+    }
+
+    .google-icon {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+      display: block;
+    }
+
+    .btn-google-text {
+      font-size: 16.8px;
+      font-weight: 700;
+      color: #ffffff;
+      line-height: normal;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    /* Agreement Disclaimer */
+    .disclaimer-wrap {
+      margin-top: 20px;
+      text-align: center;
+      width: 100%;
+    }
+
+    .disclaimer-text {
+      font-size: 13.12px;
+      font-weight: 400;
+      line-height: 19.68px;
+      color: #94a3b8;
+    }
+
+    .disclaimer-text a {
+      color: #64748b;
+      text-decoration: underline;
+      text-underline-position: from-font;
+      text-decoration-skip-ink: none;
+      transition: color 0.15s ease;
+    }
+
+    .disclaimer-text a:hover {
+      color: #0f172a;
+    }
+
+    /* Instant Access Accordion */
+    .instant-access-wrap {
+      margin-top: 24px;
+      border-top: 1px dashed #e2e8f0;
+      padding-top: 18px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .instant-toggle-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: inherit;
+      transition: background 0.15s ease;
+      outline: none;
+    }
+
+    .instant-toggle-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .instant-toggle-text {
+      font-size: 13.12px;
+      font-weight: 600;
+      color: #64748b;
+      line-height: normal;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .instant-toggle-icon {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+    }
+
+    .instant-toggle-icon svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+    }
+
+    .instant-toggle-btn.active .instant-toggle-icon {
+      transform: rotate(180deg);
+    }
+
+    /* Sandbox Form Drawer */
+    .instant-form-drawer {
+      display: none;
+      width: 100%;
+      margin-top: 14px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      text-align: left;
+    }
+
+    .instant-form-drawer.visible {
+      display: block;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .instant-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .instant-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .instant-input {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 14px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #0f172a;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .instant-input:focus {
+      border-color: #059669;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.12);
+    }
+
+    .instant-submit-btn {
+      padding: 10px 18px;
+      background: #059669;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      white-space: nowrap;
+      transition: background 0.15s ease;
+    }
+
+    .instant-submit-btn:hover {
+      background: #047857;
+    }
+
+    .instant-submit-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    /* Footer */
+    .page-footer {
+      margin-top: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 25px;
+      width: 100%;
+    }
+
+    .footer-copyright {
+      font-size: 12.8px;
+      font-weight: 400;
+      color: #94a3b8;
+      line-height: normal;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .footer-link {
+      font-size: 12.8px;
+      font-weight: 400;
+      color: #64748b;
+      text-decoration: none;
+      line-height: normal;
+      text-align: center;
+      white-space: nowrap;
+      transition: color 0.15s ease;
+    }
+
+    .footer-link:hover {
+      color: #0f172a;
+      text-decoration: underline;
+    }
+
+    @media (max-width: 620px) {
+      body {
+        padding: 24px 16px;
+      }
+
+      .card {
+        padding: 32px 20px;
+        border-radius: 20px;
+      }
+
+      .heading-title {
+        font-size: 22px;
+      }
+
+      .btn-google {
+        height: 52px;
+        padding: 14px 20px;
+      }
+
+      .instant-row {
+        flex-direction: column;
+      }
+
+      .instant-submit-btn {
+        width: 100%;
+      }
+
+      .page-footer {
+        flex-wrap: wrap;
+        gap: 14px 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="login-container">
+
+    <!-- Main Card -->
+    <main class="card" data-name="Main Content">
+
+      <!-- Gmail Icon in 68x68 Box -->
+      <div class="icon-wrapper">
+        <div class="icon-box-outer">
+          <div class="icon-box-inner">
+            <img src="/assets/gmail-logo.png" alt="Gmail" class="gmail-logo" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <h1 class="heading-title">Connect Your Gmail</h1>
+
+      <!-- Notice & Error Banners -->
+      <div id="noticeBanner" class="alert-banner success" style="display: none;"></div>
+      <div id="errorBanner" class="alert-banner error" style="display: none;"></div>
+
+      <!-- 3 Trust Items Box -->
+      <div class="trust-container">
+
+        <!-- 1. Permissions we need -->
+        <div class="trust-item">
+          <div class="trust-icon-box">
+            <svg preserveAspectRatio="none" overflow="visible" viewBox="0 0 18 18" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path d="M15.75 1.5L14.25 3L13.125 4.125L12 5.25M12 5.25L10.5 6.75L9.375 5.625L10.875 4.125L12 5.25Z"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="white" />
+              <path
+                d="M9.75 11.625C9.75 13.9032 7.90317 15.75 5.625 15.75C3.34683 15.75 1.5 13.9032 1.5 11.625C1.5 9.34683 3.34683 7.5 5.625 7.5C7.90317 7.5 9.75 9.34683 9.75 11.625Z"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="white" />
+              <path d="M8.625 8.625L11.625 5.625" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                stroke="white" />
+            </svg>
+          </div>
+          <div class="trust-content">
+            <div class="trust-title">Permissions we need</div>
+            <div class="trust-desc">Mail Track only requests the permissions strictly necessary to deliver its features.
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. No data harvesting -->
+        <div class="trust-item bordered">
+          <div class="trust-icon-box">
+            <svg preserveAspectRatio="none" overflow="visible" viewBox="0 0 18 18" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M3.75 8.25H14.25C15.0784 8.25 15.75 8.92157 15.75 9.75V15C15.75 15.8284 15.0784 16.5 14.25 16.5H3.75C2.92157 16.5 2.25 15.8284 2.25 15V9.75C2.25 8.92157 2.92157 8.25 3.75 8.25Z"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="white" />
+              <path
+                d="M5.25 8.25V5.25C5.25 4.25544 5.64509 3.30161 6.34835 2.59835C7.05161 1.89509 8.00544 1.5 9 1.5C9.99456 1.5 10.9484 1.89509 11.6517 2.59835C12.3549 3.30161 12.75 4.25544 12.75 5.25V8.25"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="white" />
+            </svg>
+          </div>
+          <div class="trust-content">
+            <div class="trust-title">No data harvesting</div>
+            <div class="trust-desc">We do not store, sell, or analyze the content of your emails.</div>
+          </div>
+        </div>
+
+        <!-- 3. You're in control -->
+        <div class="trust-item bordered">
+          <div class="trust-icon-box">
+            <svg preserveAspectRatio="none" overflow="visible" viewBox="0 0 18 18" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 16.5C9 16.5 15 13.5 15 9V3.75L9 1.5L3 3.75V9C3 13.5 9 16.5 9 16.5Z" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" stroke="white" />
+              <path d="M6.75 9L8.25 10.5L11.25 7.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                stroke="white" />
+            </svg>
+          </div>
+          <div class="trust-content">
+            <div class="trust-title">You're in control</div>
+            <div class="trust-desc">You can revoke access or permanently delete your data whenever you choose.</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Continue to Google Button -->
+      <a href="/auth/google" id="googleLoginBtn" class="btn-google">
+        <svg class="google-icon" preserveAspectRatio="none" overflow="visible" viewBox="0 0 22 22" fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M20.68 11.2292C20.68 10.5142 20.6158 9.82667 20.4967 9.16667H11V13.0717H16.4267C16.1883 14.3275 15.4733 15.3908 14.4008 16.1058V18.645H17.6733C19.58 16.885 20.68 14.3 20.68 11.2292Z"
+            fill="white" />
+          <path
+            d="M11 21.0833C13.7225 21.0833 16.005 20.185 17.6733 18.645L14.4008 16.1058C13.5025 16.7108 12.3567 17.0775 11 17.0775C8.37833 17.0775 6.15083 15.3083 5.35333 12.925H1.99833V15.5283C3.6575 18.8192 7.05833 21.0833 11 21.0833Z"
+            fill="white" />
+          <path
+            d="M5.35333 12.9158C5.15167 12.3108 5.0325 11.6692 5.0325 11C5.0325 10.3308 5.15167 9.68917 5.35333 9.08417V6.47167H1.99833C1.31083 7.8375 0.916666 9.36833 0.916666 11C0.916666 12.6317 1.31083 14.1625 1.99833 15.5283L4.61083 13.4933L5.35333 12.9158Z"
+            fill="white" />
+          <path
+            d="M11 4.93167C12.485 4.93167 13.805 5.445 14.8592 6.435L17.7467 3.5475C15.9958 1.91583 13.7225 0.916666 11 0.916666C7.05833 0.916666 3.6575 3.18083 1.99833 6.47167L5.35333 9.075C6.15083 6.69167 8.37833 4.93167 11 4.93167Z"
+            fill="white" />
+        </svg>
+        <span class="btn-google-text">Continue to Google</span>
+      </a>
+
+      <!-- Terms & Privacy Notice -->
+      <div class="disclaimer-wrap">
+        <p class="disclaimer-text">
+          By clicking “Continue to Google” you agree to the
+          <a href="https://mailsuite.com/en/terms" target="_blank" rel="noopener noreferrer">Terms of Use</a>
+          and
+          <a href="https://mailsuite.com/en/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+        </p>
+      </div>
+
+      <!-- Instant Email Access (Testing / Sandbox) -->
+      <div class="instant-access-wrap">
+        <button type="button" class="instant-toggle-btn" id="toggleInstantBtn">
+          <span class="instant-toggle-text">Instant Email Access (Testing / Sandbox)</span>
+          <span class="instant-toggle-icon">
+            <svg preserveAspectRatio="none" overflow="visible" viewBox="0 0 14 14" fill="none"
+              xmlns="http://www.w3.org/2000/svg">
+              <path d="M3.5 5.25L7 8.75L10.5 5.25" stroke-width="1.45833" stroke="#64748B" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </span>
+        </button>
+
+        <div class="instant-form-drawer" id="instantContainer">
+          <label for="devEmail" class="instant-label">Sign in directly with test email:</label>
+          <form id="devLoginForm" class="instant-row">
+            <input type="email" id="devEmail" class="instant-input" placeholder="e.g. user@gmail.com" required />
+            <button type="submit" class="instant-submit-btn">Sign in</button>
+          </form>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer Outside Card -->
+    <footer class="page-footer">
+      <span class="footer-copyright">© 2026 Mailtrack</span>
+    </footer>
+
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get('error');
+    const notice = params.get('notice');
+    const flow = params.get('flow');
+
+    // Adapt Google button URL if launched from extension
+    const googleBtn = document.getElementById('googleLoginBtn');
+    if (flow === 'extension') {
+      googleBtn.href = '/auth/google?flow=extension';
+    }
+
+    if (error) {
+      const errBanner = document.getElementById('errorBanner');
+      errBanner.textContent = decodeURIComponent(error);
+      errBanner.style.display = 'flex';
+    }
+
+    if (notice) {
+      const noticeBanner = document.getElementById('noticeBanner');
+      noticeBanner.textContent = decodeURIComponent(notice);
+      noticeBanner.style.display = 'flex';
+    }
+
+    // Toggle Instant / Sandbox Login Drawer
+    const toggleInstantBtn = document.getElementById('toggleInstantBtn');
+    const instantContainer = document.getElementById('instantContainer');
+    toggleInstantBtn.addEventListener('click', () => {
+      const isVisible = instantContainer.classList.contains('visible');
+      if (isVisible) {
+        instantContainer.classList.remove('visible');
+        toggleInstantBtn.classList.remove('active');
+      } else {
+        instantContainer.classList.add('visible');
+        toggleInstantBtn.classList.add('active');
+        document.getElementById('devEmail').focus();
+      }
+    });
+
+    // Handle Instant Email Login Submission
+    document.getElementById('devLoginForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('devEmail').value.trim();
+      if (!email) return;
+
+      const submitBtn = e.target.querySelector('button');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Signing in...';
+
+      try {
+        const res = await fetch('/auth/dev-login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const data = await res.json();
+        if (data.success) {
+          if (flow === 'extension') {
+            window.location.href = `/auth/extension-success?apiKey=${encodeURIComponent(data.user.apiKey)}&email=${encodeURIComponent(data.user.email)}`;
+          } else {
+            window.location.href = '/';
+          }
+        } else {
+          alert(data.error || 'Login failed');
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Sign in';
+        }
+      } catch (err) {
+        alert('Cannot reach server: ' + err.message);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Sign in';
+      }
+    };
+  </script>
+</body>
+
+</html>

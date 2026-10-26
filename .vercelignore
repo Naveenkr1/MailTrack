@@ -1,0 +1,12 @@
+.git
+extension
+unpacked_extension
+mailsuite.crx
+mailsuite.zip
+inject_analysis.json
+*.log
+.agents
+Skills
+server/data/*.db*
+server/data/*.json
+scratch
