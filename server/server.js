@@ -21,7 +21,10 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const PORT = process.env.PORT || 4000;
-let publicBaseUrl = process.env.BASE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : `http://localhost:${PORT}`));
+let publicBaseUrl = process.env.BASE_URL || 
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 
+  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
+  (process.env.VERCEL ? 'https://mail-track-pink.vercel.app' : `http://localhost:${PORT}`)));
 let customDomain = (process.env.CUSTOM_DOMAIN || '').trim();
 let tunnelToken = (process.env.CLOUDFLARE_TUNNEL_TOKEN || '').trim();
 
@@ -61,11 +64,14 @@ function getRequestBaseUrl(req) {
   if (process.env.BASE_URL) return process.env.BASE_URL.replace(/\/+$/, '');
   if (req) {
     const proto = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
-    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    const host = req.headers['x-forwarded-host'] || req.headers['host'];
     if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
       return `${proto}://${host}`;
     }
   }
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.VERCEL) return 'https://mail-track-pink.vercel.app';
   return publicBaseUrl;
 }
 
