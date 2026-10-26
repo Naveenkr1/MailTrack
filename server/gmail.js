@@ -213,7 +213,7 @@ async function createLabelWithFallback(accessToken, name, color) {
 /**
  * Search for an email message and thread in Gmail by tracking ID or subject
  */
-async function findThreadForEmail(userId, emailId, subject = null) {
+async function findThreadForEmail(userId, emailId, subject = null, recipient = null) {
   const accessToken = await getValidAccessToken(userId);
   if (!accessToken) return null;
 
@@ -235,8 +235,8 @@ async function findThreadForEmail(userId, emailId, subject = null) {
 
     // 2. Fallback search by subject if unique ID search returned 0
     if (subject && subject !== 'No Subject') {
-      const cleanSub = subject.replace(/["\\]/g, '');
-      const subQuery = encodeURIComponent(`subject:"${cleanSub}" newer_than:2d`);
+      const cleanSub = subject.replace(/["\\]/g, '').trim();
+      const subQuery = encodeURIComponent(`from:me subject:"${cleanSub}" newer_than:7d`);
       const subRes = await fetch(`${GMAIL_API_BASE}/messages?q=${subQuery}&maxResults=5`, {
         headers: { Authorization: `Bearer ${accessToken}` }
       });
@@ -251,8 +251,26 @@ async function findThreadForEmail(userId, emailId, subject = null) {
       }
     }
 
-    // 3. Fallback: inspect the latest 10 sent messages
-    const sentRes = await fetch(`${GMAIL_API_BASE}/messages?q=from:me+newer_than:2d&maxResults=10`, {
+    // 3. Fallback search by recipient
+    if (recipient && recipient.includes('@')) {
+      const cleanRec = recipient.split(/[,;\s]+/)[0].replace(/[<>]/g, '').trim().toLowerCase();
+      const recQuery = encodeURIComponent(`from:me to:${cleanRec} newer_than:7d`);
+      const recRes = await fetch(`${GMAIL_API_BASE}/messages?q=${recQuery}&maxResults=5`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+
+      if (recRes.ok) {
+        const data = await recRes.json();
+        if (data.messages && data.messages.length > 0) {
+          const msg = data.messages[0];
+          await db.updateEmailThreadId(emailId, { threadId: msg.threadId, messageId: msg.id });
+          return { threadId: msg.threadId, messageId: msg.id };
+        }
+      }
+    }
+
+    // 4. Fallback: inspect the latest 15 sent messages
+    const sentRes = await fetch(`${GMAIL_API_BASE}/messages?q=from:me+newer_than:7d&maxResults=15`, {
       headers: { Authorization: `Bearer ${accessToken}` }
     });
 
@@ -260,7 +278,7 @@ async function findThreadForEmail(userId, emailId, subject = null) {
       const sentData = await sentRes.json();
       if (sentData.messages && sentData.messages.length > 0) {
         for (const m of sentData.messages) {
-          const detailRes = await fetch(`${GMAIL_API_BASE}/messages/${m.id}?format=metadata&metadataHeaders=Subject`, {
+          const detailRes = await fetch(`${GMAIL_API_BASE}/messages/${m.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=To`, {
             headers: { Authorization: `Bearer ${accessToken}` }
           });
           if (detailRes.ok) {
@@ -294,20 +312,26 @@ async function applySentLabel(userId, emailId, threadId = null, attempt = 1) {
   try { userSettings = JSON.parse(user.settings || '{}'); } catch {}
   if (userSettings.mobileAlerts === false) return; // User turned off mobile sync
 
+  const emailRecord = await db.getEmailForBeacon(emailId);
+
+  // If email was already opened, ensure double checkmark is applied instead of downgrading
+  if (emailRecord && (emailRecord.status === 'opened' || (emailRecord.opens && emailRecord.opens.length > 0))) {
+    return applyOpenedLabel(userId, emailId);
+  }
+
   const labels = await ensureLabels(userId);
   if (!labels) return;
 
   let targetThreadId = threadId;
   let targetMessageId = null;
 
-  const emailRecord = await db.getEmailForBeacon(emailId);
   if (!targetThreadId && emailRecord && emailRecord.threadId) {
     targetThreadId = emailRecord.threadId;
     targetMessageId = emailRecord.gmailMessageId;
   }
 
   if (!targetThreadId) {
-    const found = await findThreadForEmail(userId, emailId, emailRecord ? emailRecord.subject : null);
+    const found = await findThreadForEmail(userId, emailId, emailRecord ? emailRecord.subject : null, emailRecord ? emailRecord.recipient : null);
     if (found) {
       targetThreadId = found.threadId;
       targetMessageId = found.messageId;
@@ -385,7 +409,7 @@ async function applyOpenedLabel(userId, emailId) {
   let targetMessageId = emailRecord?.gmailMessageId;
 
   if (!targetThreadId) {
-    const found = await findThreadForEmail(userId, emailId, emailRecord ? emailRecord.subject : null);
+    const found = await findThreadForEmail(userId, emailId, emailRecord ? emailRecord.subject : null, emailRecord ? emailRecord.recipient : null);
     if (found) {
       targetThreadId = found.threadId;
       targetMessageId = found.messageId;
@@ -460,7 +484,7 @@ async function syncAllRecentEmails(userId) {
     try {
       let threadId = email.threadId;
       if (!threadId) {
-        const found = await findThreadForEmail(userId, email.id, email.subject);
+        const found = await findThreadForEmail(userId, email.id, email.subject, email.recipient);
         if (found) threadId = found.threadId;
       }
 

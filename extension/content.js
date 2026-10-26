@@ -745,21 +745,30 @@
         });
 
         // Watch for Gmail's "Message sent. View message" toast to capture threadId
-        setTimeout(() => {
+        let toastPollCount = 0;
+        const toastPollTimer = setInterval(() => {
+          toastPollCount++;
           try {
-            const toastLink = document.querySelector('a#link_vmsg, a[href*="#sent/"], a[href*="#inbox/"]');
+            const toastLink = document.querySelector(
+              'a#link_vmsg, span#link_vmsg a, div[role="alert"] a, div.vh a, .b8.UC a, a[href*="#sent/"], a[href*="#inbox/"], a[href*="#all/"]'
+            );
             if (toastLink) {
-              const m = (toastLink.getAttribute('href') || '').match(/#(?:sent|inbox)\/([a-zA-Z0-9]{12,})/i);
-              if (m && m[1] && isAlive()) {
-                chrome.runtime.sendMessage({
-                  action: 'BIND_THREAD_ID',
-                  emailId: trackingId,
-                  threadId: m[1]
-                });
+              const href = toastLink.getAttribute('href') || '';
+              const m = href.match(/#(?:sent|inbox|all)\/([a-zA-Z0-9]{12,})/i);
+              if (m && m[1]) {
+                clearInterval(toastPollTimer);
+                if (isAlive()) {
+                  chrome.runtime.sendMessage({
+                    action: 'BIND_THREAD_ID',
+                    emailId: trackingId,
+                    threadId: m[1]
+                  });
+                }
               }
             }
           } catch { }
-        }, 2000);
+          if (toastPollCount > 25) clearInterval(toastPollTimer);
+        }, 300);
       } catch { }
     }
   }

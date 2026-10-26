@@ -735,8 +735,8 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
     broadcast('EMAIL_CREATED', { email: newEmail }, user.id);
 
     // Asynchronously trigger Gmail Mobile Sync to apply single checkmark (✓)
-    if (threadId && newEmail.id) {
-      gmail.applySentLabel(user.id, newEmail.id, threadId).catch(err => {
+    if (newEmail.id && user.id) {
+      gmail.applySentLabel(user.id, newEmail.id, threadId || null).catch(err => {
         console.warn('[GMAIL MOBILE SYNC] Non-blocking applySentLabel error:', err.message);
       });
     }
