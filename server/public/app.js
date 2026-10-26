@@ -351,6 +351,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function populateUserData(user) {
     if (!user) return;
 
+    // Broadcast auth credentials to extension auth-bridge if present
+    try {
+      window.postMessage({
+        type: 'MAILTRACK_AUTH_SUCCESS',
+        apiKey: user.apiKey || '',
+        email: user.email || '',
+        name: user.name || ''
+      }, '*');
+    } catch {}
+
     // Ensure WebSocket is authenticated as this active user profile
     if (ws && ws.readyState === WebSocket.OPEN && user.apiKey) {
       try {
@@ -687,11 +697,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // -------------------------------------------------------------
   // EMAILS FETCH & LIVE WEBSOCKET
   // -------------------------------------------------------------
-  async function loadEmails() {
+  async function loadEmails(silent = false) {
     try {
       const res = await fetch('/api/emails');
       if (res.status === 401) {
-        window.location.href = '/login';
+        if (!silent) window.location.href = '/login';
         return;
       }
       const data = await res.json();
@@ -700,57 +710,98 @@ document.addEventListener('DOMContentLoaded', () => {
         renderDashboard();
         if (activeTab === 'activity') renderActivityFeed();
 
-        // Check if deep link to a specific email's detailed page was requested
-        const targetEmailId = urlParams.get('emailId') || urlParams.get('id');
-        if (targetEmailId) {
-          openEmailDetails(targetEmailId);
+        // Check if deep link to a specific email's detailed page was requested (only on initial load)
+        if (!silent) {
+          const targetEmailId = urlParams.get('emailId') || urlParams.get('id');
+          if (targetEmailId) {
+            openEmailDetails(targetEmailId);
+          }
         }
       }
     } catch (err) {
-      console.error('Failed to load emails:', err);
+      if (!silent) console.error('Failed to load emails:', err);
     }
   }
 
+  let wsReconnectAttempts = 0;
+  let smartPollInterval = null;
+
+  function enableSmartPolling() {
+    if (smartPollInterval) return;
+    if (wsStatus) {
+      wsStatus.classList.add('connected');
+      const label = wsStatus.querySelector('.status-label');
+      if (label) label.textContent = 'Live Cloud Sync';
+    }
+    // Poll every 5s if tab is visible in browser
+    smartPollInterval = setInterval(() => {
+      if (!document.hidden && currentUser) {
+        loadEmails(true);
+      }
+    }, 5000);
+  }
+
   function connectWebSocket() {
+    // If we've determined we're on serverless hosting (e.g. Vercel), stay in smart polling
+    if (wsReconnectAttempts >= 2) {
+      enableSmartPolling();
+      return;
+    }
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const authQuery = currentUser && currentUser.apiKey ? `?apiKey=${encodeURIComponent(currentUser.apiKey)}` : '';
     const wsUrl = `${protocol}//${window.location.host}${authQuery}`;
 
-    ws = new WebSocket(wsUrl);
+    try {
+      ws = new WebSocket(wsUrl);
 
-    ws.onopen = () => {
-      if (wsStatus) {
-        wsStatus.classList.add('connected');
-        wsStatus.querySelector('.status-label').textContent = 'Live Connected';
-      }
-      // Send AUTH message immediately on connection if user profile is loaded
-      if (currentUser && currentUser.apiKey) {
+      ws.onopen = () => {
+        wsReconnectAttempts = 0;
+        if (smartPollInterval) {
+          clearInterval(smartPollInterval);
+          smartPollInterval = null;
+        }
+        if (wsStatus) {
+          wsStatus.classList.add('connected');
+          wsStatus.querySelector('.status-label').textContent = 'Live Connected';
+        }
+        // Send AUTH message immediately on connection if user profile is loaded
+        if (currentUser && currentUser.apiKey) {
+          try {
+            ws.send(JSON.stringify({ type: 'AUTH', token: currentUser.apiKey }));
+          } catch {}
+        }
+      };
+
+      ws.onclose = () => {
+        wsReconnectAttempts++;
+        if (wsReconnectAttempts >= 2) {
+          console.log('[Dashboard] WebSocket not available on serverless host. Activating Live Cloud Sync.');
+          enableSmartPolling();
+          return;
+        }
+        if (wsStatus) {
+          wsStatus.classList.remove('connected');
+          wsStatus.querySelector('.status-label').textContent = 'Connecting...';
+        }
+        setTimeout(connectWebSocket, 3000);
+      };
+
+      ws.onerror = () => {
+        // Handled via onclose
+      };
+
+      ws.onmessage = event => {
         try {
-          ws.send(JSON.stringify({ type: 'AUTH', token: currentUser.apiKey }));
-        } catch {}
-      }
-    };
-
-    ws.onclose = () => {
-      if (wsStatus) {
-        wsStatus.classList.remove('connected');
-        wsStatus.querySelector('.status-label').textContent = 'Disconnected (Reconnecting...)';
-      }
-      setTimeout(connectWebSocket, 3000);
-    };
-
-    ws.onerror = err => {
-      console.warn('WS error:', err);
-    };
-
-    ws.onmessage = event => {
-      try {
-        const payload = JSON.parse(event.data);
-        handleWsMessage(payload);
-      } catch (e) {
-        console.error('Failed to parse WS msg:', e);
-      }
-    };
+          const payload = JSON.parse(event.data);
+          handleWsMessage(payload);
+        } catch (e) {
+          console.error('Failed to parse WS msg:', e);
+        }
+      };
+    } catch (e) {
+      enableSmartPolling();
+    }
   }
 
   function handleWsMessage(payload) {

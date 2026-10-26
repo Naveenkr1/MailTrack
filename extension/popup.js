@@ -11,6 +11,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let isRedirecting = false;
 
+  async function getServerUrl() {
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      const items = await chrome.storage.local.get(['mt_active_server_url']);
+      if (items.mt_active_server_url) return items.mt_active_server_url.replace(/\/+$/, '');
+    }
+    return 'https://mailtrack.in';
+  }
+
   function showView(view) {
     if (loadingView) loadingView.style.display = (view === 'loading') ? 'block' : 'none';
     if (loggedOutView) loggedOutView.style.display = (view === 'loggedOut') ? 'block' : 'none';
@@ -41,11 +49,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     showView('loggedOut');
   }
 
-  function redirectToDashboard() {
+  async function redirectToDashboard() {
+    const sUrl = await getServerUrl();
     // Notify background worker to focus or open dashboard tab
     chrome.runtime.sendMessage({ action: 'REDIRECT_DASHBOARD' }, (res) => {
       if (chrome.runtime.lastError || !res) {
-        chrome.tabs.create({ url: 'http://localhost:4000/' });
+        chrome.tabs.create({ url: `${sUrl}/` });
       }
       setTimeout(() => {
         window.close();
@@ -66,7 +75,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 2. Fetch fresh auth status from tracking server
   try {
-    const res = await fetch('http://localhost:4000/auth/me', { 
+    const sUrl = await getServerUrl();
+    const res = await fetch(`${sUrl}/auth/me`, { 
       credentials: 'include' 
     });
     
@@ -127,8 +137,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 4. Click Handlers
   if (loginBtn) {
-    loginBtn.onclick = () => {
-      chrome.tabs.create({ url: 'http://localhost:4000/login' });
+    loginBtn.onclick = async () => {
+      const sUrl = await getServerUrl();
+      chrome.tabs.create({ url: `${sUrl}/login` });
       window.close();
     };
   }

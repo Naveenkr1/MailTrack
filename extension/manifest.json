@@ -21,8 +21,26 @@
       "js": ["content.js"],
       "css": ["content.css"],
       "run_at": "document_end"
+    },
+    {
+      "matches": [
+        "https://mailtrack.in/*",
+        "https://www.mailtrack.in/*",
+        "https://*.vercel.app/*",
+        "http://localhost:4000/*"
+      ],
+      "js": ["auth-bridge.js"],
+      "run_at": "document_start"
     }
   ],
+  "externally_connectable": {
+    "matches": [
+      "https://mailtrack.in/*",
+      "https://www.mailtrack.in/*",
+      "https://*.vercel.app/*",
+      "http://localhost:4000/*"
+    ]
+  },
   "permissions": [
     "storage",
     "notifications",

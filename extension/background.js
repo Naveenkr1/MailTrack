@@ -2,9 +2,75 @@
 let ws = null;
 let reconnectInterval = 3000;
 let cachedConfig = {
-  localUrl: 'http://localhost:4000',
-  publicUrl: 'http://localhost:4000'
+  localUrl: 'https://mailtrack.in',
+  publicUrl: 'https://mailtrack.in'
 };
+
+const CANDIDATE_SERVERS = [
+  'https://mailtrack.in',
+  'https://www.mailtrack.in',
+  'https://mail-track-pink.vercel.app',
+  'http://localhost:4000'
+];
+
+let activeServerUrl = 'https://mailtrack.in';
+
+async function getActiveServerUrl() {
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    const stored = await chrome.storage.local.get(['mt_active_server_url', 'mt_custom_server_url']);
+    if (stored.mt_custom_server_url) {
+      activeServerUrl = stored.mt_custom_server_url.replace(/\/+$/, '');
+      return activeServerUrl;
+    }
+    if (stored.mt_active_server_url) {
+      activeServerUrl = stored.mt_active_server_url.replace(/\/+$/, '');
+      return activeServerUrl;
+    }
+  }
+  return activeServerUrl;
+}
+
+async function probeAndSetActiveServer() {
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    const stored = await chrome.storage.local.get(['mt_custom_server_url']);
+    if (stored.mt_custom_server_url) {
+      activeServerUrl = stored.mt_custom_server_url.replace(/\/+$/, '');
+      return activeServerUrl;
+    }
+  }
+
+  for (const url of CANDIDATE_SERVERS) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+      const res = await fetch(`${url}/api/ping`, { signal: controller.signal, cache: 'no-store' });
+      clearTimeout(timeout);
+      if (res.ok) {
+        activeServerUrl = url;
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          await chrome.storage.local.set({ mt_active_server_url: url });
+        }
+        console.log('[MailTrack BG] Active tracking server set to:', activeServerUrl);
+        return activeServerUrl;
+      }
+    } catch (e) {}
+  }
+  return activeServerUrl;
+}
+
+async function getAuthTokenCookie() {
+  if (typeof chrome === 'undefined' || !chrome.cookies || !chrome.cookies.getAll) return null;
+  try {
+    const cookies = await chrome.cookies.getAll({ name: 'mt_token' });
+    if (!cookies || cookies.length === 0) return null;
+    const currentHost = new URL(activeServerUrl).hostname;
+    const matched = cookies.find(c => c.domain.includes(currentHost));
+    if (matched) return matched.value;
+    return cookies[0].value;
+  } catch {
+    return null;
+  }
+}
 
 let isConnecting = false;
 let reconnectTimer = null;
@@ -26,12 +92,13 @@ function updateActionBehavior(isLoggedIn) {
 }
 
 function openOrFocusDashboard() {
-  const dashUrl = (cachedConfig && cachedConfig.localUrl) || 'http://localhost:4000';
+  const dashUrl = (cachedConfig && cachedConfig.publicUrl) || activeServerUrl || 'https://mailtrack.in';
   chrome.tabs.query({}, (tabs) => {
     const existing = tabs.find(t => {
       if (!t.url) return false;
-      return t.url.startsWith('http://localhost:4000') ||
-             (cachedConfig && cachedConfig.publicUrl && t.url.startsWith(cachedConfig.publicUrl));
+      return t.url.includes('mailtrack.in') ||
+             t.url.includes('vercel.app') ||
+             t.url.startsWith('http://localhost:4000');
     });
 
     if (existing && existing.id) {
@@ -54,10 +121,10 @@ if (typeof chrome !== 'undefined' && chrome.action && chrome.action.onClicked) {
       chrome.action.setPopup({ popup: 'popup.html' });
       if (chrome.action.openPopup) {
         chrome.action.openPopup().catch(() => {
-          chrome.tabs.create({ url: 'http://localhost:4000/login' });
+          chrome.tabs.create({ url: `${activeServerUrl}/login` });
         });
       } else {
-        chrome.tabs.create({ url: 'http://localhost:4000/login' });
+        chrome.tabs.create({ url: `${activeServerUrl}/login` });
       }
     }
   });
@@ -91,9 +158,16 @@ async function syncAuth() {
 
   syncAuthPromise = (async () => {
     try {
+      await probeAndSetActiveServer();
+      const serverUrl = activeServerUrl;
       const headers = {};
       if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
-      const res = await fetch('http://localhost:4000/auth/me', { 
+      const token = await getAuthTokenCookie();
+      if (token && !headers['Authorization']) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      const res = await fetch(`${serverUrl}/auth/me`, { 
         credentials: 'include',
         headers
       });
@@ -141,24 +215,28 @@ async function syncAuth() {
   return syncAuthPromise;
 }
 
-// Observe ONLY mt_token cookie changes on localhost:4000 (NEVER mt_sender)
+// Observe mt_token cookie changes across mailtrack.in, vercel.app, and localhost
 if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.onChanged) {
   let cookieDebounce = null;
   chrome.cookies.onChanged.addListener((changeInfo) => {
     if (changeInfo.cookie && changeInfo.cookie.name === 'mt_token') {
-      console.log('[MailTrack BG] Auth token cookie change detected, removed:', changeInfo.removed);
-      clearTimeout(cookieDebounce);
-      cookieDebounce = setTimeout(() => {
-        syncAuth();
-      }, 500);
+      const domain = changeInfo.cookie.domain || '';
+      if (domain.includes('mailtrack.in') || domain.includes('vercel.app') || domain.includes('localhost')) {
+        console.log('[MailTrack BG] Auth token cookie change detected on', domain, 'removed:', changeInfo.removed);
+        clearTimeout(cookieDebounce);
+        cookieDebounce = setTimeout(() => {
+          syncAuth();
+        }, 500);
+      }
     }
   });
 }
 
-// Check if local server is responsive before opening WebSocket
+// Check if tracking server is responsive
 async function checkServerReady() {
   try {
-    const res = await fetch('http://localhost:4000/api/config', { cache: 'no-store' });
+    await probeAndSetActiveServer();
+    const res = await fetch(`${activeServerUrl}/api/config`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       if (data && data.success) {
@@ -167,7 +245,7 @@ async function checkServerReady() {
       }
     }
   } catch (e) {
-    // Handled silently: server not yet running or restarting
+    // Handled silently
   }
   return false;
 }
@@ -175,7 +253,8 @@ async function checkServerReady() {
 // 1. Fetch server config
 async function updateConfig() {
   try {
-    const res = await fetch('http://localhost:4000/api/config', { cache: 'no-store' });
+    const serverUrl = await getActiveServerUrl();
+    const res = await fetch(`${serverUrl}/api/config`, { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       if (data.success) {
@@ -188,7 +267,7 @@ async function updateConfig() {
   }
 }
 
-// 2. Connect WebSocket safely without ERR_CONNECTION_REFUSED
+// 2. Connect WebSocket safely if server supports it (with automatic fallback on serverless)
 async function safeConnectWS() {
   if (isConnecting) return;
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
@@ -204,8 +283,10 @@ async function safeConnectWS() {
       return;
     }
 
+    const wsProto = activeServerUrl.startsWith('https:') ? 'wss:' : 'ws:';
+    const wsHost = activeServerUrl.replace(/^https?:\/\//, '');
     const authQuery = cachedApiKey ? `?apiKey=${encodeURIComponent(cachedApiKey)}` : '';
-    const socket = new WebSocket(`ws://localhost:4000${authQuery}`);
+    const socket = new WebSocket(`${wsProto}//${wsHost}${authQuery}`);
     ws = socket;
 
     socket.onopen = () => {
@@ -261,31 +342,18 @@ function formatDeviceDisplay(client) {
   if (/iPhone/i.test(c)) return 'Read on iPhone';
   if (/iPad/i.test(c)) return 'Read on iPad';
   if (/Android/i.test(c)) return 'Read on Android';
-  if (/Mac/i.test(c)) return 'Read on Mac';
-  if (/Windows/i.test(c)) return 'Read on Windows PC';
-  if (/Linux/i.test(c)) return 'Read on Linux PC';
-  return `Read via ${c}`;
-}
-
-function formatDeviceName(client) {
-  if (!client) return 'Gmail (Google Proxy)';
-  const c = String(client).trim();
-  if (/Google Proxy|Gmail|Desktop/i.test(c)) return 'Gmail (Google Proxy)';
-  if (/iPhone/i.test(c)) return 'iPhone';
-  if (/iPad/i.test(c)) return 'iPad';
-  if (/Android/i.test(c)) return 'Android';
-  if (/Mac/i.test(c)) return 'Mac';
-  if (/Windows/i.test(c)) return 'Windows PC';
-  if (/Linux/i.test(c)) return 'Linux PC';
+  if (/Macintosh|Mac OS/i.test(c)) return 'Read on Mac';
+  if (/Windows/i.test(c)) return 'Read on Windows';
   return c;
 }
 
+// Handle real-time push events from server
 function handleServerEvent(payload) {
   if (!payload || !payload.type) return;
   const { type, data } = payload;
   if (!data) return;
 
-  // Enforce account isolation: ignore notifications for other user profiles
+  // Multi-user isolation
   const eventEmail = data.email || null;
   const eventUserId = (eventEmail && eventEmail.userId) || data.userId || null;
   if (currentUser && currentUser.id && eventUserId && eventUserId !== currentUser.id) {
@@ -293,53 +361,71 @@ function handleServerEvent(payload) {
   }
 
   if (type === 'EMAIL_OPENED') {
-    const { email, event } = data;
-    if (currentUser && email && email.userId && currentUser.id !== email.userId) {
-      return;
+    const rawDevice = data.client || (data.open && data.open.client) || 'Gmail (Google Proxy)';
+    const displayDevice = formatDeviceDisplay(rawDevice);
+
+    const emailSubject = (data.email && data.email.subject) || 'Your email';
+    const recipient = (data.email && data.email.recipient) || 'Recipient';
+    const openCount = (data.email && data.email.openCount) || 1;
+
+    let notifBody = `${recipient} just opened your email "${emailSubject}"`;
+    if (openCount > 1) {
+      notifBody += ` (${openCount} opens)`;
+    }
+    notifBody += ` • ${displayDevice}`;
+
+    if (typeof chrome !== 'undefined' && chrome.notifications) {
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon-128.png',
+        title: 'Email Opened! ✓✓',
+        message: notifBody,
+        priority: 2
+      });
     }
 
-    const deviceDisplay = formatDeviceDisplay(event.client);
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon-128.png',
-      title: '✓✓ Email Opened!',
-      message: `"${email.subject}" was just read by ${email.recipient} (${deviceDisplay})`,
-      priority: 2
-    });
+    broadcastToGmailTabs({ type: 'EMAIL_OPENED', data });
+  }
 
-    broadcastToGmailTabs({ type: 'EMAIL_OPENED', emailId: email.id, email });
-  } else if (type === 'LINK_CLICKED') {
-    const { email, event } = data;
-    if (currentUser && email && email.userId && currentUser.id !== email.userId) {
-      return;
+  if (type === 'LINK_CLICKED') {
+    const emailSubject = (data.email && data.email.subject) || 'Your email';
+    const targetUrl = (data.click && data.click.targetUrl) || 'a link';
+
+    if (typeof chrome !== 'undefined' && chrome.notifications) {
+      chrome.notifications.create({
+        type: 'basic',
+        iconUrl: 'icons/icon-128.png',
+        title: 'Link Clicked! 🔗',
+        message: `Recipient clicked ${targetUrl} in "${emailSubject}"`,
+        priority: 2
+      });
     }
 
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon-128.png',
-      title: '↗ Link Clicked!',
-      message: `A link in "${email ? email.subject : 'email'}" was clicked (${event.url})`,
-      priority: 1
-    });
+    broadcastToGmailTabs({ type: 'LINK_CLICKED', data });
+  }
 
-    broadcastToGmailTabs({ type: 'LINK_CLICKED', emailId: email ? email.id : null });
-  } else if (type === 'CONFIG_UPDATED') {
-    updateConfig().then(() => {
+  if (type === 'EMAIL_CREATED') {
+    broadcastToGmailTabs({ type: 'EMAIL_CREATED', data });
+  }
+
+  if (type === 'CONFIG_UPDATED') {
+    if (data.publicUrl) {
+      cachedConfig.publicUrl = data.publicUrl;
       broadcastToGmailTabs({ type: 'CONFIG_UPDATED', config: cachedConfig });
-    });
+    }
   }
 }
 
 function broadcastToGmailTabs(message) {
-  chrome.tabs.query({ url: 'https://mail.google.com/*' }, (tabs) => {
-    tabs.forEach((tab) => {
+  if (typeof chrome === 'undefined' || !chrome.tabs) return;
+  chrome.tabs.query({ url: '*://mail.google.com/*' }, (tabs) => {
+    for (const tab of tabs) {
       chrome.tabs.sendMessage(tab.id, message).catch(() => {});
-    });
+    }
   });
 }
 
-// Universal link protector: if any tab navigates to a tracked link with a stale/dead tunnel domain,
-// immediately rescue it by rerouting to localhost:4000 so the click tracks and destination opens!
+// Universal link protector
 if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.onUpdated) {
   chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.url && changeInfo.url.includes('/trace/link')) {
@@ -350,11 +436,12 @@ if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.onUpdated) {
 
         const activePublic = cachedConfig && cachedConfig.publicUrl;
         const isLocal = u.origin === 'http://localhost:4000';
-        const isActiveTunnel = activePublic && u.origin === activePublic;
+        const isActiveCurrent = activePublic && u.origin === activePublic;
+        const isActiveDomain = u.origin.includes('mailtrack.in') || u.origin.includes('vercel.app');
 
-        if (!isLocal && !isActiveTunnel && targetUrl) {
+        if (!isLocal && !isActiveCurrent && !isActiveDomain && targetUrl) {
           console.log('[MailTrack BG] Rescuing click on legacy/offline link:', u.origin);
-          const rerouted = `http://localhost:4000/trace/link/${emailId || ''}?url=${encodeURIComponent(targetUrl)}`;
+          const rerouted = `${activeServerUrl}/trace/link/${emailId || ''}?url=${encodeURIComponent(targetUrl)}`;
           chrome.tabs.update(tabId, { url: rerouted });
         }
       } catch (e) {}
@@ -362,18 +449,40 @@ if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.onUpdated) {
   });
 }
 
+// External message listener (from web pages on mailtrack.in or vercel.app)
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessageExternal) {
+  chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
+    if (message && (message.type === 'MAILTRACK_AUTH_SUCCESS' || message.action === 'AUTH_SUCCESS_BRIDGE')) {
+      console.log('[MailTrack BG] External auth received for:', message.email);
+      if (message.apiKey) cachedApiKey = message.apiKey;
+      syncAuth().then((isAuth) => sendResponse({ success: true, authenticated: isAuth }));
+      return true;
+    }
+  });
+}
+
 // Initialize
-updateConfig();
-syncAuth();
-safeConnectWS();
+probeAndSetActiveServer().then(() => {
+  updateConfig();
+  syncAuth();
+  safeConnectWS();
+});
 
 // 3. Message listener for content scripts & popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'AUTH_SUCCESS_BRIDGE') {
+    if (request.apiKey) cachedApiKey = request.apiKey;
+    syncAuth().then((isAuth) => {
+      sendResponse({ success: true, authenticated: isAuth });
+    });
+    return true;
+  }
+
   if (request.action === 'GET_CONFIG') {
     updateConfig().then(() => {
-      sendResponse({ success: true, config: cachedConfig, user: currentUser });
+      sendResponse({ success: true, config: cachedConfig, user: currentUser, activeServerUrl });
     }).catch(() => {
-      sendResponse({ success: true, config: cachedConfig, user: currentUser });
+      sendResponse({ success: true, config: cachedConfig, user: currentUser, activeServerUrl });
     });
     return true;
   }
@@ -385,14 +494,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === 'OPEN_LOGIN') {
-    chrome.tabs.create({ url: 'http://localhost:4000/login' });
+    const sUrl = activeServerUrl || 'https://mailtrack.in';
+    chrome.tabs.create({ url: `${sUrl}/login` });
     sendResponse({ success: true });
     return true;
   }
 
   if (request.action === 'GET_AUTH_STATUS' || request.action === 'SYNC_AUTH') {
     syncAuth().then((isAuth) => {
-      sendResponse({ authenticated: isAuth, user: currentUser, apiKey: cachedApiKey });
+      sendResponse({ authenticated: isAuth, user: currentUser, apiKey: cachedApiKey, activeServerUrl });
     });
     return true;
   }
@@ -401,7 +511,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const headers = { 'Content-Type': 'application/json' };
     if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
 
-    fetch('http://localhost:4000/api/emails', {
+    fetch(`${activeServerUrl}/api/emails`, {
       method: 'POST',
       headers,
       body: JSON.stringify(request.payload)
@@ -416,7 +526,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const headers = { 'Content-Type': 'application/json' };
     if (cachedApiKey) headers['X-API-Key'] = cachedApiKey;
 
-    fetch(`http://localhost:4000/api/emails/${encodeURIComponent(request.emailId)}/thread`, {
+    fetch(`${activeServerUrl}/api/emails/${encodeURIComponent(request.emailId)}/thread`, {
       method: 'POST',
       headers,
       body: JSON.stringify({ threadId: request.threadId, messageId: request.messageId })
@@ -447,8 +557,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (activeEmail) headers['X-MailTrack-User-Email'] = activeEmail;
 
       const url = activeEmail 
-        ? `http://localhost:4000/api/emails?email=${encodeURIComponent(activeEmail)}`
-        : 'http://localhost:4000/api/emails';
+        ? `${activeServerUrl}/api/emails?email=${encodeURIComponent(activeEmail)}`
+        : `${activeServerUrl}/api/emails`;
 
       try {
         const res = await fetch(url, { headers });

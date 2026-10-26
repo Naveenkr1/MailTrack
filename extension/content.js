@@ -5,16 +5,29 @@
   console.log('[Mail Track] ⚡ Activating Ultra-Fast Gmail Tracking...');
 
   let trackedEmails = [];
-  let publicTrackingUrl = 'http://localhost:4000';
+  let publicTrackingUrl = 'https://mailtrack.in';
   let ws = null;
   let currentAuthUser = null;
+
+  function getServerUrl() {
+    return publicTrackingUrl || 'https://mailtrack.in';
+  }
+
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['mt_active_server_url'], (items) => {
+      if (items.mt_active_server_url) {
+        publicTrackingUrl = items.mt_active_server_url.replace(/\/+$/, '');
+      }
+    });
+  }
 
   // Immediately query active public URL from background service worker
   if (isAlive()) {
     try {
       chrome.runtime.sendMessage({ action: 'GET_CONFIG' }, (res) => {
-        if (res && res.success && res.config && res.config.publicUrl) {
-          publicTrackingUrl = res.config.publicUrl;
+        if (res && res.success) {
+          if (res.activeServerUrl) publicTrackingUrl = res.activeServerUrl;
+          else if (res.config && res.config.publicUrl) publicTrackingUrl = res.config.publicUrl;
         }
       });
     } catch { }
@@ -41,14 +54,14 @@
       const emailId = u.pathname.split('/trace/link/')[1] || u.searchParams.get('id');
 
       // If the link uses an old/offline domain or expired tunnel:
-      const isDeadDomain = !href.startsWith(publicTrackingUrl) && !href.startsWith('http://localhost:4000');
+      const isDeadDomain = !href.startsWith(publicTrackingUrl) && !href.includes('mailtrack.in') && !href.includes('vercel.app') && !href.startsWith('http://localhost:4000');
       if (isDeadDomain && dest) {
         e.preventDefault();
         e.stopPropagation();
         console.log('[Mail Track] Rescuing click on legacy/offline link:', href);
-        // Ping local server in background to record the click
+        // Ping active tracking server in background to record the click
         if (isAlive()) {
-          fetch(`http://localhost:4000/trace/link/${emailId || ''}?url=${encodeURIComponent(dest)}`, { mode: 'no-cors' }).catch(() => { });
+          fetch(`${getServerUrl()}/trace/link/${emailId || ''}?url=${encodeURIComponent(dest)}`, { mode: 'no-cors' }).catch(() => { });
         }
         window.open(dest, '_blank', 'noopener,noreferrer');
       }
@@ -242,7 +255,7 @@
 
     function fetchDirect() {
       const q = activeEmail ? `?email=${encodeURIComponent(activeEmail)}` : '';
-      fetch(`http://localhost:4000/api/emails${q}`)
+      fetch(`${getServerUrl()}/api/emails${q}`)
         .then(r => r.json())
         .then(applyEmailsData)
         .catch(() => { });
@@ -275,11 +288,11 @@
     wsConnecting = true;
 
     try {
-      // Ping local server first to avoid net::ERR_CONNECTION_REFUSED
-      const res = await fetch('http://localhost:4000/api/config', { cache: 'no-store' });
+      const sUrl = getServerUrl();
+      const res = await fetch(`${sUrl}/api/config`, { cache: 'no-store' });
       if (!res.ok) {
         wsConnecting = false;
-        setTimeout(initDirectWebSocket, 4000);
+        setTimeout(initDirectWebSocket, 6000);
         return;
       }
 
@@ -287,7 +300,9 @@
       const authQuery = currentAuthUser && currentAuthUser.apiKey
         ? `?apiKey=${encodeURIComponent(currentAuthUser.apiKey)}`
         : (activeEmail ? `?email=${encodeURIComponent(activeEmail)}` : '');
-      const socket = new WebSocket(`ws://localhost:4000${authQuery}`);
+      const wsProto = sUrl.startsWith('https:') ? 'wss:' : 'ws:';
+      const wsHost = sUrl.replace(/^https?:\/\//, '');
+      const socket = new WebSocket(`${wsProto}//${wsHost}${authQuery}`);
       ws = socket;
 
       socket.onopen = () => {
@@ -1436,7 +1451,7 @@
         ${recipientsSectionHtml}
       </div>
       <div class="mt-tt-footer">
-        <a href="http://localhost:4000/app?emailId=${encodeURIComponent(email?.id || '')}" target="_blank" rel="noopener noreferrer" class="mt-tt-cta">
+        <a href="${getServerUrl()}/app?emailId=${encodeURIComponent(email?.id || '')}" target="_blank" rel="noopener noreferrer" class="mt-tt-cta">
           <span>View in Dashboard</span>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -1625,7 +1640,7 @@
             <span class="mt-auth-dot unlinked"></span>
             <span>Gmail Not Linked</span>
           </div>
-          <a href="http://localhost:4000/auth/google?flow=extension" target="_blank" class="mt-auth-link-btn">
+          <a href="${getServerUrl()}/auth/google?flow=extension" target="_blank" class="mt-auth-link-btn">
             Link Google Account
           </a>
         </div>
@@ -1644,7 +1659,7 @@
         ${itemsHtml}
       </div>
       <div class="mt-dropdown-footer">
-        <a href="http://localhost:4000" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta">
+        <a href="${getServerUrl()}" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta">
           <span>Open Full Dashboard</span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -1669,7 +1684,7 @@
         e.stopPropagation();
         const emailId = item.getAttribute('data-email-id');
         if (emailId) {
-          window.open(`http://localhost:4000/app?emailId=${encodeURIComponent(emailId)}`, '_blank');
+          window.open(`${getServerUrl()}/app?emailId=${encodeURIComponent(emailId)}`, '_blank');
           closeTopNavDropdown();
         }
       };
