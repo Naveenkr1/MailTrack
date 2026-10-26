@@ -19,7 +19,7 @@ function getEffectiveBaseUrl(req) {
 // 1. INITIATE GOOGLE OAUTH (With Gmail Permissions for Mobile Sync)
 // -------------------------------------------------------------
 router.get('/google', (req, res) => {
-  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
   const isExtension = req.query.flow === 'extension';
   const isMobileSync = req.query.flow === 'mobile_sync';
 
@@ -81,8 +81,8 @@ router.get('/google/callback', async (req, res) => {
   }
   res.clearCookie('mt_oauth_state');
 
-  const clientId = process.env.GOOGLE_CLIENT_ID;
-  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
+  const clientSecret = (process.env.GOOGLE_CLIENT_SECRET || '').trim();
   const baseUrl = getEffectiveBaseUrl(req);
   const redirectUri = `${baseUrl}/auth/google/callback`;
 
