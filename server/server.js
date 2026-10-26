@@ -98,13 +98,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// Anti-self tracking cookie (set only if not already present)
-app.use((req, res, next) => {
-  if (!req.cookies || !req.cookies.mt_sender) {
-    res.cookie('mt_sender', '1', { maxAge: 365 * 24 * 60 * 60 * 1000, path: '/' });
-  }
-  next();
-});
 
 // Rate limiters for security
 const loginLimiter = rateLimit({
@@ -350,30 +343,15 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
   const createdTime = email.createdAt ? new Date(email.createdAt).getTime() : now;
   const elapsedSeconds = (now - createdTime) / 1000;
 
-  // 1. Pre-render Grace Period: Only filter if local non-proxy sender device rendered it immediately (< 2s)
-  if (elapsedSeconds < 2 && !/GoogleImageProxy/i.test(userAgent)) {
-    console.log(`[SELF-OPEN FILTERED] "${email.subject}" (${emailId}) local pre-render - IGNORED.`);
-    res.writeHead(200, {
-      'Content-Type': 'image/png',
-      'Content-Length': TRANSPARENT_PNG.length,
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Access-Control-Allow-Origin': '*'
-    });
-    return res.end(TRANSPARENT_PNG);
-  }
-
-  // 2. Sender Machine / Network Filter
+  // 1. Pre-render Grace Period: Only filter immediate send pre-renders (< 3s) from local sender IP
   const isSenderIP = cleanIp === senderPublicIp || 
                      cleanIp === email.senderPublicIp || 
                      cleanIp === '1' || 
                      cleanIp === '127.0.0.1' || 
                      cleanIp === email.senderIp;
 
-  const hasSenderCookie = req.cookies && req.cookies.mt_sender === '1';
-  const isSenderDevice = hasSenderCookie || (isSenderIP && !/GoogleImageProxy/i.test(userAgent));
-
-  if (isSenderDevice) {
-    console.log(`[SELF-OPEN FILTERED] "${email.subject}" rendered by sender (${cleanIp}) - IGNORED.`);
+  if (elapsedSeconds < 3 && !/GoogleImageProxy/i.test(userAgent) && isSenderIP) {
+    console.log(`[SELF-OPEN FILTERED] "${email.subject}" (${emailId}) local pre-render (< 3s) - IGNORED.`);
     res.writeHead(200, {
       'Content-Type': 'image/png',
       'Content-Length': TRANSPARENT_PNG.length,
@@ -383,7 +361,7 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
     return res.end(TRANSPARENT_PNG);
   }
 
-  // 3. Automated Notification Bot Scanner Filter
+  // 2. Automated Notification Bot Scanner Filter
   if (isBotOrPrefetch(userAgent, req)) {
     console.log(`[BOT / NOTIFICATION PREFETCH FILTERED] "${email.subject}" (${emailId}) request by ${userAgent} (${cleanIp}) - IGNORED.`);
     res.writeHead(200, {
@@ -469,15 +447,12 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
   // Parse recipient parameter if provided
   let clickRecipient = req.query.r ? decodeURIComponent(req.query.r).trim().toLowerCase() : null;
 
-  // Only filter if sender is explicitly viewing their own sent folder in Gmail with the extension
-  const isSenderHeader = req.headers['x-mailtrack-sender'] === '1' || 
-                         (req.headers['cookie'] && req.headers['cookie'].includes('mt_sender=1'));
-  const isExplicitSenderClick = isSenderHeader || 
-                                (email && email.sender && clickRecipient && clickRecipient === email.sender.toLowerCase().trim()) ||
-                                (clickRecipient === 'nnaveen.8527@gmail.com');
-
-  if (isExplicitSenderClick) {
-    console.log(`[SELF-CLICK FILTERED] Sender (${email ? email.sender : clickRecipient}) clicked own link in sent mail - IGNORED.`);
+  // Only filter self-clicks if clicked within 3 seconds of email creation by sender device
+  const now = Date.now();
+  const createdTime = email && email.createdAt ? new Date(email.createdAt).getTime() : now;
+  const elapsedSeconds = (now - createdTime) / 1000;
+  if (elapsedSeconds < 3 && req.headers['x-mailtrack-sender'] === '1') {
+    console.log(`[SELF-CLICK FILTERED] Immediate pre-click on "${safeTargetUrl}" (< 3s) - IGNORED.`);
     return res.redirect(302, safeTargetUrl);
   }
 
@@ -565,18 +540,12 @@ app.post('/api/emails/:id/open', async (req, res) => {
   const timestamp = req.body.timestamp || new Date().toISOString();
   const client = req.body.client || 'Gmail (Web)';
 
-  // 1. Prevent sender self-open
-  const isSenderCookie = (req.cookies && req.cookies.mt_sender === '1') ||
-                         (req.headers['cookie'] && req.headers['cookie'].includes('mt_sender=1'));
-  const isSenderHeader = req.headers['x-mailtrack-sender'] === '1';
-  if (isSenderCookie || isSenderHeader) {
-    console.log(`[SELF-OPEN FILTERED] Request from sender browser cookie/header - IGNORED.`);
-    return res.json({ success: true, ignored: true });
-  }
-
-  const senderEmail = (email.sender || '').toLowerCase().trim();
-  if (recipient && (recipient === senderEmail || recipient === 'me' || recipient === 'nnaveen.8527@gmail.com')) {
-    console.log(`[SELF-OPEN FILTERED] Sender (${recipient}) viewing own email "${email.subject}" - IGNORED.`);
+  // 1. Prevent immediate sender self-open (< 3s)
+  const now = Date.now();
+  const createdTime = email && email.createdAt ? new Date(email.createdAt).getTime() : now;
+  const elapsedSeconds = (now - createdTime) / 1000;
+  if (elapsedSeconds < 3 && req.headers['x-mailtrack-sender'] === '1') {
+    console.log(`[SELF-OPEN FILTERED] Immediate pre-open (< 3s) - IGNORED.`);
     return res.json({ success: true, ignored: true });
   }
 

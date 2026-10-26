@@ -4,19 +4,23 @@
 
   console.log('[Mail Track] ⚡ Activating Ultra-Fast Gmail Tracking...');
 
-  let trackedEmails = [];
-  let publicTrackingUrl = 'https://mailtrack.in';
+  const DEFAULT_PROD_URL = 'https://mail-track-pink.vercel.app';
+  let publicTrackingUrl = DEFAULT_PROD_URL;
   let ws = null;
   let currentAuthUser = null;
 
   function getServerUrl() {
-    return publicTrackingUrl || 'https://mailtrack.in';
+    return publicTrackingUrl || DEFAULT_PROD_URL;
   }
 
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['mt_active_server_url'], (items) => {
-      if (items.mt_active_server_url) {
+    chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url'], (items) => {
+      if (items.mt_server_mode === 'localhost') {
+        publicTrackingUrl = 'http://localhost:4000';
+      } else if (items.mt_active_server_url) {
         publicTrackingUrl = items.mt_active_server_url.replace(/\/+$/, '');
+      } else {
+        publicTrackingUrl = DEFAULT_PROD_URL;
       }
     });
   }
@@ -34,8 +38,9 @@
 
     // Listen for live tunnel updates from server watchdog
     chrome.runtime.onMessage.addListener((msg) => {
-      if (msg && msg.type === 'CONFIG_UPDATED' && msg.config && msg.config.publicUrl) {
-        publicTrackingUrl = msg.config.publicUrl;
+      if (msg && msg.type === 'CONFIG_UPDATED') {
+        if (msg.activeServerUrl) publicTrackingUrl = msg.activeServerUrl;
+        else if (msg.config && msg.config.publicUrl) publicTrackingUrl = msg.config.publicUrl;
         console.log('[Mail Track] Live public tracking URL synchronized:', publicTrackingUrl);
       }
     });
@@ -54,7 +59,7 @@
       const emailId = u.pathname.split('/trace/link/')[1] || u.searchParams.get('id');
 
       // If the link uses an old/offline domain or expired tunnel:
-      const isDeadDomain = !href.startsWith(publicTrackingUrl) && !href.includes('mailtrack.in') && !href.includes('vercel.app') && !href.startsWith('http://localhost:4000');
+      const isDeadDomain = !href.startsWith(publicTrackingUrl) && !href.includes('vercel.app') && !href.startsWith('http://localhost:4000');
       if (isDeadDomain && dest) {
         e.preventDefault();
         e.stopPropagation();

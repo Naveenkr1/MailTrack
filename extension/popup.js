@@ -9,14 +9,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const userEmailEl = document.getElementById('userEmail');
   const userAvatarEl = document.getElementById('userAvatar');
 
+  const DEFAULT_PROD_URL = 'https://mail-track-pink.vercel.app';
+  const LOCAL_URL = 'http://localhost:4000';
+
   let isRedirecting = false;
 
   async function getServerUrl() {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      const items = await chrome.storage.local.get(['mt_active_server_url']);
+      const items = await chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url']);
+      if (items.mt_custom_server_url) return items.mt_custom_server_url.replace(/\/+$/, '');
+      if (items.mt_server_mode === 'localhost') return LOCAL_URL;
       if (items.mt_active_server_url) return items.mt_active_server_url.replace(/\/+$/, '');
     }
-    return 'https://mailtrack.in';
+    return DEFAULT_PROD_URL;
   }
 
   function showView(view) {
@@ -147,6 +152,45 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (openDashboardBtn) {
     openDashboardBtn.onclick = () => {
       redirectToDashboard();
+    };
+  }
+
+  // 5. Host Environment Switcher (Cloud vs Localhost)
+  const envProdBtn = document.getElementById('envProdBtn');
+  const envLocalBtn = document.getElementById('envLocalBtn');
+
+  function updateEnvUI(mode) {
+    if (!envProdBtn || !envLocalBtn) return;
+    if (mode === 'localhost') {
+      envLocalBtn.classList.add('active');
+      envProdBtn.classList.remove('active');
+    } else {
+      envProdBtn.classList.add('active');
+      envLocalBtn.classList.remove('active');
+    }
+  }
+
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['mt_server_mode'], (items) => {
+      updateEnvUI(items.mt_server_mode || 'production');
+    });
+  }
+
+  if (envProdBtn) {
+    envProdBtn.onclick = () => {
+      updateEnvUI('production');
+      chrome.runtime.sendMessage({ action: 'SET_SERVER_MODE', mode: 'production' }, () => {
+        window.location.reload();
+      });
+    };
+  }
+
+  if (envLocalBtn) {
+    envLocalBtn.onclick = () => {
+      updateEnvUI('localhost');
+      chrome.runtime.sendMessage({ action: 'SET_SERVER_MODE', mode: 'localhost' }, () => {
+        window.location.reload();
+      });
     };
   }
 });

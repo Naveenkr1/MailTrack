@@ -1,60 +1,51 @@
 // Background Service Worker for Mail Track
 let ws = null;
 let reconnectInterval = 3000;
+
+const PROD_SERVER_URL = 'https://mail-track-pink.vercel.app';
+const LOCAL_SERVER_URL = 'http://localhost:4000';
+
+let serverMode = 'production'; // 'production' | 'localhost'
+let activeServerUrl = PROD_SERVER_URL;
+
 let cachedConfig = {
-  localUrl: 'https://mailtrack.in',
-  publicUrl: 'https://mailtrack.in'
+  localUrl: LOCAL_SERVER_URL,
+  publicUrl: PROD_SERVER_URL
 };
-
-const CANDIDATE_SERVERS = [
-  'https://mailtrack.in',
-  'https://www.mailtrack.in',
-  'https://mail-track-pink.vercel.app',
-  'http://localhost:4000'
-];
-
-let activeServerUrl = 'https://mailtrack.in';
 
 async function getActiveServerUrl() {
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    const stored = await chrome.storage.local.get(['mt_active_server_url', 'mt_custom_server_url']);
+    const stored = await chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url']);
     if (stored.mt_custom_server_url) {
       activeServerUrl = stored.mt_custom_server_url.replace(/\/+$/, '');
       return activeServerUrl;
     }
-    if (stored.mt_active_server_url) {
-      activeServerUrl = stored.mt_active_server_url.replace(/\/+$/, '');
+    // Only use localhost if the user has specifically selected localhost mode
+    if (stored.mt_server_mode === 'localhost') {
+      serverMode = 'localhost';
+      activeServerUrl = LOCAL_SERVER_URL;
       return activeServerUrl;
     }
+    // Default to the current live domain
+    serverMode = 'production';
+    activeServerUrl = PROD_SERVER_URL;
+    return activeServerUrl;
   }
-  return activeServerUrl;
+  return PROD_SERVER_URL;
 }
 
 async function probeAndSetActiveServer() {
-  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    const stored = await chrome.storage.local.get(['mt_custom_server_url']);
-    if (stored.mt_custom_server_url) {
-      activeServerUrl = stored.mt_custom_server_url.replace(/\/+$/, '');
+  const url = await getActiveServerUrl();
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 2000);
+    const res = await fetch(`${url}/api/ping`, { signal: controller.signal, cache: 'no-store' });
+    clearTimeout(timeout);
+    if (res.ok) {
+      activeServerUrl = url;
       return activeServerUrl;
     }
-  }
-
-  for (const url of CANDIDATE_SERVERS) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 2000);
-      const res = await fetch(`${url}/api/ping`, { signal: controller.signal, cache: 'no-store' });
-      clearTimeout(timeout);
-      if (res.ok) {
-        activeServerUrl = url;
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-          await chrome.storage.local.set({ mt_active_server_url: url });
-        }
-        console.log('[MailTrack BG] Active tracking server set to:', activeServerUrl);
-        return activeServerUrl;
-      }
-    } catch (e) {}
-  }
+  } catch (e) {}
   return activeServerUrl;
 }
 
@@ -92,11 +83,11 @@ function updateActionBehavior(isLoggedIn) {
 }
 
 function openOrFocusDashboard() {
-  const dashUrl = (cachedConfig && cachedConfig.publicUrl) || activeServerUrl || 'https://mailtrack.in';
+  const dashUrl = (cachedConfig && cachedConfig.publicUrl) || activeServerUrl || PROD_SERVER_URL;
   chrome.tabs.query({}, (tabs) => {
     const existing = tabs.find(t => {
       if (!t.url) return false;
-      return t.url.includes('mailtrack.in') ||
+      return t.url.includes('mail-track-pink.vercel.app') ||
              t.url.includes('vercel.app') ||
              t.url.startsWith('http://localhost:4000');
     });
@@ -478,11 +469,43 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return true;
   }
 
+  if (request.action === 'SET_SERVER_MODE') {
+    const newMode = request.mode === 'localhost' ? 'localhost' : 'production';
+    serverMode = newMode;
+    activeServerUrl = newMode === 'localhost' ? LOCAL_SERVER_URL : PROD_SERVER_URL;
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.set({
+        mt_server_mode: newMode,
+        mt_active_server_url: activeServerUrl
+      });
+    }
+    cachedConfig = {
+      localUrl: LOCAL_SERVER_URL,
+      publicUrl: activeServerUrl
+    };
+    console.log('[MailTrack BG] Server mode switched to:', newMode, 'URL:', activeServerUrl);
+
+    // Notify all Gmail content scripts of the updated tracking URL
+    broadcastToGmailTabs({
+      type: 'CONFIG_UPDATED',
+      config: { publicUrl: activeServerUrl },
+      serverMode: newMode,
+      activeServerUrl
+    });
+
+    syncAuth().then((isAuth) => {
+      sendResponse({ success: true, mode: newMode, activeServerUrl, authenticated: isAuth });
+    });
+    return true;
+  }
+
   if (request.action === 'GET_CONFIG') {
-    updateConfig().then(() => {
-      sendResponse({ success: true, config: cachedConfig, user: currentUser, activeServerUrl });
-    }).catch(() => {
-      sendResponse({ success: true, config: cachedConfig, user: currentUser, activeServerUrl });
+    getActiveServerUrl().then(() => {
+      updateConfig().then(() => {
+        sendResponse({ success: true, config: cachedConfig, user: currentUser, activeServerUrl, serverMode });
+      }).catch(() => {
+        sendResponse({ success: true, config: cachedConfig, user: currentUser, activeServerUrl, serverMode });
+      });
     });
     return true;
   }
@@ -494,7 +517,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === 'OPEN_LOGIN') {
-    const sUrl = activeServerUrl || 'https://mailtrack.in';
+    const sUrl = activeServerUrl || PROD_SERVER_URL;
     chrome.tabs.create({ url: `${sUrl}/login` });
     sendResponse({ success: true });
     return true;
