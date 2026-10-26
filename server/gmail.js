@@ -109,8 +109,8 @@ async function ensureLabels(userId) {
     const listData = await listRes.json();
     const labels = listData.labels || [];
 
-    let singleLabel = labels.find(l => l.name === LABEL_SINGLE_NAME);
-    let doubleLabel = labels.find(l => l.name === LABEL_DOUBLE_NAME);
+    let singleLabel = labels.find(l => l.name === LABEL_SINGLE_NAME || l.id === user.gmail_single_label_id);
+    let doubleLabel = labels.find(l => l.name === LABEL_DOUBLE_NAME || l.id === user.gmail_double_label_id);
 
     // 2. Create single checkmark label if missing, or update visibility
     if (!singleLabel) {
