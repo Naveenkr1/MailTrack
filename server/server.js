@@ -52,6 +52,22 @@ if (customDomain) {
     }
   } catch {}
 }
+
+function getRequestBaseUrl(req) {
+  if (customDomain) {
+    return customDomain.startsWith('http') ? customDomain.replace(/\/+$/, '') : `https://${customDomain.replace(/\/+$/, '')}`;
+  }
+  if (process.env.BASE_URL) return process.env.BASE_URL.replace(/\/+$/, '');
+  if (req) {
+    const proto = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
+    const host = req.headers['x-forwarded-host'] || req.headers.host;
+    if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
+      return `${proto}://${host}`;
+    }
+  }
+  return publicBaseUrl;
+}
+
 let senderPublicIp = '103.181.161.19';
 
 // Auto-detect host public IP for self-open filtering
@@ -603,10 +619,11 @@ app.post('/api/emails/:id/open', async (req, res) => {
 app.use('/api', apiLimiter);
 
 app.get('/api/config', (req, res) => {
+  const effectiveUrl = getRequestBaseUrl(req);
   res.json({
     success: true,
     localUrl: `http://localhost:${PORT}`,
-    publicUrl: publicBaseUrl,
+    publicUrl: effectiveUrl,
     wsUrl: `ws://localhost:${PORT}`,
     customDomain: customDomain || null,
     hasTunnelToken: !!tunnelToken,
@@ -615,7 +632,7 @@ app.get('/api/config', (req, res) => {
 });
 
 app.get('/api/ping', (req, res) => {
-  res.json({ pong: true, time: Date.now(), publicUrl: publicBaseUrl });
+  res.json({ pong: true, time: Date.now(), publicUrl: getRequestBaseUrl(req) });
 });
 
 // Update or disconnect personal custom domain
@@ -728,7 +745,8 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
     gmailMessageId: gmailMessageId || null
   });
 
-  const pixelUrl = `${publicBaseUrl}/trace/mail/${id}.png`;
+  const effectiveBaseUrl = getRequestBaseUrl(req);
+  const pixelUrl = `${effectiveBaseUrl}/trace/mail/${id}.png`;
   const trackingPixelHtml = `<img src="${pixelUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />`;
 
   if (newEmail) {
@@ -747,7 +765,7 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
     email: newEmail,
     pixelUrl,
     trackingPixelHtml,
-    linkTrackPrefix: `${publicBaseUrl}/trace/link/${id}?url=`
+    linkTrackPrefix: `${effectiveBaseUrl}/trace/link/${id}?url=`
   });
 });
 
