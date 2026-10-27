@@ -513,27 +513,28 @@
 }
 
 /* Gmail Top Navigation Bar Mail Track Button */
+/* Gmail Top Navigation Bar Mail Track Button */
 .mt-topnav-btn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 8px !important;
+  gap: 7px !important;
   height: 36px !important;
-  padding: 0 14px 0 8px !important;
+  padding: 0 12px 0 6px !important;
   border-radius: 18px !important;
   background: #ffffff !important;
   border: 1px solid #dadce0 !important;
   color: #3c4043 !important;
   font-family: 'Google Sans', Roboto, -apple-system, sans-serif !important;
   font-size: 13px !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   cursor: pointer !important;
   margin: 0 8px 0 0 !important;
   user-select: none !important;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
   vertical-align: middle !important;
   align-self: center !important;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.1) !important;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.08) !important;
   box-sizing: border-box !important;
   flex-shrink: 0 !important;
   line-height: normal !important;
@@ -543,8 +544,8 @@
 
 .mt-topnav-btn:hover {
   background: #f8fafc !important;
-  border-color: #10b981 !important;
-  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.25) !important;
+  border-color: #059669 !important;
+  box-shadow: 0 1px 4px rgba(5, 150, 105, 0.2) !important;
   color: #059669 !important;
 }
 
@@ -552,30 +553,38 @@
   background: #ecfdf5 !important;
   border-color: #059669 !important;
   color: #059669 !important;
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.25) !important;
 }
 
-.mt-nav-img-icon {
-  width: 22px !important;
-  height: 22px !important;
-  border-radius: 6px !important;
-  display: block !important;
-  flex-shrink: 0 !important;
-  object-fit: cover !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) !important;
-}
-
-.mt-topnav-btn .mt-nav-icon {
+.mt-nav-brand-badge {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 7px !important;
+  background: #059669 !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
+  box-shadow: 0 1px 2px rgba(5, 150, 105, 0.3) !important;
+  transition: transform 0.15s ease !important;
+}
+
+.mt-topnav-btn:hover .mt-nav-brand-badge {
+  transform: scale(1.05) !important;
+}
+
+.mt-nav-brand-badge svg {
+  display: block !important;
+  width: 15px !important;
+  height: 15px !important;
 }
 
 .mt-topnav-btn .mt-nav-text {
   letter-spacing: -0.01em;
   font-weight: 600;
+  font-size: 13px;
   white-space: nowrap;
+  color: inherit;
 }
 
 .mt-nav-badge {
@@ -588,11 +597,12 @@
   border-radius: 9px;
   background: #ef4444;
   color: #ffffff;
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
   line-height: 1;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.4);
   margin-left: 2px;
+  box-sizing: border-box;
 }
 
 /* Pulse animation on new notification */
@@ -601,36 +611,36 @@
 }
 
 @keyframes mtBtnPulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
-  70% { transform: scale(1.04); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5); }
+  70% { transform: scale(1.04); box-shadow: 0 0 0 7px rgba(5, 150, 105, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
 }
 
 /* Topnav Notifications Dropdown */
 .mt-topnav-dropdown {
   position: fixed !important;
-  right: 16px !important;
-  left: auto !important;
   z-index: 2147483647 !important;
-  width: 400px;
-  max-width: calc(100vw - 32px);
-  background: #ffffff;
-  color: #1f2937;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  box-shadow: 0 20px 35px -5px rgba(0, 0, 0, 0.2), 0 10px 15px -5px rgba(0, 0, 0, 0.1);
-  font-family: 'Google Sans', Roboto, -apple-system, sans-serif;
-  overflow: hidden;
-  display: none;
-  opacity: 0;
-  transform: translateY(-6px);
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  width: 380px !important;
+  max-width: calc(100vw - 24px) !important;
+  background: #ffffff !important;
+  color: #1f2937 !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.18), 0 4px 14px -2px rgba(0, 0, 0, 0.08) !important;
+  font-family: 'Google Sans', Roboto, -apple-system, sans-serif !important;
+  overflow: hidden !important;
+  display: none !important;
+  opacity: 0 !important;
+  transform: translateY(-4px) !important;
+  transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1), transform 0.18s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  box-sizing: border-box !important;
 }
 
 .mt-topnav-dropdown.visible {
-  display: block;
-  opacity: 1;
-  transform: translateY(0);
+  display: flex !important;
+  flex-direction: column !important;
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
 .mt-dropdown-header {
@@ -829,6 +839,11 @@
   border-radius: 4px;
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+.mt-notif-badge.mt-badge-sent {
+  color: #64748b !important;
+  background: #f1f5f9 !important;
 }
 
 .mt-notif-red-dot {

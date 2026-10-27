@@ -297,6 +297,29 @@
             try { ws.send(JSON.stringify({ type: 'AUTH', token: currentAuthUser.apiKey })); } catch { }
           }
         }
+
+        // Calculate unread count for activity that happened since last seen
+        try {
+          let lastSeenTime = parseInt(localStorage.getItem('mt_last_seen_activity_time') || '0', 10);
+          if (!lastSeenTime) {
+            lastSeenTime = Date.now();
+            localStorage.setItem('mt_last_seen_activity_time', lastSeenTime.toString());
+          } else {
+            let unseenCount = 0;
+            trackedEmails.forEach(e => {
+              const openTime = e.lastOpenedAt ? new Date(e.lastOpenedAt).getTime() : (e.opens && e.opens.length ? new Date(e.opens[e.opens.length - 1].timestamp).getTime() : 0);
+              const createTime = e.createdAt ? new Date(e.createdAt).getTime() : 0;
+              const latestTime = Math.max(openTime, createTime);
+              if (latestTime > lastSeenTime) {
+                unseenCount++;
+                newOpenedEmailIds.add(e.id);
+              }
+            });
+            unreadNotificationsCount = unseenCount;
+            updateNavBadgeCount(unreadNotificationsCount);
+          }
+        } catch (e) { }
+
         updateAllRows();
         updateOpenThreadHeader();
         if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
@@ -376,8 +399,12 @@
           const payload = JSON.parse(event.data);
           if (payload.type === 'EMAIL_OPENED' && payload.data && payload.data.email) {
             handleInstantOpen(payload.data.email);
-          } else if (payload.type === 'EMAIL_CREATED' || payload.type === 'LINK_CLICKED') {
-            fetchAllTrackedEmails();
+          } else if (payload.type === 'EMAIL_CREATED') {
+            incrementUnreadCount();
+            fetchAllTrackedEmails(true);
+          } else if (payload.type === 'LINK_CLICKED') {
+            incrementUnreadCount();
+            fetchAllTrackedEmails(true);
           }
         } catch (e) { }
       };
@@ -404,6 +431,12 @@
         // If direct WebSocket is connected and already handled this event, skip background duplicate
         if (ws && ws.readyState === WebSocket.OPEN) return;
         handleInstantOpen(message.email);
+      } else if (message.type === 'EMAIL_CREATED') {
+        incrementUnreadCount();
+        fetchAllTrackedEmails(true);
+      } else if (message.type === 'LINK_CLICKED') {
+        incrementUnreadCount();
+        fetchAllTrackedEmails(true);
       } else if (message.type === 'AUTH_UPDATED') {
         if (message.user) {
           currentAuthUser = message.user;
@@ -413,9 +446,9 @@
             } catch { }
           }
         }
-        fetchAllTrackedEmails();
-      } else if (message.type === 'LINK_CLICKED' || message.type === 'CONFIG_UPDATED') {
-        fetchAllTrackedEmails();
+        fetchAllTrackedEmails(true);
+      } else if (message.type === 'CONFIG_UPDATED') {
+        fetchAllTrackedEmails(true);
       }
     });
   } catch (e) { }
@@ -512,18 +545,9 @@
       }
     });
 
-    // Increment topnav notification badge on each open event
-    unreadNotificationsCount++;
-    const navBtn = document.getElementById('mt-topnav-btn');
-    if (navBtn) {
-      const badge = navBtn.querySelector('#mtNavBadge');
-      if (badge) {
-        badge.textContent = unreadNotificationsCount;
-        badge.style.display = unreadNotificationsCount > 0 ? 'inline-flex' : 'none';
-      }
-      navBtn.classList.add('mt-pulse');
-      setTimeout(() => navBtn.classList.remove('mt-pulse'), 5000);
-    }
+    // Increment topnav notification badge on open event
+    newOpenedEmailIds.add(openedEmail.id);
+    incrementUnreadCount();
 
     if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
       renderNotificationsDropdown();
@@ -1771,9 +1795,62 @@
   const readNotificationIds = new Set();
   const newOpenedEmailIds = new Set();
 
+  function updateNavBadgeCount(count) {
+    const navBtn = document.getElementById('mt-topnav-btn');
+    if (!navBtn) return;
+    const badge = navBtn.querySelector('#mtNavBadge');
+    if (!badge) return;
+
+    if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : String(count);
+      badge.style.display = 'inline-flex';
+    } else {
+      badge.style.display = 'none';
+      badge.textContent = '0';
+    }
+  }
+
+  function incrementUnreadCount() {
+    unreadNotificationsCount++;
+    updateNavBadgeCount(unreadNotificationsCount);
+    const navBtn = document.getElementById('mt-topnav-btn');
+    if (navBtn) {
+      navBtn.classList.add('mt-pulse');
+      setTimeout(() => navBtn.classList.remove('mt-pulse'), 5000);
+    }
+  }
+
   function escapeHtml(str) {
     if (!str) return '';
     return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function positionDropdown(btn) {
+    if (!topNavDropdownEl || !btn) return;
+    const rect = btn.getBoundingClientRect();
+    const dropdownWidth = 380;
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+
+    // Anchor directly below the button with 8px margin
+    const top = Math.round(rect.bottom + 8);
+    // Align dropdown's right edge with button's right edge
+    let left = Math.round(rect.right - dropdownWidth);
+
+    // Viewport clamping
+    if (left + dropdownWidth > viewportWidth - 12) {
+      left = viewportWidth - dropdownWidth - 12;
+    }
+    if (left < 12) {
+      left = 12;
+    }
+
+    topNavDropdownEl.style.setProperty('position', 'fixed', 'important');
+    topNavDropdownEl.style.setProperty('top', `${top}px`, 'important');
+    topNavDropdownEl.style.setProperty('left', `${left}px`, 'important');
+    topNavDropdownEl.style.setProperty('right', 'auto', 'important');
+    const maxHeight = Math.max(280, viewportHeight - top - 16);
+    topNavDropdownEl.style.setProperty('max-height', `${maxHeight}px`, 'important');
   }
 
   function renderNotificationsDropdown() {
@@ -1791,16 +1868,21 @@
       });
     }
 
-    // Filter opened emails, sorted by newest open timestamp descending
-    const openedEmails = trackedEmails.filter(e => e.status === 'opened' || (e.opens && e.opens.length > 0));
-    openedEmails.sort((a, b) => {
-      const timeA = new Date(a.lastOpenedAt || (a.opens && a.opens.length ? a.opens[a.opens.length - 1].timestamp : 0)).getTime();
-      const timeB = new Date(b.lastOpenedAt || (b.opens && b.opens.length ? b.opens[b.opens.length - 1].timestamp : 0)).getTime();
+    // Sort all tracked emails by newest activity timestamp descending
+    const activityEmails = [...trackedEmails].sort((a, b) => {
+      const timeA = Math.max(
+        new Date(a.lastOpenedAt || (a.opens && a.opens.length ? a.opens[a.opens.length - 1].timestamp : 0)).getTime(),
+        new Date(a.createdAt || 0).getTime()
+      );
+      const timeB = Math.max(
+        new Date(b.lastOpenedAt || (b.opens && b.opens.length ? b.opens[b.opens.length - 1].timestamp : 0)).getTime(),
+        new Date(b.createdAt || 0).getTime()
+      );
       return timeB - timeA;
     });
 
     let itemsHtml = '';
-    if (openedEmails.length === 0) {
+    if (activityEmails.length === 0) {
       itemsHtml = `
         <div class="mt-dropdown-empty">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5">
@@ -1808,14 +1890,17 @@
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
           <div class="mt-empty-title">No notifications yet</div>
-          <div class="mt-empty-desc">When a recipient opens your tracked emails, notifications will appear here instantly.</div>
+          <div class="mt-empty-desc">When you send tracked emails and recipients open them, notifications will appear here instantly.</div>
         </div>
       `;
     } else {
-      itemsHtml = openedEmails.slice(0, 50).map(email => {
-        const lastOpen = email.lastOpenedAt || (email.opens && email.opens.length ? email.opens[email.opens.length - 1].timestamp : null);
-        const openCount = email.openCount || (email.opens ? email.opens.length : 1);
-        const timeFormatted = formatFullDateTime(lastOpen);
+      itemsHtml = activityEmails.slice(0, 50).map(email => {
+        const isOpened = email.status === 'opened' || (email.opens && email.opens.length > 0) || (email.openCount > 0);
+        const openCount = email.openCount || (email.opens ? email.opens.length : (isOpened ? 1 : 0));
+        const lastActivityTime = isOpened
+          ? (email.lastOpenedAt || (email.opens && email.opens.length ? email.opens[email.opens.length - 1].timestamp : email.createdAt))
+          : email.createdAt;
+        const timeFormatted = formatFullDateTime(lastActivityTime);
 
         // Recipient formatting with truncation & "+X" for multiple recipients
         const recList = Array.isArray(email.recipients) && email.recipients.length > 0
@@ -1832,11 +1917,28 @@
 
         // Check if this notification is newly opened (unread)
         const isUnread = newOpenedEmailIds.has(email.id);
-        const redDotHtml = isUnread ? `<span class="mt-notif-red-dot" title="New open"></span>` : '';
+        const redDotHtml = isUnread ? `<span class="mt-notif-red-dot" title="New activity"></span>` : '';
 
-        const lastOpenObj = email.opens && email.opens.length > 0 ? email.opens[email.opens.length - 1] : null;
-        const deviceDisplay = lastOpenObj ? formatDeviceDisplay(lastOpenObj.client) : 'Read on Desktop';
-        const deviceTagHtml = `<span class="mt-notif-device">• ${escapeHtml(deviceDisplay)}</span>`;
+        let badgeHtml = '';
+        let deviceTagHtml = '';
+        if (isOpened) {
+          const lastOpenObj = email.opens && email.opens.length > 0 ? email.opens[email.opens.length - 1] : null;
+          const deviceDisplay = lastOpenObj ? formatDeviceDisplay(lastOpenObj.client) : 'Read on Desktop';
+          deviceTagHtml = `<span class="mt-notif-device">• ${escapeHtml(deviceDisplay)}</span>`;
+          badgeHtml = `
+            <span class="mt-notif-badge">
+              ${openCount} open${openCount > 1 ? 's' : ''}
+              ${redDotHtml}
+            </span>
+          `;
+        } else {
+          badgeHtml = `
+            <span class="mt-notif-badge mt-badge-sent">
+              ✓ Sent
+              ${redDotHtml}
+            </span>
+          `;
+        }
 
         return `
           <div class="mt-notif-item ${isUnread ? 'is-unread' : ''}" data-email-id="${escapeHtml(email.id)}">
@@ -1844,10 +1946,7 @@
               <div class="mt-notif-top-row">
                 <div class="mt-notif-subject-group">
                   <span class="mt-notif-subject" title="${escapeHtml(email.subject || 'No Subject')}">${escapeHtml(email.subject || 'No Subject')}</span>
-                  <span class="mt-notif-badge">
-                    ${openCount} open${openCount > 1 ? 's' : ''}
-                    ${redDotHtml}
-                  </span>
+                  ${badgeHtml}
                 </div>
                 <span class="mt-notif-time">${timeFormatted}</span>
               </div>
@@ -1871,8 +1970,8 @@
             <span class="mt-auth-dot unlinked"></span>
             <span>Gmail Not Linked</span>
           </div>
-          <a href="${getServerUrl()}/auth/google?flow=mobile_sync&flow_src=extension" target="_blank" class="mt-auth-link-btn">
-            Link Google Account (Mobile ✓✓ Ready)
+          <a href="${getServerUrl()}/auth/google?flow_src=extension" target="_blank" class="mt-auth-link-btn">
+            Link Google Account
           </a>
         </div>
       `;
@@ -1882,6 +1981,7 @@
       <div class="mt-dropdown-header">
         <div class="mt-dh-left">
           <span class="mt-dh-title">Mail Track Activity</span>
+          ${activityEmails.length > 0 ? `<span class="mt-dh-count">${activityEmails.length}</span>` : ''}
         </div>
         <button class="mt-dh-close" id="mtDropdownCloseBtn" title="Close">✕</button>
       </div>
@@ -1889,11 +1989,8 @@
       <div class="mt-dropdown-list">
         ${itemsHtml}
       </div>
-      <div class="mt-dropdown-footer" style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:#f8fafc;border-top:1px solid #e2e8f0;">
-        <a href="${getServerUrl()}/auth/google/mobile-sync" target="_blank" rel="noopener noreferrer" style="font-size:11.5px;font-weight:600;color:#059669;text-decoration:none;display:flex;align-items:center;gap:4px;padding:5px 9px;border-radius:6px;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);" title="Enable green checkmarks in official Gmail mobile app">
-          <span>📱 Mobile (✓✓)</span>
-        </a>
-        <a href="${getServerUrl()}" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta" style="flex:1;justify-content:center;">
+      <div class="mt-dropdown-footer">
+        <a href="${getServerUrl()}" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta">
           <span>Open Dashboard</span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
@@ -1933,20 +2030,17 @@
       closeTopNavDropdown();
     } else {
       renderNotificationsDropdown();
-      const rect = btn.getBoundingClientRect();
-      topNavDropdownEl.style.position = 'fixed';
-      topNavDropdownEl.style.top = `${rect.bottom + 8}px`;
-
-      // Constrained right-aligned to button & viewport
-      const rightMargin = Math.min(Math.max(16, window.innerWidth - rect.right), window.innerWidth - 416);
-      topNavDropdownEl.style.right = `${Math.max(16, rightMargin)}px`;
-      topNavDropdownEl.style.left = 'auto';
+      positionDropdown(btn);
       topNavDropdownEl.classList.add('visible');
+      btn.classList.add('active');
+
       // Clear badge and mark currently visible notifications as read on view
       unreadNotificationsCount = 0;
-      const badge = btn.querySelector('#mtNavBadge');
-      if (badge) badge.style.display = 'none';
+      updateNavBadgeCount(0);
       btn.classList.remove('mt-pulse');
+      try {
+        localStorage.setItem('mt_last_seen_activity_time', Date.now().toString());
+      } catch (e) { }
 
       // Schedule clearing the red dot after user sees them
       setTimeout(() => {
@@ -1973,6 +2067,13 @@
     const btn = document.getElementById('mt-topnav-btn');
     if (btn) btn.classList.remove('active');
   }
+
+  window.addEventListener('resize', () => {
+    if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
+      const btn = document.getElementById('mt-topnav-btn');
+      if (btn) positionDropdown(btn);
+    }
+  }, { passive: true });
 
   function findSupportButton() {
     const selectors = [
@@ -2020,27 +2121,30 @@
     let navBtn = document.getElementById('mt-topnav-btn');
     if (navBtn) {
       if (navBtn.nextElementSibling === targetAnchor) {
+        updateNavBadgeCount(unreadNotificationsCount);
         return;
       }
       navBtn.remove();
     }
-
-    const iconUrl = isAlive() && chrome.runtime?.getURL ? chrome.runtime.getURL('icons/icon-48.png') : '';
 
     navBtn = document.createElement('div');
     navBtn.id = 'mt-topnav-btn';
     navBtn.className = 'mt-topnav-btn';
     navBtn.title = 'Mail Track Activity & Notifications';
     navBtn.innerHTML = `
-      <span class="mt-nav-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; display: inline-block;">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+      <span class="mt-nav-brand-badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"></polyline>
+          <polyline points="24 6 13 17 10 14" opacity="0.9"></polyline>
         </svg>
       </span>
       <span class="mt-nav-text">Mail Track</span>
       <span class="mt-nav-badge" id="mtNavBadge" style="display:none">0</span>
     `;
+
+    if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
+      navBtn.classList.add('active');
+    }
 
     navBtn.onclick = (e) => {
       e.stopPropagation();
@@ -2048,6 +2152,7 @@
     };
 
     parentContainer.insertBefore(navBtn, targetAnchor);
+    updateNavBadgeCount(unreadNotificationsCount);
   }
 
   // Initial runs
