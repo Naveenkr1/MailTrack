@@ -489,11 +489,20 @@
     const targetSubject = (openedEmail.subject || '').toLowerCase().trim();
 
     rows.forEach((row) => {
+      const rowId = row.getAttribute('data-mt-id');
       const rowText = row.textContent.toLowerCase();
-      if (targetSubject && (rowText.includes(targetSubject) || targetSubject.includes(rowText.substring(0, 25)))) {
+      const isMatch = (rowId && rowId === openedEmail.id) || 
+                      (targetSubject && (rowText.includes(targetSubject) || targetSubject.includes(rowText.substring(0, 25))));
+      if (isMatch) {
         row.setAttribute('data-mt-state', 'opened');
         row.setAttribute('data-mt-id', openedEmail.id);
         let badge = row.querySelector('.mt-tick-container');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'mt-tick-container';
+          const mountCell = row.querySelector('.yX, .yW') || row.querySelector('.xY') || row.firstElementChild;
+          if (mountCell) mountCell.insertBefore(badge, mountCell.firstChild);
+        }
         if (badge) {
           badge.className = 'mt-tick-container opened pop-animation';
           badge.setAttribute('data-mt-id', openedEmail.id);
@@ -1528,7 +1537,40 @@
     triggerThrottledUpdate();
   });
 
-  // Background live sync polling every 3.5s (only if tab visible)
+  // ⚡ SUB-SECOND REAL-TIME LIVE PULSE (Checks every 800ms for instant < 1s read confirmation)
+  let lastPulseTime = new Date(Date.now() - 30000).toISOString();
+  let isPulsing = false;
+
+  function runSubSecondPulse() {
+    if (!isAlive() || document.hidden || isPulsing) return;
+    const activeEmail = getCurrentGmailUser() || (currentAuthUser && currentAuthUser.email) || null;
+    const q = activeEmail 
+      ? `?email=${encodeURIComponent(activeEmail)}&since=${encodeURIComponent(lastPulseTime)}`
+      : `?since=${encodeURIComponent(lastPulseTime)}`;
+
+    isPulsing = true;
+    fetch(`${getServerUrl()}/api/emails/pulse${q}`, { cache: 'no-store' })
+      .then(r => r.json())
+      .then(data => {
+        isPulsing = false;
+        if (data && data.success) {
+          if (data.serverTime) lastPulseTime = data.serverTime;
+          if (data.updated && Array.isArray(data.emails) && data.emails.length > 0) {
+            data.emails.forEach(updatedEmail => {
+              handleInstantOpen(updatedEmail);
+            });
+          }
+        }
+      })
+      .catch(() => {
+        isPulsing = false;
+      });
+  }
+
+  // Poll high-speed pulse every 800ms when tab is active (< 1s speed)
+  setInterval(runSubSecondPulse, 800);
+
+  // Background live sync polling every 4s
   setInterval(() => {
     if (!isAlive() || document.hidden) return;
     fetchAllTrackedEmails();
@@ -1536,7 +1578,7 @@
     updateOpenThreadHeader();
     setupComposeButtons();
     setupTopNavButton();
-  }, 3500);
+  }, 4000);
 
   // -------------------------------------------------------------------------
   // 4. HOVER TOOLTIP SYSTEM (Total Opens, Last Open Time, Dashboard CTA)

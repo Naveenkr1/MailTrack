@@ -687,6 +687,60 @@ async function isKnownSenderIp(userId, ip) {
   return false;
 }
 
+async function getEmailsUpdatedSince(userId, sinceIso) {
+  if (!userId || !sinceIso) return [];
+  if (turso) {
+    try {
+      const res = await turso.execute({
+        sql: `SELECT id, user_id, subject, recipient, recipients, sender, status, open_count, last_opened_at, created_at
+              FROM emails
+              WHERE user_id = ? AND last_opened_at > ?
+              ORDER BY last_opened_at DESC
+              LIMIT 10`,
+        args: [userId, sinceIso]
+      });
+      return res.rows.map(r => ({
+        id: r.id,
+        userId: r.user_id,
+        subject: r.subject,
+        recipient: r.recipient,
+        recipients: (r.recipients || '').split(',').map(s => s.trim()).filter(Boolean),
+        sender: r.sender,
+        status: r.status,
+        openCount: r.open_count,
+        lastOpenedAt: r.last_opened_at,
+        createdAt: r.created_at
+      }));
+    } catch (e) {
+      console.warn('[DB] getEmailsUpdatedSince error:', e.message);
+    }
+  }
+  if (db) {
+    try {
+      const rows = db.prepare(`
+        SELECT id, user_id, subject, recipient, recipients, sender, status, open_count, last_opened_at, created_at
+        FROM emails
+        WHERE user_id = ? AND last_opened_at > ?
+        ORDER BY last_opened_at DESC
+        LIMIT 10
+      `).all(userId, sinceIso);
+      return rows.map(r => ({
+        id: r.id,
+        userId: r.user_id,
+        subject: r.subject,
+        recipient: r.recipient,
+        recipients: (r.recipients || '').split(',').map(s => s.trim()).filter(Boolean),
+        sender: r.sender,
+        status: r.status,
+        openCount: r.open_count,
+        lastOpenedAt: r.last_opened_at,
+        createdAt: r.created_at
+      }));
+    } catch {}
+  }
+  return [];
+}
+
 async function recordOpen(emailId, openData) {
   const email = await getEmailForBeacon(emailId);
   if (!email) return null;
@@ -700,9 +754,9 @@ async function recordOpen(emailId, openData) {
   const elapsedSec = (now - lastTime) / 1000;
 
   // Deduplication & burst debounce:
-  // Only suppress rapid-fire duplicate requests that arrive within 5 seconds of the previous hit (caused by Google Image Proxy dual fetches or network retries)
-  if (email.openCount > 0 && elapsedSec < 5) {
-    console.log(`[RAPID BURST SUPPRESSED] "${email.subject}" (${emailId}) open hit ${elapsedSec.toFixed(1)}s ago (< 5s) - duplicate proxy burst ignored.`);
+  // Only suppress rapid-fire duplicate requests that arrive within 2.5 seconds of the previous hit (caused by Google Image Proxy dual fetches or network retries)
+  if (email.openCount > 0 && elapsedSec < 2.5) {
+    console.log(`[RAPID BURST SUPPRESSED] "${email.subject}" (${emailId}) open hit ${elapsedSec.toFixed(1)}s ago (< 2.5s) - duplicate proxy burst ignored.`);
     if (turso) {
       try {
         await turso.execute({
@@ -813,5 +867,6 @@ module.exports = {
   updateEmailThreadId,
   registerUserIp,
   isKnownSenderIp,
-  isSelfOrInternalEmail
+  isSelfOrInternalEmail,
+  getEmailsUpdatedSince
 };

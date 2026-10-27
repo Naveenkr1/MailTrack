@@ -943,6 +943,34 @@ app.get('/api/emails', optionalAuth, async (req, res) => {
   });
 });
 
+// High-speed sub-second live pulse check (delivers open counts in < 1s)
+app.get('/api/emails/pulse', optionalAuth, async (req, res) => {
+  let user = req.user;
+  const userEmail = (req.query.email || req.headers['x-mailtrack-user-email'] || '').trim().toLowerCase();
+
+  if (userEmail && userEmail.includes('@')) {
+    if (!user || user.email.toLowerCase() !== userEmail) {
+      user = await db.findUserByEmail(userEmail);
+    }
+  }
+  if (!user) {
+    user = (await db.findUserByEmail('nnaveen.8527@gmail.com')) || (await db.findUserById('usr_default'));
+  }
+  if (!user) {
+    return res.json({ success: true, updated: false, emails: [] });
+  }
+
+  const since = req.query.since || new Date(Date.now() - 30000).toISOString();
+  const updatedEmails = await db.getEmailsUpdatedSince(user.id, since);
+
+  res.json({
+    success: true,
+    updated: updatedEmails.length > 0,
+    emails: updatedEmails,
+    serverTime: new Date().toISOString()
+  });
+});
+
 // Get single tracked email
 app.get('/api/emails/:id', optionalAuth, async (req, res) => {
   let user = req.user;
