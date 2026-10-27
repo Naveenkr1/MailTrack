@@ -27,8 +27,8 @@ function getEffectiveBaseUrl(req) {
 // -------------------------------------------------------------
 router.get('/google', (req, res) => {
   const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
-  const isExtension = req.query.flow === 'extension' || req.query.ext === '1';
-  const isMobileSync = req.query.flow === 'mobile_sync';
+  const isExtension = req.query.flow === 'extension' || req.query.ext === '1' || req.query.flow_src === 'extension';
+  const isMobileSync = req.query.flow === 'mobile_sync' || req.query.mobile === '1';
 
   // If Google OAuth credentials are not yet set up, provide the Setup / Dev Login view
   if (!clientId || clientId.includes('your_google_client_id')) {
@@ -54,10 +54,8 @@ router.get('/google', (req, res) => {
   authUrl.searchParams.append('redirect_uri', redirectUri);
   authUrl.searchParams.append('response_type', 'code');
 
-  // For standard login: request non-sensitive scopes (openid email profile).
-  // This allows ANY Google user in the world to log in and track emails freely without Google verification blocks.
-  // Restricted scopes (gmail.modify) are ONLY requested during explicit mobile checkmarks authorization (flow=mobile_sync).
-  const scope = isMobileSync
+  // Request all permissions upfront including gmail.modify for extension & mobile sync
+  const scope = (isMobileSync || isExtension)
     ? 'openid email profile https://www.googleapis.com/auth/gmail.modify'
     : 'openid email profile';
   authUrl.searchParams.append('scope', scope);

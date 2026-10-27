@@ -94,7 +94,9 @@ http.get('http://api.ipify.org', (res) => {
 // -------------------------------------------------------------
 app.use(helmet({
   contentSecurityPolicy: false,
-  crossOriginEmbedderPolicy: false
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+  crossOriginOpenerPolicy: false
 }));
 
 app.use(cors({
@@ -323,6 +325,9 @@ function parseClient(ua) {
 function isBotOrPrefetch(userAgent, req) {
   if (!userAgent || userAgent === 'Unknown') return false;
 
+  // Real Gmail open via Google Image Proxy - NEVER filter as bot
+  if (/GoogleImageProxy/i.test(userAgent)) return false;
+
   const purpose = (req.headers['purpose'] || req.headers['x-purpose'] || req.headers['sec-purpose'] || '').toLowerCase();
   if (purpose.includes('prefetch') || purpose.includes('preview')) return true;
 
@@ -391,7 +396,9 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
       'Content-Type': 'image/png',
       'Content-Length': TRANSPARENT_PNG.length,
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Timing-Allow-Origin': '*'
     });
     return res.end(TRANSPARENT_PNG);
   }
@@ -403,7 +410,9 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
       'Content-Type': 'image/png',
       'Content-Length': TRANSPARENT_PNG.length,
       'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Access-Control-Allow-Origin': '*'
+      'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Timing-Allow-Origin': '*'
     });
     return res.end(TRANSPARENT_PNG);
   }
@@ -452,7 +461,9 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
     'Cache-Control': 'no-cache, no-store, must-revalidate, max-age=0, post-check=0, pre-check=0',
     'Pragma': 'no-cache',
     'Expires': '0',
-    'Access-Control-Allow-Origin': '*'
+    'Access-Control-Allow-Origin': '*',
+    'Cross-Origin-Resource-Policy': 'cross-origin',
+    'Timing-Allow-Origin': '*'
   });
   res.end(TRANSPARENT_PNG);
 });
@@ -761,7 +772,7 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
 
   const effectiveBaseUrl = getRequestBaseUrl(req);
   const pixelUrl = `${effectiveBaseUrl}/trace/mail/${id}.png`;
-  const trackingPixelHtml = `<img src="${pixelUrl}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />`;
+  const trackingPixelHtml = `<img src="${pixelUrl}" width="1" height="1" alt="" style="display:inline-block;width:1px;min-width:1px;height:1px;min-height:1px;margin:0;padding:0;border:0;outline:none;opacity:0.01;pointer-events:none;" />`;
 
   if (newEmail) {
     broadcast('EMAIL_CREATED', { email: newEmail }, user.id);

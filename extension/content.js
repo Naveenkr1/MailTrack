@@ -181,38 +181,35 @@
     const titleMatch = document.title.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
     if (titleMatch) return titleMatch[1].toLowerCase();
 
-    // 2. From top-right Google Account button / profile links
+    // 2. From top-right Google Account button / profile links strictly in header or banner
     const accSelectors = [
+      'header a[aria-label*="Google Account:"]',
+      'div[role="banner"] a[aria-label*="Google Account:"]',
       'a[aria-label*="Google Account:"]',
-      'a[aria-label*="@"]',
-      'a[data-identifier*="@"]',
-      'a.gb_A[aria-label*="@"]',
-      'div[aria-label*="Google Account:"]',
-      'div[aria-label*="@"]',
-      'header [aria-label*="@"]'
+      'header a[href*="SignOutOptions"]',
+      'div[role="banner"] a[href*="SignOutOptions"]',
+      'header .gb_A[aria-label*="@"]',
+      'div[role="banner"] .gb_A[aria-label*="@"]'
     ];
     for (const sel of accSelectors) {
       const el = document.querySelector(sel);
       if (el) {
-        const text = el.getAttribute('aria-label') || el.getAttribute('data-identifier') || el.title || '';
+        const text = (el.getAttribute('aria-label') || '') + ' ' + (el.getAttribute('data-identifier') || '') + ' ' + (el.title || '') + ' ' + (el.textContent || '');
         const m = text.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
         if (m) return m[1].toLowerCase();
       }
     }
 
-    // 3. From profile avatar image alt or title
-    const avatar = document.querySelector('img[alt*="@"], img[title*="@"]');
+    // 3. From profile avatar image alt or title in header
+    const avatar = document.querySelector('header img[alt*="@"], div[role="banner"] img[alt*="@"], header img[title*="@"]');
     if (avatar) {
       const m = (avatar.getAttribute('alt') || avatar.getAttribute('title') || '').match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
       if (m) return m[1].toLowerCase();
     }
 
-    // 4. From any active compose dialog 'from' element
-    const fromEl = document.querySelector('input[name="from"], [aria-label*="From" i], .aoD.hl, tr.GS [email]');
-    if (fromEl) {
-      const val = fromEl.value || fromEl.getAttribute('email') || fromEl.getAttribute('aria-label') || fromEl.textContent || '';
-      const m = val.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-      if (m) return m[1].toLowerCase();
+    // 4. Fallback to active authenticated user session if available
+    if (currentAuthUser && currentAuthUser.email) {
+      return currentAuthUser.email.toLowerCase();
     }
 
     return null;
@@ -699,15 +696,28 @@
     const recipients = extractAllRecipients(dialog);
     const recipient = recipients.join(', ');
 
-    // Extract sender email - check the dialog's own "From" field FIRST for multi-account accuracy!
+    // Extract sender email - check the dialog's own "From" field ONLY if there is an explicit From row/selector
     let sender = null;
-    const fromEl = dialog.querySelector('input[name="from"], [aria-label*="From" i], .aoD.hl, [data-hovercard-id*="@"], tr.GS [email]');
+    const fromEl = dialog.querySelector(
+      'tr[aria-label*="From" i] input, ' +
+      'tr[aria-label*="From" i] select, ' +
+      'tr[aria-label*="From" i] [role="combobox"], ' +
+      'input[name="from"], ' +
+      'select[name="from"], ' +
+      '[aria-label*="Send mail as" i], ' +
+      'div[aria-label*="From:" i]'
+    );
     if (fromEl) {
-      const fromVal = fromEl.value || fromEl.getAttribute('email') || fromEl.getAttribute('data-hovercard-id') || fromEl.getAttribute('aria-label') || fromEl.textContent || '';
+      const fromVal = fromEl.value || fromEl.getAttribute('aria-label') || fromEl.textContent || '';
       const m = fromVal.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
       if (m) sender = m[1].toLowerCase();
     }
-    if (!sender) sender = getCurrentGmailUser();
+
+    // Always prefer the active Gmail user of this tab over anything else
+    const activeGmailUser = getCurrentGmailUser();
+    if (!sender || (recipients.includes(sender) && activeGmailUser && !recipients.includes(activeGmailUser))) {
+      sender = activeGmailUser;
+    }
     if (!sender) sender = (currentAuthUser && currentAuthUser.email) || 'Me';
 
     let trackingId = dialog.getAttribute('data-mt-tracking-id');
@@ -716,7 +726,10 @@
       dialog.setAttribute('data-mt-tracking-id', trackingId);
     }
 
-    const activeTrackingUrl = getServerUrl();
+    let activeTrackingUrl = getServerUrl();
+    if (!activeTrackingUrl || activeTrackingUrl.includes('localhost') || !activeTrackingUrl.startsWith('https://')) {
+      activeTrackingUrl = DEFAULT_PROD_URL;
+    }
 
     // Auto-wrap any existing links in the email body that aren't already tracked
     const existingLinks = body.querySelectorAll('a[href]');
@@ -751,9 +764,13 @@
     if (recipient && recipient !== 'Recipient') qs.set('r', recipient);
     if (sender && sender.includes('@')) qs.set('from', sender);
     const qsStr = qs.toString() ? `?${qs.toString()}` : '';
-    const pixelHtml = `<img src="${activeTrackingUrl}/trace/mail/${trackingId}.png${qsStr}" width="1" height="1" style="display:none !important; width:1px; height:1px; border:0;" alt="" />`;
+    const pixelHtml = `<img src="${activeTrackingUrl}/trace/mail/${trackingId}.png${qsStr}" width="1" height="1" alt="" style="display:inline-block;width:1px;min-width:1px;height:1px;min-height:1px;margin:0;padding:0;border:0;outline:none;opacity:0.01;pointer-events:none;" />`;
     body.insertAdjacentHTML('beforeend', pixelHtml);
-    console.log(`[Mail Track] ⚡ Tracking injected for "${subject}" (${trackingId}) using ${activeTrackingUrl} to:`, recipients);
+    try {
+      body.dispatchEvent(new Event('input', { bubbles: true }));
+      body.dispatchEvent(new Event('change', { bubbles: true }));
+    } catch {}
+    console.log(`[Mail Track] ⚡ Tracking injected for "${subject}" (${trackingId}) using ${activeTrackingUrl} from ${sender} to:`, recipients);
 
     // Register with backend
     if (isAlive()) {
@@ -784,6 +801,11 @@
               const m = href.match(/#(?:sent|inbox|all)\/([a-zA-Z0-9]{12,})/i);
               if (m && m[1]) {
                 clearInterval(toastPollTimer);
+                const localItem = trackedEmails.find(e => e.id === trackingId);
+                if (localItem) {
+                  localItem.threadId = m[1];
+                  updateAllRows();
+                }
                 if (isAlive()) {
                   chrome.runtime.sendMessage({
                     action: 'BIND_THREAD_ID',
@@ -1797,8 +1819,8 @@
             <span class="mt-auth-dot unlinked"></span>
             <span>Gmail Not Linked</span>
           </div>
-          <a href="${getServerUrl()}/auth/google?flow=extension" target="_blank" class="mt-auth-link-btn">
-            Link Google Account
+          <a href="${getServerUrl()}/auth/google?flow=mobile_sync&flow_src=extension" target="_blank" class="mt-auth-link-btn">
+            Link Google Account (Mobile ✓✓ Ready)
           </a>
         </div>
       `;
