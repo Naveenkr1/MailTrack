@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const dropdownThemeSwitch = document.getElementById('dropdownThemeSwitch');
 
   function initTheme() {
-    const savedTheme = localStorage.getItem('mt_theme') || 'dark';
+    const savedTheme = localStorage.getItem('mt_theme') || 'light';
     applyTheme(savedTheme);
   }
 
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const toggleTheme = () => {
-    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const current = document.documentElement.getAttribute('data-theme') || 'light';
     const next = current === 'dark' ? 'light' : 'dark';
     applyTheme(next);
   };
@@ -580,12 +580,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data && data.success) {
         if (data.connected) {
           if (mobileSyncStatusBadge) {
-            mobileSyncStatusBadge.textContent = 'Active & Connected';
+            mobileSyncStatusBadge.textContent = 'Active';
             mobileSyncStatusBadge.className = 'sync-active-badge connected';
           }
           if (mobileSyncDesc) {
+            const emailStr = escapeHtml(data.email || (currentUser && currentUser.email) || '');
             mobileSyncDesc.innerHTML = `
-              Gmail Mobile Sync is <strong>Active</strong>. Mail Track is connected to your Gmail account (<span style="color:var(--color-primary);font-weight:600;">${escapeHtml(data.email)}</span>). Sent emails automatically show <span class="preview-chip grey">✓</span> and <span class="preview-chip green">✓✓</span> in the official Gmail mobile app.
+              Gmail mobile sync is active for your connected Gmail account (${emailStr ? `<span class="sync-account-email">${emailStr}</span>` : 'your account'}). Sent emails show a single checkmark when delivered and a green double checkmark when opened in the Gmail mobile app.
             `;
           }
           if (connectMobileGmailBtn) connectMobileGmailBtn.style.display = 'none';
@@ -598,7 +599,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }
           if (mobileSyncDesc) {
             mobileSyncDesc.innerHTML = `
-              To see checkmarks (<span class="preview-chip grey">✓</span> and <span class="preview-chip green">✓✓</span>) on your phone's Gmail app, connect your Google account with Gmail permissions.
+              Connect your Google account with Gmail permissions to enable mobile checkmarks. Sent emails show a single checkmark when delivered and a green double checkmark when opened in the Gmail mobile app.
             `;
           }
           if (connectMobileGmailBtn) connectMobileGmailBtn.style.display = 'inline-flex';

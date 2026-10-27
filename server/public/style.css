@@ -199,33 +199,20 @@ body {
 }
 
 .brand-badge-icon {
-  background: rgba(5, 150, 105, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 8px;
-  padding: 6px;
+  background: #059669;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  color: var(--color-green);
-  width: 34px;
-  height: 34px;
+  width: 38px;
+  height: 38px;
   flex-shrink: 0;
+  border: none;
 }
 
 .brand-badge-icon svg {
-  position: absolute;
-}
-
-.brand-badge-icon svg.check-primary {
-  left: 5px;
-  top: 7px;
-}
-
-.brand-badge-icon svg.check-secondary {
-  left: 11px;
-  top: 7px;
-  opacity: 0.9;
+  display: block;
 }
 
 .brand-title-wrap {
@@ -1395,6 +1382,20 @@ body {
   transition: all 0.15s ease;
 }
 
+.figma-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%230F172A' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+[data-theme="dark"] .figma-select {
+  background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23F8FAFC' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
 .figma-input:focus,
 .figma-select:focus {
   border-color: var(--color-green);
@@ -1640,52 +1641,206 @@ body {
   opacity: 0.9;
 }
 
-/* Mobile Features Sync Card */
+/* ==========================================================================
+   Mobile Features Sync Card (Figma Node 186:9600)
+   ========================================================================== */
 .mobile-sync-card {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
   gap: 16px;
   padding: 16px 20px;
-  background: var(--bg-table-head);
+  background: rgba(247, 249, 251, 0.38);
   border: 1px solid var(--border-sidebar);
   border-radius: 10px;
 }
 
-.sync-info-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+[data-theme="dark"] .mobile-sync-card {
+  background: rgba(255, 255, 255, 0.02);
 }
 
-.sync-title-line {
+.sync-top-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+
+.sync-title-badge-wrap {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
 .sync-title {
+  font-family: 'Inter', sans-serif;
   font-size: 14px;
   font-weight: 600;
   color: var(--text-title);
+  margin: 0;
 }
 
 .sync-active-badge {
-  background: var(--bg-badge-open);
-  color: var(--color-green);
-  border: 1px solid var(--border-badge-open);
+  background: rgba(5, 150, 105, 0.15);
+  color: #059669;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
-  font-weight: 700;
-  padding: 1px 7px;
-  border-radius: 4px;
+  font-weight: 600;
   letter-spacing: 0.5px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: none;
+}
+
+.sync-active-badge.connected {
+  background: rgba(5, 150, 105, 0.15);
+  color: #059669;
+}
+
+.sync-active-badge.disconnected {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 .sync-description {
-  font-size: 12.5px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  line-height: 18.75px;
+  color: #5c6776;
+  max-width: 848px;
+  margin: 0;
+}
+
+[data-theme="dark"] .sync-description {
   color: var(--text-subtitle);
-  max-width: 650px;
-  line-height: 1.5;
+}
+
+.sync-account-email {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  color: #656565;
+}
+
+[data-theme="dark"] .sync-account-email {
+  color: #e2e8f0;
+}
+
+.mobile-sync-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-sync-mobile {
+  background: #ffffff;
+  border: 1px solid var(--border-sidebar);
+  border-radius: 6px;
+  height: 40px;
+  padding: 9px 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-title);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .btn-sync-mobile {
+  background: var(--bg-card);
+  color: var(--text-title);
+  border-color: var(--border-sidebar);
+}
+
+.btn-sync-mobile:hover {
+  background: var(--bg-table-head);
+  border-color: #cbd5e1;
+}
+
+.sync-inner-divider {
+  height: 1px;
+  background: var(--border-sidebar);
+  width: 100%;
+}
+
+.sync-tag-appearance-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.sync-appearance-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-title);
+  margin: 0;
+}
+
+.sync-tag-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.sync-tag-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sync-tag-chip {
+  width: 30px;
+  height: 26px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sync-tag-chip.grey {
+  background: #e2e8f0;
+  color: #334155;
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.sync-tag-chip.green {
+  background: #16a766;
+  border: 1px solid #149e60;
+}
+
+.sync-tag-chip.green svg {
+  display: block;
+}
+
+.sync-tag-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  color: var(--text-title);
+}
+
+.sync-tip-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Inter', sans-serif;
+  font-style: italic;
+  font-size: 13px;
+  line-height: 18px;
+  color: #7f8389;
+  margin-top: 4px;
+}
+
+.sync-tip-note svg {
+  flex-shrink: 0;
 }
 
 .figma-switch-toggle {
@@ -1727,140 +1882,56 @@ body {
 }
 
 .figma-switch-toggle input:checked+.switch-slider {
-  background-color: var(--color-green);
+  background-color: #059669;
 }
 
 .figma-switch-toggle input:checked+.switch-slider:before {
   transform: translateX(20px);
 }
 
-.sync-active-badge.connected {
-  background: var(--bg-badge-open);
-  color: var(--color-green);
-  border-color: var(--border-badge-open);
+/* ==========================================================================
+   Danger Zone: Delete Account & Permanent Data Removal (Figma Node 186:9668)
+   ========================================================================== */
+.danger-card {
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
 }
 
-.sync-active-badge.disconnected {
-  background: rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-  border-color: rgba(239, 68, 68, 0.25);
-}
-
-.mobile-sync-actions-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.btn-sm {
-  padding: 6px 14px;
-  font-size: 12px;
-  border-radius: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.btn-figma-primary.btn-sm {
-  background: var(--color-primary);
-  color: #ffffff;
-  border: 1px solid transparent;
-}
-
-.btn-figma-primary.btn-sm:hover {
-  filter: brightness(1.1);
-}
-
-.btn-figma-secondary.btn-sm {
-  background: var(--bg-card);
-  color: var(--text-title);
-  border: 1px solid var(--border-sidebar);
-}
-
-.btn-figma-secondary.btn-sm:hover {
-  background: var(--bg-table-head);
-}
-
-.preview-chip {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 700;
-  padding: 1px 7px;
-  border-radius: 4px;
-  letter-spacing: 0.5px;
-  line-height: 1.4;
-  vertical-align: middle;
-}
-
-.preview-chip.grey {
-  background: #e2e8f0;
-  color: #334155;
-  border: 1px solid #cbd5e1;
-}
-
-.preview-chip.green {
-  background: #16a766;
-  color: #ffffff;
-  border: 1px solid #149e60;
-  box-shadow: 0 1px 3px rgba(22, 167, 102, 0.25);
-}
-
-.mobile-preview-box {
-  margin-top: 14px;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px dashed var(--border-sidebar);
-  border-radius: 8px;
-}
-
-.mp-title {
-  font-size: 11.5px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-subtitle);
-  margin-bottom: 8px;
-}
-
-.mp-items {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.mp-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.mp-label {
-  font-size: 12.5px;
-  color: var(--text-title);
-}
-
-.sync-tip-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-top: 14px;
-  font-size: 12px;
-  color: var(--text-subtitle);
-  line-height: 1.5;
+.danger-heading {
+  color: #ce1e25 !important;
 }
 
 .danger-paragraph {
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
-  color: var(--text-subtitle);
+  line-height: 20.8px;
+  color: #6e6f71;
   margin-bottom: 16px;
-  line-height: 1.6;
   max-width: 650px;
+}
+
+[data-theme="dark"] .danger-paragraph {
+  color: var(--text-subtitle);
+}
+
+.btn-figma-danger {
+  background: #d8272d;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  height: 40px;
+  padding: 8px 18px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-figma-danger:hover {
+  opacity: 0.92;
 }
 
 /* FAQ Grid in Help & Support */

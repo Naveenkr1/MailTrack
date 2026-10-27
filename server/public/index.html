@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=mobile_v4_perfect">
+  <link rel="stylesheet" href="style.css?v=settings_figma_v2">
 </head>
 
 <body>
@@ -25,19 +25,13 @@
       <!-- 1. Header: Logo + PRO Badge + Collapse Button (Node 60:3760) -->
       <div class="sidebar-header">
         <div class="brand-group">
-          <div class="brand-badge-icon">
-            <svg class="check-primary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            <svg class="check-secondary" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="20 6 9 17 4 12"></polyline>
+          <div class="brand-badge-icon" aria-label="Mail Track Logo">
+            <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
             </svg>
           </div>
           <div class="brand-title-wrap">
-            <span class="brand-name">MailTrack</span>
-            <span class="pro-tag">PRO</span>
+            <span class="brand-name">Mail Track</span>
           </div>
         </div>
         <!-- <button class="btn-drawer-collapse" id="drawerCollapseBtn" title="Toggle Sidebar">
@@ -125,7 +119,7 @@
                 <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
               </svg>
             </span>
-            <span class="dropdown-item-label" id="dropdownThemeText">Dark Mode</span>
+            <span class="dropdown-item-label" id="dropdownThemeText">Light Mode</span>
             <span class="dropdown-toggle-switch" id="dropdownThemeSwitch" aria-hidden="true">
               <span class="dropdown-toggle-thumb"></span>
             </span>
@@ -475,22 +469,21 @@
         </section>
 
         <!-- TAB 3: SETTINGS -->
-        <!-- TAB 3: SETTINGS (Single Unified Settings Form) -->
+        <!-- TAB 3: SETTINGS (Figma Node 186:9462) -->
         <section class="tab-panel" id="tabContentSettings">
           <div class="settings-card-stack">
-            <!-- 1. Single Unified Settings Card -->
+            <!-- 1. Settings & Preferences Card (Node 186:9539) -->
             <div class="figma-table-card">
               <div class="panel-inner-header">
                 <div>
                   <h3 class="panel-section-title">Settings &amp; Preferences</h3>
-                  <p class="panel-section-desc">Manage your account profile, timezone preferences, and mobile Gmail
-                    tracking in one place.</p>
+                  <p class="panel-section-desc">Manage your account profile, timezone preferences, and mobile Gmail tracking in one place.</p>
                 </div>
               </div>
 
               <div class="panel-inner-body">
                 <form id="unifiedSettingsForm" class="figma-form">
-                  <!-- Section A: Account Information -->
+                  <!-- Section 1: Account Profile (Node 186:9551) -->
                   <div class="settings-form-section">
                     <h4 class="settings-section-subtitle">Account Profile</h4>
                     <div class="form-row-grid">
@@ -501,14 +494,14 @@
                       <div class="form-group">
                         <label for="settingUserEmail">Gmail Address</label>
                         <input type="email" id="settingUserEmail" class="figma-input" disabled readonly />
-                        <span class="field-caption">Linked via Google OAuth</span>
+                        <span class="field-caption">Linked via Google </span>
                       </div>
                     </div>
                   </div>
 
                   <div class="settings-section-divider"></div>
 
-                  <!-- Section B: Time & Localization -->
+                  <!-- Section 2: Time & Localization (Node 186:9572) -->
                   <div class="settings-form-section">
                     <h4 class="settings-section-subtitle">Time &amp; Localization</h4>
                     <div class="form-row-grid">
@@ -516,14 +509,14 @@
                         <label for="settingTimezone">Time Zone</label>
                         <select id="settingTimezone" class="figma-select">
                           <option value="auto">Auto-detect from browser</option>
+                          <option value="Asia/Kolkata">India Standard Time (IST)</option>
                           <option value="UTC">UTC (Coordinated Universal Time)</option>
-                          <option value="America/New_York">Eastern Time (US & Canada)</option>
-                          <option value="America/Chicago">Central Time (US & Canada)</option>
-                          <option value="America/Denver">Mountain Time (US & Canada)</option>
-                          <option value="America/Los_Angeles">Pacific Time (US & Canada)</option>
+                          <option value="America/New_York">Eastern Time (US &amp; Canada)</option>
+                          <option value="America/Chicago">Central Time (US &amp; Canada)</option>
+                          <option value="America/Denver">Mountain Time (US &amp; Canada)</option>
+                          <option value="America/Los_Angeles">Pacific Time (US &amp; Canada)</option>
                           <option value="Europe/London">London (GMT / BST)</option>
                           <option value="Europe/Paris">Paris, Berlin, Rome (CET)</option>
-                          <option value="Asia/Kolkata">India Standard Time (IST)</option>
                           <option value="Asia/Tokyo">Tokyo, Seoul (JST)</option>
                           <option value="Australia/Sydney">Sydney, Melbourne (AEST)</option>
                         </select>
@@ -540,77 +533,73 @@
 
                   <div class="settings-section-divider"></div>
 
-                  <!-- Section C: Mobile Features — Checkmarks (✓✓) Status -->
+                  <!-- Section 3: Mobile Checkmarks Status (Node 186:9597) -->
                   <div class="settings-form-section">
-                    <h4 class="settings-section-subtitle">Mobile Features — Checkmarks (✓✓) Status</h4>
+                    <h4 class="settings-section-subtitle">Mobile Checkmarks Status</h4>
                     <div class="mobile-sync-card">
-                      <div class="sync-info-wrap">
-                        <div class="sync-title-line">
-                          <span class="sync-title">Mobile Double Checkmarks Sync</span>
-                          <span class="sync-active-badge" id="mobileSyncStatusBadge">Checking...</span>
+                      <div class="sync-top-line">
+                        <div class="sync-title-badge-wrap">
+                          <p class="sync-title">Mobile Double Checkmarks Sync</p>
+                          <span class="sync-active-badge connected" id="mobileSyncStatusBadge">Active</span>
                         </div>
-                        <p class="sync-description" id="mobileSyncDesc">
-                          Mail Track automatically synchronizes read checkmarks into your Gmail account so you can see
-                          delivered (<span class="preview-chip grey">✓</span>) and read (<span
-                            class="preview-chip green">✓✓</span>) statuses in the official Gmail mobile app without
-                          installing extra apps.
-                        </p>
-                        <div class="mobile-sync-actions-row" id="mobileSyncActionsRow">
-                          <a href="/auth/google/mobile-sync" class="btn-figma-primary btn-sm" id="connectMobileGmailBtn"
-                            style="display:none; text-decoration:none;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                              stroke-width="2">
-                              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-                              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-                            </svg>
-                            <span>Connect Gmail for Mobile Checkmarks</span>
-                          </a>
-                          <button type="button" class="btn-figma-secondary btn-sm" id="syncExistingMobileBtn"
-                            style="display:none;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                              stroke-width="2">
-                              <polyline points="23 4 23 10 17 10"></polyline>
-                              <polyline points="1 20 1 14 7 14"></polyline>
-                              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                            </svg>
-                            <span>Sync Tracked Emails to Mobile</span>
-                          </button>
+                        <label class="figma-switch-toggle" title="Toggle Mobile Double Checkmarks Sync">
+                          <input type="checkbox" id="mobileCheckmarksToggle" checked />
+                          <span class="switch-slider"></span>
+                        </label>
+                      </div>
+
+                      <p class="sync-description" id="mobileSyncDesc">
+                        Gmail mobile sync is active for your connected Gmail account (<span class="sync-account-email" id="syncAccountEmail">user@gmail.com</span>). Sent emails show a single checkmark when delivered and a green double checkmark when opened in the Gmail mobile app.
+                      </p>
+
+                      <div class="mobile-sync-actions-row" id="mobileSyncActionsRow">
+                        <a href="/auth/google/mobile-sync" class="btn-figma-primary btn-sm" id="connectMobileGmailBtn"
+                          style="display:none; text-decoration:none;">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                          </svg>
+                          <span>Connect Gmail for Mobile Checkmarks</span>
+                        </a>
+                        <button type="button" class="btn-sync-mobile" id="syncExistingMobileBtn">
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M7 2.33333C5.48888 2.33333 4.1452 3.05114 3.2916 4.1666L4.66667 5.54167H1.16667V2.04167L2.46087 3.33587C3.52952 2.01367 5.16576 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7H11.6667C11.6667 4.42267 9.57734 2.33333 7 2.33333ZM2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667C8.51113 11.6667 9.85483 10.9489 10.7084 9.83343L9.33333 8.45833H12.8333V11.9583L11.5392 10.6642C10.4705 11.9863 8.83423 12.8333 7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7H2.33333Z" fill="currentColor"/>
+                          </svg>
+                          <span>Sync emails to mobile</span>
+                        </button>
+                      </div>
+
+                      <div class="sync-inner-divider"></div>
+
+                      <div class="sync-tag-appearance-wrap">
+                        <p class="sync-appearance-title">Checkmark Tag Appearance</p>
+                        <div class="sync-tag-list">
+                          <div class="sync-tag-item">
+                            <div class="sync-tag-chip grey">✓</div>
+                            <span class="sync-tag-label">Delivered / Unread (Grey Single Tick)</span>
+                          </div>
+                          <div class="sync-tag-item">
+                            <div class="sync-tag-chip green">
+                              <svg width="18" height="14" viewBox="0 0 18.2207 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M0 7.73065L1.10156 6.62518L2.91016 8.40253L6.92188 4.40643L8.03125 5.5119L2.91016 10.6057L0 7.73065Z" fill="white"/>
+                                <path d="M10.1895 7.73065L11.291 6.62518L13.0996 8.40253L17.1113 4.40643L18.2207 5.5119L13.0996 10.6057L10.1895 7.73065Z" fill="white"/>
+                              </svg>
+                            </div>
+                            <span class="sync-tag-label">Recipient Opened Email (Vibrant Green Double Tick)</span>
+                          </div>
                         </div>
                       </div>
-                      <label class="figma-switch-toggle" title="Toggle Mobile Double Checkmarks Sync">
-                        <input type="checkbox" id="mobileCheckmarksToggle" checked />
-                        <span class="switch-slider"></span>
-                      </label>
-                    </div>
 
-                    <div class="mobile-preview-box">
-                      <div class="mp-title">How it appears in the Gmail mobile app:</div>
-                      <div class="mp-items">
-                        <div class="mp-item">
-                          <span class="preview-chip grey">✓</span>
-                          <span class="mp-label">Delivered / Unread (Grey Single Tick)</span>
-                        </div>
-                        <div class="mp-item">
-                          <span class="preview-chip green">✓✓</span>
-                          <span class="mp-label">Recipient Opened Email (Vibrant Green Double Tick)</span>
-                        </div>
+                      <div class="sync-tip-note">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7C1.16667 3.77834 3.77834 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7C12.8333 10.2216 10.2216 12.8333 7 12.8333ZM7 11.6667C9.57734 11.6667 11.6667 9.57734 11.6667 7C11.6667 4.42267 9.57734 2.33333 7 2.33333C4.42267 2.33333 2.33333 4.42267 2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667ZM6.41667 4.08333H7.58333V5.25H6.41667V4.08333ZM6.41667 6.41667H7.58333V9.91667H6.41667V6.41667Z" fill="#7F8389"/>
+                        </svg>
+                        <span>For checkmarks to appear on sent threads, enable Conversation View in Gmail settings.</span>
                       </div>
-                    </div>
-
-                    <div class="sync-tip-note">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                      </svg>
-                      <span><strong>Important:</strong> Ensure <strong>Conversation View</strong> is turned
-                        <strong>ON</strong> in your Gmail settings so checkmark labels show directly on sent threads on
-                        phone.</span>
                     </div>
                   </div>
 
-                  <!-- SINGLE SAVE BUTTON -->
+                  <!-- SINGLE SAVE BUTTON (Node 186:9661) -->
                   <div class="form-actions-bar settings-single-save-bar">
                     <button type="submit" class="btn-figma-save" id="saveUnifiedSettingsBtn">Save Settings</button>
                     <span class="save-status-indicator" id="unifiedSaveStatus"></span>
@@ -619,23 +608,21 @@
               </div>
             </div>
 
-            <!-- 2. Danger Zone: Delete Account & All Data -->
+            <!-- 2. Danger Zone: Delete Account & Permanent Data Removal (Node 186:9668) -->
             <div class="figma-table-card danger-card">
               <div class="panel-inner-header">
                 <div>
                   <h3 class="panel-section-title danger-heading">Delete Account &amp; Permanent Data Removal</h3>
-                  <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and
-                    all account data.</p>
+                  <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and all account data.</p>
                 </div>
               </div>
               <div class="panel-inner-body">
-                <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails,
-                  open logs, clicks, and API credentials will be permanently erased from both local storage and cloud
-                  database.</p>
+                <div class="settings-section-divider"></div>
+                <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails, open logs, clicks, and API credentials will be permanently erased from both local storage and cloud database.</p>
                 <button class="btn-figma-danger" id="deleteAccountBtn" type="button">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.17" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.75 3.5H2.91667H12.25"/>
+                    <path d="M11.0833 3.5V11.6667C11.0833 11.9761 10.9604 12.2728 10.7416 12.4916C10.5228 12.7104 10.2261 12.8333 9.91667 12.8333H4.08333C3.77391 12.8333 3.47717 12.7104 3.25838 12.4916C3.03958 12.2728 2.91667 11.9761 2.91667 11.6667V3.5M4.66667 3.5V2.33333C4.66667 2.02391 4.78958 1.72717 5.00838 1.50838C5.22717 1.28958 5.52391 1.16667 5.83333 1.16667H8.16667C8.47609 1.16667 8.77283 1.28958 8.99162 1.50838C9.21042 1.72717 9.33333 2.02391 9.33333 2.33333V3.5"/>
                   </svg>
                   <span>Delete My Account &amp; All Data</span>
                 </button>
@@ -959,7 +946,7 @@
     <div class="toast-container" id="toastContainer"></div>
   </div>
 
-  <script src="app.js?v=mobile_v4_perfect"></script>
+  <script src="app.js?v=settings_figma_v2"></script>
 </body>
 
 </html>
