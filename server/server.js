@@ -153,6 +153,11 @@ app.get(['/terms', '/terms-of-service', '/tos'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'terms.html'));
 });
 
+// Google Search Console Site Verification
+app.get('/googlec4ad3d7d85161054.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'googlec4ad3d7d85161054.html'));
+});
+
 // Root: Dashboard for authenticated users, Landing Page for unauthenticated visitors
 app.get('/', optionalAuth, (req, res) => {
   if (req.user) {
