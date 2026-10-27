@@ -699,24 +699,10 @@ async function recordOpen(emailId, openData) {
   const lastTime = email.lastOpenedAt ? new Date(email.lastOpenedAt).getTime() : 0;
   const elapsedSec = (now - lastTime) / 1000;
 
-  const isSelf = await isSelfOrInternalEmail(email, openData.recipient);
-
-  // 1. Self or internal test email:
-  // First open: sets status = 'opened', open_count = 1.
-  // ALL subsequent opens on any device, sent mail, or reloads: CAPPED AT 1 FOREVER!
-  if (isSelf) {
-    if (email.openCount >= 1 || email.status === 'opened') {
-      console.log(`[SELF-EMAIL CAPPED] "${email.subject}" (${emailId}) self-open capped at 1. Count remains 1.`);
-      return { ...email, isExistingSession: true };
-    }
-    console.log(`[SELF-EMAIL FIRST OPEN] "${email.subject}" (${emailId}) confirmed first read.`);
-  }
-
-  // 2. Reading Session Cooldown for all emails:
-  // Any repeat hit within 2 hours (7200s) is part of the same reading session!
-  // Updates lastOpenedAt, but DOES NOT increment open_count.
-  if (email.openCount > 0 && elapsedSec < 7200) {
-    console.log(`[SESSION COOLDOWN] "${email.subject}" (${emailId}) open hit ${Math.round(elapsedSec)}s ago (< 7200s) - treated as same reading session. Count stays ${email.openCount}.`);
+  // Deduplication & burst debounce:
+  // Only suppress rapid-fire duplicate requests that arrive within 5 seconds of the previous hit (caused by Google Image Proxy dual fetches or network retries)
+  if (email.openCount > 0 && elapsedSec < 5) {
+    console.log(`[RAPID BURST SUPPRESSED] "${email.subject}" (${emailId}) open hit ${elapsedSec.toFixed(1)}s ago (< 5s) - duplicate proxy burst ignored.`);
     if (turso) {
       try {
         await turso.execute({
