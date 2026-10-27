@@ -512,108 +512,110 @@
   border: 1px solid #dadce0;
 }
 
-/* Gmail Top Navigation Bar Mail Track Button */
-/* Gmail Top Navigation Bar Mail Track Button */
+/* Gmail Top Navigation Bar Mail Track Button (Figma Node 188:9972) */
 .mt-topnav-btn {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 7px !important;
-  height: 36px !important;
-  padding: 0 12px 0 6px !important;
-  border-radius: 18px !important;
-  background: #ffffff !important;
-  border: 1px solid #dadce0 !important;
-  color: #3c4043 !important;
-  font-family: 'Google Sans', Roboto, -apple-system, sans-serif !important;
-  font-size: 13px !important;
-  font-weight: 600 !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: transparent !important;
+  border: none !important;
   cursor: pointer !important;
-  margin: 0 8px 0 0 !important;
+  margin: 0 4px !important;
   user-select: none !important;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: background-color 0.15s ease !important;
   vertical-align: middle !important;
   align-self: center !important;
-  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.08) !important;
   box-sizing: border-box !important;
   flex-shrink: 0 !important;
   line-height: normal !important;
   position: relative !important;
   z-index: 10 !important;
+  outline: none !important;
 }
 
 .mt-topnav-btn:hover {
-  background: #f8fafc !important;
-  border-color: #059669 !important;
-  box-shadow: 0 1px 4px rgba(5, 150, 105, 0.2) !important;
-  color: #059669 !important;
+  background-color: rgba(60, 64, 67, 0.08) !important;
 }
 
 .mt-topnav-btn.active {
-  background: #ecfdf5 !important;
-  border-color: #059669 !important;
-  color: #059669 !important;
-  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.25) !important;
+  background-color: rgba(11, 27, 22, 0.12) !important;
 }
 
-.mt-nav-brand-badge {
-  width: 24px !important;
-  height: 24px !important;
-  border-radius: 7px !important;
-  background: #059669 !important;
+/* Inner Container: 28x28 dark teal #0b1b16 with 5.6px rounded corners */
+.mt-nav-container {
+  position: relative !important;
+  width: 28px !important;
+  height: 28px !important;
+  background: #0b1b16 !important;
+  border-radius: 5.6px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
-  box-shadow: 0 1px 2px rgba(5, 150, 105, 0.3) !important;
-  transition: transform 0.15s ease !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease !important;
 }
 
-.mt-topnav-btn:hover .mt-nav-brand-badge {
+.mt-topnav-btn:hover .mt-nav-container {
   transform: scale(1.05) !important;
 }
 
-.mt-nav-brand-badge svg {
+.mt-topnav-btn.active .mt-nav-container {
+  box-shadow: 0 0 0 2px rgba(61, 241, 182, 0.5) !important;
+}
+
+/* Double Checkmark SVG: #3DF1B6 fill */
+.mt-nav-svg {
   display: block !important;
-  width: 15px !important;
-  height: 15px !important;
+  width: 19.158px !important;
+  height: 19.158px !important;
+  flex-shrink: 0 !important;
 }
 
-.mt-topnav-btn .mt-nav-text {
-  letter-spacing: -0.01em;
-  font-weight: 600;
-  font-size: 13px;
-  white-space: nowrap;
-  color: inherit;
-}
-
+/* Count Badge: #f24949 with #f8fafd border, Geist/Sans 11px medium */
 .mt-nav-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: #ef4444;
-  color: #ffffff;
-  font-size: 10.5px;
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: 0 1px 3px rgba(239, 68, 68, 0.4);
-  margin-left: 2px;
-  box-sizing: border-box;
+  position: absolute !important;
+  top: -8.07px !important;
+  left: 16.5px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 5px !important;
+  border-radius: 102px !important;
+  background: #f24949 !important;
+  border: 1px solid #f8fafd !important;
+  color: #ffffff !important;
+  font-family: 'Geist', 'Google Sans', Roboto, -apple-system, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: normal !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  white-space: nowrap !important;
+  z-index: 2 !important;
+  animation: mtBadgePop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+@keyframes mtBadgePop {
+  0% { transform: scale(0.6); }
+  100% { transform: scale(1); }
 }
 
 /* Pulse animation on new notification */
-.mt-pulse {
-  animation: mtBtnPulse 1.2s infinite;
+.mt-pulse .mt-nav-container {
+  animation: mtBtnPulse 1.4s infinite !important;
 }
 
 @keyframes mtBtnPulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.5); }
-  70% { transform: scale(1.04); box-shadow: 0 0 0 7px rgba(5, 150, 105, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(61, 241, 182, 0.6); }
+  70% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(61, 241, 182, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(61, 241, 182, 0); }
 }
 
 /* Topnav Notifications Dropdown */

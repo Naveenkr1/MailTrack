@@ -2131,15 +2131,18 @@
     navBtn.id = 'mt-topnav-btn';
     navBtn.className = 'mt-topnav-btn';
     navBtn.title = 'Mail Track Activity & Notifications';
+    navBtn.setAttribute('role', 'button');
+    navBtn.setAttribute('aria-label', 'Mail Track Activity & Notifications');
+    navBtn.setAttribute('tabindex', '0');
+    navBtn.setAttribute('data-node-id', '188:9972');
+    navBtn.setAttribute('data-name', 'Track Mail Butotn');
     navBtn.innerHTML = `
-      <span class="mt-nav-brand-badge">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="20 6 9 17 4 12"></polyline>
-          <polyline points="24 6 13 17 10 14" opacity="0.9"></polyline>
+      <div class="mt-nav-container" data-node-id="188:9973" data-name="Container">
+        <svg class="mt-nav-svg" width="19.158" height="19.158" viewBox="0 0 19.158 19.158" fill="none" xmlns="http://www.w3.org/2000/svg" data-node-id="188:9974" data-name="Frame">
+          <path d="M9.2602 10.9842L10.3873 12.1113L17.1449 5.35369L18.2738 6.48258L10.3873 14.3691L5.30729 9.28904L6.43618 8.16016L8.13228 9.85628L9.2602 10.9842ZM9.26156 8.727L13.2149 4.77352L14.3407 5.89927L10.3873 9.85268L9.26156 8.727ZM7.00514 13.2412L5.8772 14.3691L0.797201 9.28904L1.92609 8.16016L3.05402 9.28816L3.05307 9.28904L7.00514 13.2412Z" fill="#3DF1B6"/>
         </svg>
-      </span>
-      <span class="mt-nav-text">Mail Track</span>
-      <span class="mt-nav-badge" id="mtNavBadge" style="display:none">0</span>
+        <span class="mt-nav-badge" id="mtNavBadge" style="display:none" data-node-id="188:9976" data-name="Count Badge">0</span>
+      </div>
     `;
 
     if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
@@ -2149,6 +2152,13 @@
     navBtn.onclick = (e) => {
       e.stopPropagation();
       toggleTopNavDropdown();
+    };
+
+    navBtn.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleTopNavDropdown();
+      }
     };
 
     parentContainer.insertBefore(navBtn, targetAnchor);
