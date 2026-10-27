@@ -570,6 +570,123 @@ async function deleteEmail(emailId, userId) {
   return existing;
 }
 
+// -------------------------------------------------------------
+// SENDER & SELF-OPEN DETECTION HELPERS
+// -------------------------------------------------------------
+
+let cachedUserEmails = null;
+let lastUserEmailsFetch = 0;
+
+async function getAllUserEmails() {
+  const now = Date.now();
+  if (cachedUserEmails && (now - lastUserEmailsFetch < 60000)) {
+    return cachedUserEmails;
+  }
+  const emailSet = new Set();
+  try {
+    if (turso) {
+      const res = await turso.execute('SELECT email FROM users');
+      res.rows.forEach(r => {
+        if (r.email) emailSet.add(r.email.toLowerCase().trim());
+      });
+    } else if (db) {
+      const rows = db.prepare('SELECT email FROM users').all();
+      rows.forEach(r => {
+        if (r.email) emailSet.add(r.email.toLowerCase().trim());
+      });
+    }
+  } catch {}
+  cachedUserEmails = emailSet;
+  lastUserEmailsFetch = now;
+  return emailSet;
+}
+
+async function isSelfOrInternalEmail(email, recipientOverride = null) {
+  const senderClean = (email.sender || '').toLowerCase().trim();
+  const recipientClean = (recipientOverride || email.recipient || '').toLowerCase().trim();
+  const recList = (email.recipients || []).map(r => (r || '').toLowerCase().trim());
+
+  // 1. Direct identical address
+  if (senderClean && recipientClean && senderClean === recipientClean) {
+    return true;
+  }
+  if (senderClean && recList.includes(senderClean)) {
+    return true;
+  }
+
+  // 2. Sender is 'Me' or test placeholder
+  if (senderClean === 'me') {
+    return true;
+  }
+
+  // 3. Sender and recipient are both registered users in the database
+  const allUserEmails = await getAllUserEmails();
+  const senderIsUser = allUserEmails.has(senderClean);
+  const recipientIsUser = allUserEmails.has(recipientClean) || recList.some(r => allUserEmails.has(r));
+
+  if (senderIsUser && recipientIsUser) {
+    return true;
+  }
+
+  // 4. Known user alias prefixes (e.g. Naveen's test accounts across devices)
+  const knownPrefixes = ['nnaveen', 'nk5975', 'hello.naveeen', 'dafuqbc'];
+  const matchesKnown = (addr) => knownPrefixes.some(p => addr.startsWith(p));
+  if (matchesKnown(senderClean) && (matchesKnown(recipientClean) || recList.some(matchesKnown))) {
+    return true;
+  }
+
+  return false;
+}
+
+async function registerUserIp(userId, ip) {
+  if (!userId || !ip) return;
+  const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
+  if (!clean || clean === '127.0.0.1' || clean === '::1' || clean === '1') return;
+  
+  const parts = clean.split('.');
+  const subnet = parts.length === 4 ? `${parts[0]}.${parts[1]}.${parts[2]}` : clean;
+
+  const user = await findUserById(userId);
+  if (!user) return;
+  let settings = {};
+  try { settings = JSON.parse(user.settings || '{}'); } catch {}
+  const ips = new Set(settings.knownIps || []);
+  const subnets = new Set(settings.knownSubnets || []);
+  
+  const beforeSize = ips.size;
+  ips.add(clean);
+  subnets.add(subnet);
+  
+  if (ips.size > beforeSize) {
+    settings.knownIps = Array.from(ips).slice(-20);
+    settings.knownSubnets = Array.from(subnets).slice(-15);
+    await updateUserSettings(userId, settings);
+  }
+}
+
+async function isKnownSenderIp(userId, ip) {
+  if (!userId || !ip) return false;
+  const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
+  if (!clean || clean === '127.0.0.1' || clean === '::1' || clean === '1') return true;
+  
+  const user = await findUserById(userId);
+  if (!user) return false;
+  let settings = {};
+  try { settings = JSON.parse(user.settings || '{}'); } catch {}
+  
+  const knownIps = new Set(settings.knownIps || []);
+  if (knownIps.has(clean)) return true;
+  
+  const parts = clean.split('.');
+  if (parts.length === 4) {
+    const subnet = `${parts[0]}.${parts[1]}.${parts[2]}`;
+    const knownSubnets = new Set(settings.knownSubnets || []);
+    if (knownSubnets.has(subnet)) return true;
+  }
+  
+  return false;
+}
+
 async function recordOpen(emailId, openData) {
   const email = await getEmailForBeacon(emailId);
   if (!email) return null;
@@ -582,19 +699,24 @@ async function recordOpen(emailId, openData) {
   const lastTime = email.lastOpenedAt ? new Date(email.lastOpenedAt).getTime() : 0;
   const elapsedSec = (now - lastTime) / 1000;
 
-  const senderClean = (email.sender || '').toLowerCase().trim();
-  const recipientClean = (openData.recipient || email.recipient || '').toLowerCase().trim();
-  const isSelfEmail = senderClean && recipientClean && senderClean === recipientClean;
+  const isSelf = await isSelfOrInternalEmail(email, openData.recipient);
 
-  // 1. If self-email (test to own address) was already opened once, cap forever at 1
-  if (isSelfEmail && (email.openCount >= 1 || email.status === 'opened')) {
-    console.log(`[SELF-EMAIL DEBOUNCED] "${email.subject}" (${emailId}) self test capped at 1 open.`);
-    return { ...email, isExistingSession: true };
+  // 1. Self or internal test email:
+  // First open: sets status = 'opened', open_count = 1.
+  // ALL subsequent opens on any device, sent mail, or reloads: CAPPED AT 1 FOREVER!
+  if (isSelf) {
+    if (email.openCount >= 1 || email.status === 'opened') {
+      console.log(`[SELF-EMAIL CAPPED] "${email.subject}" (${emailId}) self-open capped at 1. Count remains 1.`);
+      return { ...email, isExistingSession: true };
+    }
+    console.log(`[SELF-EMAIL FIRST OPEN] "${email.subject}" (${emailId}) confirmed first read.`);
   }
 
-  // 2. Session cooldown: If opened < 10 minutes (600s) ago, treat as same reading session
-  if (email.openCount > 0 && elapsedSec < 600) {
-    console.log(`[SESSION COOLDOWN] "${email.subject}" (${emailId}) open hit ${Math.round(elapsedSec)}s ago (< 600s) - treated as same reading session. Count stays ${email.openCount}.`);
+  // 2. Reading Session Cooldown for all emails:
+  // Any repeat hit within 2 hours (7200s) is part of the same reading session!
+  // Updates lastOpenedAt, but DOES NOT increment open_count.
+  if (email.openCount > 0 && elapsedSec < 7200) {
+    console.log(`[SESSION COOLDOWN] "${email.subject}" (${emailId}) open hit ${Math.round(elapsedSec)}s ago (< 7200s) - treated as same reading session. Count stays ${email.openCount}.`);
     if (turso) {
       try {
         await turso.execute({
@@ -702,5 +824,8 @@ module.exports = {
   recordClick,
   saveUserGoogleTokens,
   saveUserGmailLabels,
-  updateEmailThreadId
+  updateEmailThreadId,
+  registerUserIp,
+  isKnownSenderIp,
+  isSelfOrInternalEmail
 };

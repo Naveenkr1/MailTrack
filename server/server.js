@@ -79,31 +79,33 @@ function getRequestBaseUrl(req) {
 
 let senderPublicIp = '103.181.161.19';
 
-// In-memory registry of known IPs per user for cross-device self-open suppression
+// In-memory + persistent registry of known IPs per user for cross-device self-open suppression
 const userKnownIps = new Map(); // userId -> Set of recent clean IPs
 
-function registerUserIp(userId, ip) {
+async function registerUserIp(userId, ip) {
   if (!userId || !ip) return;
   const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
   if (!clean || clean === '127.0.0.1' || clean === '::1' || clean === '1') return;
   if (!userKnownIps.has(userId)) {
     userKnownIps.set(userId, new Set());
   }
-  const set = userKnownIps.get(userId);
-  set.add(clean);
-  if (set.size > 20) {
-    const first = set.values().next().value;
-    set.delete(first);
-  }
+  userKnownIps.get(userId).add(clean);
+  try {
+    await db.registerUserIp(userId, clean);
+  } catch {}
 }
 
-function isKnownSenderIp(userId, ip) {
+async function isKnownSenderIp(userId, ip) {
   if (!userId || !ip) return false;
   const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
-  if (userKnownIps.has(userId)) {
-    return userKnownIps.get(userId).has(clean);
+  if (userKnownIps.has(userId) && userKnownIps.get(userId).has(clean)) {
+    return true;
   }
-  return false;
+  try {
+    return await db.isKnownSenderIp(userId, clean);
+  } catch {
+    return false;
+  }
 }
 
 // Auto-detect host public IP for self-open filtering
@@ -417,7 +419,7 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
                      cleanIp === email.senderIp || 
                      cleanIp === '1' || 
                      cleanIp === '127.0.0.1' ||
-                     isKnownSenderIp(email.userId, cleanIp);
+                     (await isKnownSenderIp(email.userId, cleanIp));
 
   if (isSenderIP && !/GoogleImageProxy/i.test(userAgent)) {
     console.log(`[SELF-OPEN FILTERED] "${email.subject}" (${emailId}) from sender device IP (${cleanIp}) - IGNORED.`);
@@ -432,8 +434,8 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
     return res.end(TRANSPARENT_PNG);
   }
 
-  // 2. Pre-render Grace Period: Google Image Proxy or email client pre-rendering immediately after send (< 15s)
-  if (elapsedSeconds < 15) {
+  // 2. Pre-render Grace Period: Google Image Proxy or email client pre-rendering immediately after send (< 30s)
+  if (elapsedSeconds < 30) {
     console.log(`[PRE-RENDER FILTERED] "${email.subject}" (${emailId}) hit within ${Math.round(elapsedSeconds)}s of sending - IGNORED.`);
     res.writeHead(200, {
       'Content-Type': 'image/png',
