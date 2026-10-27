@@ -592,13 +592,17 @@
   font-size: 11px !important;
   font-weight: 500 !important;
   line-height: normal !important;
-  display: inline-flex !important;
+  display: none !important;
   align-items: center !important;
   justify-content: center !important;
   box-sizing: border-box !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
   white-space: nowrap !important;
   z-index: 2 !important;
+}
+
+.mt-nav-badge.visible {
+  display: inline-flex !important;
   animation: mtBadgePop 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
 
