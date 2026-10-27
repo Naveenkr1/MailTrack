@@ -79,6 +79,23 @@ let reconnectTimer = null;
 let cachedApiKey = null;
 let currentUser = null;
 
+// Block self-open tracking pixel requests originating from the sender's own Gmail tab
+if (typeof chrome !== 'undefined' && chrome.declarativeNetRequest && chrome.declarativeNetRequest.updateDynamicRules) {
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [8888],
+    addRules: [{
+      id: 8888,
+      priority: 1,
+      action: { type: 'block' },
+      condition: {
+        urlFilter: '/trace/mail/*',
+        initiatorDomains: ['mail.google.com'],
+        resourceTypes: ['image', 'xmlhttprequest', 'other']
+      }
+    }]
+  }).catch(() => {});
+}
+
 // Dynamic Extension Action behavior:
 // - If user is logged in: clicking the extension redirects immediately to dashboard.
 // - If user is NOT logged in: clicking the extension shows popup with "Log In".

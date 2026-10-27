@@ -577,6 +577,42 @@ async function recordOpen(emailId, openData) {
   const openId = openData.id || crypto.randomBytes(8).toString('hex');
   const timestamp = openData.timestamp || new Date().toISOString();
 
+  // Deduplication & session cooldown check:
+  const now = new Date(timestamp).getTime();
+  const lastTime = email.lastOpenedAt ? new Date(email.lastOpenedAt).getTime() : 0;
+  const elapsedSec = (now - lastTime) / 1000;
+
+  const senderClean = (email.sender || '').toLowerCase().trim();
+  const recipientClean = (openData.recipient || email.recipient || '').toLowerCase().trim();
+  const isSelfEmail = senderClean && recipientClean && senderClean === recipientClean;
+
+  // 1. If self-email (test to own address) was already opened once, cap forever at 1
+  if (isSelfEmail && (email.openCount >= 1 || email.status === 'opened')) {
+    console.log(`[SELF-EMAIL DEBOUNCED] "${email.subject}" (${emailId}) self test capped at 1 open.`);
+    return { ...email, isExistingSession: true };
+  }
+
+  // 2. Session cooldown: If opened < 10 minutes (600s) ago, treat as same reading session
+  if (email.openCount > 0 && elapsedSec < 600) {
+    console.log(`[SESSION COOLDOWN] "${email.subject}" (${emailId}) open hit ${Math.round(elapsedSec)}s ago (< 600s) - treated as same reading session. Count stays ${email.openCount}.`);
+    if (turso) {
+      try {
+        await turso.execute({
+          sql: `UPDATE emails SET last_opened_at = ? WHERE id = ?`,
+          args: [timestamp, emailId]
+        });
+      } catch {}
+    }
+    if (db) {
+      try {
+        db.prepare(`UPDATE emails SET last_opened_at = ? WHERE id = ?`).run(timestamp, emailId);
+      } catch {}
+    }
+    email.lastOpenedAt = timestamp;
+    return { ...email, isExistingSession: true };
+  }
+
+  // 3. New distinct reading session: increment open_count and record event
   if (turso) {
     try {
       await turso.execute({

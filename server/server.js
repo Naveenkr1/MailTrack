@@ -79,6 +79,33 @@ function getRequestBaseUrl(req) {
 
 let senderPublicIp = '103.181.161.19';
 
+// In-memory registry of known IPs per user for cross-device self-open suppression
+const userKnownIps = new Map(); // userId -> Set of recent clean IPs
+
+function registerUserIp(userId, ip) {
+  if (!userId || !ip) return;
+  const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
+  if (!clean || clean === '127.0.0.1' || clean === '::1' || clean === '1') return;
+  if (!userKnownIps.has(userId)) {
+    userKnownIps.set(userId, new Set());
+  }
+  const set = userKnownIps.get(userId);
+  set.add(clean);
+  if (set.size > 20) {
+    const first = set.values().next().value;
+    set.delete(first);
+  }
+}
+
+function isKnownSenderIp(userId, ip) {
+  if (!userId || !ip) return false;
+  const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
+  if (userKnownIps.has(userId)) {
+    return userKnownIps.get(userId).has(clean);
+  }
+  return false;
+}
+
 // Auto-detect host public IP for self-open filtering
 http.get('http://api.ipify.org', (res) => {
   let data = '';
@@ -378,20 +405,22 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
     });
   }
 
-  const cleanIp = ip.replace(/^.*:/, '');
+  const cleanIp = ip.replace(/^.*:/, '').split(',')[0].trim();
   const now = Date.now();
   const createdTime = email.createdAt ? new Date(email.createdAt).getTime() : now;
   const elapsedSeconds = (now - createdTime) / 1000;
 
-  // 1. Pre-render Grace Period: Only filter immediate send pre-renders (< 3s) from local sender IP
+  // 1. Known Sender IP check across devices:
+  // If the request comes directly from any IP associated with the sender's network or devices, ignore as self-open!
   const isSenderIP = cleanIp === senderPublicIp || 
                      cleanIp === email.senderPublicIp || 
+                     cleanIp === email.senderIp || 
                      cleanIp === '1' || 
-                     cleanIp === '127.0.0.1' || 
-                     cleanIp === email.senderIp;
+                     cleanIp === '127.0.0.1' ||
+                     isKnownSenderIp(email.userId, cleanIp);
 
-  if (elapsedSeconds < 3 && !/GoogleImageProxy/i.test(userAgent) && isSenderIP) {
-    console.log(`[SELF-OPEN FILTERED] "${email.subject}" (${emailId}) local pre-render (< 3s) - IGNORED.`);
+  if (isSenderIP && !/GoogleImageProxy/i.test(userAgent)) {
+    console.log(`[SELF-OPEN FILTERED] "${email.subject}" (${emailId}) from sender device IP (${cleanIp}) - IGNORED.`);
     res.writeHead(200, {
       'Content-Type': 'image/png',
       'Content-Length': TRANSPARENT_PNG.length,
@@ -403,7 +432,44 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
     return res.end(TRANSPARENT_PNG);
   }
 
-  // 2. Automated Notification Bot Scanner Filter
+  // 2. Pre-render Grace Period: Google Image Proxy or email client pre-rendering immediately after send (< 15s)
+  if (elapsedSeconds < 15) {
+    console.log(`[PRE-RENDER FILTERED] "${email.subject}" (${emailId}) hit within ${Math.round(elapsedSeconds)}s of sending - IGNORED.`);
+    res.writeHead(200, {
+      'Content-Type': 'image/png',
+      'Content-Length': TRANSPARENT_PNG.length,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Timing-Allow-Origin': '*'
+    });
+    return res.end(TRANSPARENT_PNG);
+  }
+
+  // 3. Non-Gmail Recipient GoogleImageProxy Filter:
+  // If recipient is NOT a @gmail.com or @googlemail.com address, the recipient will NEVER use GoogleImageProxy!
+  // Any GoogleImageProxy request for a non-Gmail recipient can ONLY be the sender opening their Sent folder in Gmail!
+  const recList = email.recipients && email.recipients.length > 0 ? email.recipients : [email.recipient];
+  const hasGmailRecipient = recList.some(r => {
+    if (!r) return false;
+    const lower = r.toLowerCase();
+    return lower.includes('@gmail.com') || lower.includes('@googlemail.com');
+  });
+
+  if (!hasGmailRecipient && /GoogleImageProxy/i.test(userAgent)) {
+    console.log(`[SENDER SENT VIEW FILTERED] "${email.subject}" (${emailId}) GoogleImageProxy on non-Gmail recipient (${email.recipient}) - SENDER SELF-OPEN IGNORED.`);
+    res.writeHead(200, {
+      'Content-Type': 'image/png',
+      'Content-Length': TRANSPARENT_PNG.length,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Timing-Allow-Origin': '*'
+    });
+    return res.end(TRANSPARENT_PNG);
+  }
+
+  // 4. Automated Notification Bot Scanner Filter
   if (isBotOrPrefetch(userAgent, req)) {
     console.log(`[BOT / NOTIFICATION PREFETCH FILTERED] "${email.subject}" (${emailId}) request by ${userAgent} (${cleanIp}) - IGNORED.`);
     res.writeHead(200, {
@@ -442,10 +508,24 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
 
   const updatedEmail = await db.recordOpen(emailId, openData);
 
+  // If this hit was within the 10-minute session cooldown or capped self-test,
+  // do not trigger repeated WebSocket popups, chime sounds, or label changes
+  if (updatedEmail && updatedEmail.isExistingSession) {
+    res.writeHead(200, {
+      'Content-Type': 'image/png',
+      'Content-Length': TRANSPARENT_PNG.length,
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Timing-Allow-Origin': '*'
+    });
+    return res.end(TRANSPARENT_PNG);
+  }
+
   console.log(`\n======================================================`);
   console.log(`🔥 [REAL OPEN CONFIRMED] "${email.subject}" (${email.id})`);
   console.log(`   Recipient: ${openData.recipient} | Client: ${openData.client} | Time: ${timestamp}`);
-  console.log(`   Status updated to READ (✓✓) in dashboard and Gmail!`);
+  console.log(`   Open Count: ${updatedEmail.openCount} | Status updated to READ (✓✓) in dashboard and Gmail!`);
   console.log(`======================================================\n`);
 
   broadcast('EMAIL_OPENED', { email: updatedEmail, event: openData }, email.userId);
@@ -756,7 +836,8 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
     user = await db.createOrUpdateUser({ email: senderEmail || 'user@example.com', name: 'User' });
   }
 
-  const senderIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').replace(/^.*:/, '');
+  const senderIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').replace(/^.*:/, '').split(',')[0].trim();
+  registerUserIp(user.id, senderIp);
 
   const newEmail = await db.createEmail(user.id, {
     id,
@@ -846,6 +927,8 @@ app.get('/api/emails', optionalAuth, async (req, res) => {
   if (!user) {
     return res.status(401).json({ success: false, error: 'Unauthorized: Please log in to view tracked emails.' });
   }
+
+  registerUserIp(user.id, req.headers['x-forwarded-for'] || req.socket.remoteAddress);
 
   const effectiveBaseUrl = getRequestBaseUrl(req);
   const emails = await db.getUserEmails(user.id);

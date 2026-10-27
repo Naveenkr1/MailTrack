@@ -650,9 +650,19 @@
   // 1b. OPEN THREAD / EMAIL VIEW: NO STATUS PILL OR STATES INSIDE EMAIL
   // -------------------------------------------------------------------------
   function updateOpenThreadHeader() {
-    // User requested: Remove status pill from the email when opened in Gmail
+    // 1. Remove status pill from the email when opened in Gmail
     const statusPills = document.querySelectorAll('.mt-thread-status-pill');
     statusPills.forEach(p => p.remove());
+
+    // 2. Neutralize any tracking pixels inside viewed email bodies to prevent desktop self-opens
+    const viewImgs = document.querySelectorAll('div.a3s img[src*="/trace/mail/"], div.ii.gt img[src*="/trace/mail/"]');
+    viewImgs.forEach(img => {
+      if (!img.closest('div[role="dialog"], div.M9, div.AD')) {
+        img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+        img.removeAttribute('src');
+        img.remove();
+      }
+    });
   }
 
   // -------------------------------------------------------------------------
