@@ -3014,7 +3014,9 @@ body {
 
 /* Strictly hidden on Desktop view — desktop remains 100% untouched */
 .mobile-bottom-nav,
+.mobile-profile-container,
 .mobile-profile-btn,
+.mobile-profile-dropdown,
 .mobile-filter-chips-bar,
 .mobile-brand-group,
 .mobile-search-bar-wrap,
@@ -3290,7 +3292,7 @@ body {
   /* Mobile Profile Container + Dropdown Menu */
   .mobile-profile-container {
     position: relative;
-    display: flex;
+    display: flex !important;
     align-items: center;
   }
 
@@ -3327,7 +3329,7 @@ body {
     border-radius: 14px;
     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.22), 0 4px 14px rgba(0, 0, 0, 0.08);
     padding: 8px 6px;
-    display: none;
+    display: none !important;
     flex-direction: column;
     gap: 3px;
     z-index: 2000;
@@ -3335,7 +3337,7 @@ body {
   }
 
   .mobile-profile-dropdown.open {
-    display: flex;
+    display: flex !important;
   }
 
   @keyframes mobileDropdownFadeIn {
