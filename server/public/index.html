@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=figma_mobile_v1">
+  <link rel="stylesheet" href="style.css?v=figma_mobile_v2">
 </head>
 
 <body>
@@ -23,167 +23,167 @@
          ====================================================================== -->
     <aside class="figma-sidebar" id="sideDrawer">
       <!-- 1. Header: Logo + PRO Badge + Collapse Button (Node 60:3760) -->
-      <div class="sidebar-header">
-        <div class="brand-group">
-          <div class="brand-badge-icon" aria-label="Mail Track Logo">
-            <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z"
-                fill="white" />
-            </svg>
-          </div>
-          <div class="brand-title-wrap">
-            <span class="brand-name">Mail Track</span>
-          </div>
+    <div class="sidebar-header">
+      <div class="brand-group">
+        <div class="brand-badge-icon" aria-label="Mail Track Logo">
+          <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z"
+              fill="white" />
+          </svg>
         </div>
-        <!-- <button class="btn-drawer-collapse" id="drawerCollapseBtn" title="Toggle Sidebar">
+        <div class="brand-title-wrap">
+          <span class="brand-name">Mail Track</span>
+        </div>
+      </div>
+      <!-- <button class="btn-drawer-collapse" id="drawerCollapseBtn" title="Toggle Sidebar">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"></polyline>
           </svg>
         </button> -->
-      </div>
+    </div>
 
-      <!-- 2. Navigation Tabs (Node 60:3775) -->
-      <nav class="sidebar-nav">
-        <button class="nav-button active" data-tab="email-tracking">
-          <span class="nav-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-              <polyline points="22,6 12,13 2,6"></polyline>
+    <!-- 2. Navigation Tabs (Node 60:3775) -->
+    <nav class="sidebar-nav">
+      <button class="nav-button active" data-tab="email-tracking">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+        </span>
+        <span class="nav-label">Email Tracking</span>
+        <span class="nav-counter" id="tabEmailCount" style="display:none;"></span>
+      </button>
+
+      <button class="nav-button" data-tab="activity">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+        </span>
+        <span class="nav-label">Activity Feed</span>
+        <span class="tab-pulse-dot" id="activityPulseDot" style="display:none;"></span>
+      </button>
+
+      <button class="nav-button" data-tab="settings">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+          </svg>
+        </span>
+        <span class="nav-label">Settings</span>
+      </button>
+
+      <button class="nav-button" data-tab="help">
+        <span class="nav-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+          </svg>
+        </span>
+        <span class="nav-label">Help & Support</span>
+      </button>
+    </nav>
+
+    <!-- 3. Sidebar Footer: User Card (Node 60:3802) + Theme Switcher -->
+    <!-- 3. Sidebar Footer: User Card with Upward Popover Menu -->
+    <div class="sidebar-footer">
+      <!-- Upward Dropdown Menu -->
+      <div class="user-profile-dropdown" id="userProfileDropdown">
+        <!-- Option 1: Dark Mode Toggle Switch -->
+        <button class="user-dropdown-item" id="dropdownThemeToggle" type="button" role="switch" aria-checked="false"
+          aria-label="Toggle dark mode">
+          <span class="dropdown-item-icon">
+            <svg class="theme-icon light-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg class="theme-icon dark-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
           </span>
-          <span class="nav-label">Email Tracking</span>
-          <span class="nav-counter" id="tabEmailCount" style="display:none;"></span>
-        </button>
-
-        <button class="nav-button" data-tab="activity">
-          <span class="nav-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-              <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-            </svg>
+          <span class="dropdown-item-label" id="dropdownThemeText">Light Mode</span>
+          <span class="dropdown-toggle-switch" id="dropdownThemeSwitch" aria-hidden="true">
+            <span class="dropdown-toggle-thumb"></span>
           </span>
-          <span class="nav-label">Activity Feed</span>
-          <span class="tab-pulse-dot" id="activityPulseDot" style="display:none;"></span>
         </button>
 
-        <button class="nav-button" data-tab="settings">
-          <span class="nav-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="3"></circle>
-              <path
-                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-              </path>
-            </svg>
-          </span>
-          <span class="nav-label">Settings</span>
-        </button>
-
-        <button class="nav-button" data-tab="help">
-          <span class="nav-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        <!-- Option 2: Get Started -->
+        <button class="user-dropdown-item" id="dropdownGetStarted" type="button">
+          <span class="dropdown-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
               stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="10"></circle>
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              <polygon points="10 8 16 12 10 16 10 8"></polygon>
             </svg>
           </span>
-          <span class="nav-label">Help & Support</span>
+          <span class="dropdown-item-label">Get Started</span>
         </button>
-      </nav>
 
-      <!-- 3. Sidebar Footer: User Card (Node 60:3802) + Theme Switcher -->
-      <!-- 3. Sidebar Footer: User Card with Upward Popover Menu -->
-      <div class="sidebar-footer">
-        <!-- Upward Dropdown Menu -->
-        <div class="user-profile-dropdown" id="userProfileDropdown">
-          <!-- Option 1: Dark Mode Toggle Switch -->
-          <button class="user-dropdown-item" id="dropdownThemeToggle" type="button" role="switch" aria-checked="false"
-            aria-label="Toggle dark mode">
-            <span class="dropdown-item-icon">
-              <svg class="theme-icon light-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="5"></circle>
-                <line x1="12" y1="1" x2="12" y2="3"></line>
-                <line x1="12" y1="21" x2="12" y2="23"></line>
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-                <line x1="1" y1="12" x2="3" y2="12"></line>
-                <line x1="21" y1="12" x2="23" y2="12"></line>
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-              </svg>
-              <svg class="theme-icon dark-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-              </svg>
-            </span>
-            <span class="dropdown-item-label" id="dropdownThemeText">Light Mode</span>
-            <span class="dropdown-toggle-switch" id="dropdownThemeSwitch" aria-hidden="true">
-              <span class="dropdown-toggle-thumb"></span>
-            </span>
-          </button>
-
-          <!-- Option 2: Get Started -->
-          <button class="user-dropdown-item" id="dropdownGetStarted" type="button">
-            <span class="dropdown-item-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polygon points="10 8 16 12 10 16 10 8"></polygon>
-              </svg>
-            </span>
-            <span class="dropdown-item-label">Get Started</span>
-          </button>
-
-          <!-- Option 3: Privacy Notice -->
-          <button class="user-dropdown-item" id="dropdownPrivacyNotice" type="button">
-            <span class="dropdown-item-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-              </svg>
-            </span>
-            <span class="dropdown-item-label">Privacy Notice</span>
-          </button>
-
-          <div class="user-dropdown-divider"></div>
-
-          <!-- Option 4: Logout -->
-          <a href="/auth/logout" class="user-dropdown-item logout-item" id="dropdownLogout">
-            <span class="dropdown-item-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-            </span>
-            <span class="dropdown-item-label">Logout</span>
-          </a>
-        </div>
-
-        <!-- User Profile Box with Arrow (Down by default, Up when active) -->
-        <div class="user-profile-box" id="userProfileBox" role="button" tabindex="0" title="Click for account options">
-          <img src="" id="userAvatar" class="user-avatar-image" alt="" style="display: none;" />
-          <span class="user-avatar-initial" id="userInitial">N</span>
-          <div class="user-meta-info">
-            <span class="user-full-name" id="userNameDisplay">Naveen Kumar</span>
-            <span class="user-email-address full-email" id="userEmailDisplay"
-              title="nnaveen.8527@gmail.com">nnaveen.8527@gmail.com</span>
-          </div>
-          <button class="user-menu-arrow-btn" id="userMenuArrowBtn" type="button" aria-label="Toggle user options">
-            <svg class="chevron-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-              stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"></polyline>
+        <!-- Option 3: Privacy Notice -->
+        <button class="user-dropdown-item" id="dropdownPrivacyNotice" type="button">
+          <span class="dropdown-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
-          </button>
-        </div>
+          </span>
+          <span class="dropdown-item-label">Privacy Notice</span>
+        </button>
+
+        <div class="user-dropdown-divider"></div>
+
+        <!-- Option 4: Logout -->
+        <a href="/auth/logout" class="user-dropdown-item logout-item" id="dropdownLogout">
+          <span class="dropdown-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </span>
+          <span class="dropdown-item-label">Logout</span>
+        </a>
       </div>
+
+      <!-- User Profile Box with Arrow (Down by default, Up when active) -->
+      <div class="user-profile-box" id="userProfileBox" role="button" tabindex="0" title="Click for account options">
+        <img src="" id="userAvatar" class="user-avatar-image" alt="" style="display: none;" />
+        <span class="user-avatar-initial" id="userInitial">N</span>
+        <div class="user-meta-info">
+          <span class="user-full-name" id="userNameDisplay">Naveen Kumar</span>
+          <span class="user-email-address full-email" id="userEmailDisplay"
+            title="nnaveen.8527@gmail.com">nnaveen.8527@gmail.com</span>
+        </div>
+        <button class="user-menu-arrow-btn" id="userMenuArrowBtn" type="button" aria-label="Toggle user options">
+          <svg class="chevron-arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
     </aside>
     <!-- Mobile Sidebar Backdrop Overlay -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
@@ -199,7 +199,9 @@
           <div class="mobile-brand-group" id="mobileBrandGroup">
             <div class="mobile-logo-squircle">
               <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
-                <path d="M11.2458 13.3377L12.6144 14.7063L20.82 6.50061L22.1909 7.8714L12.6144 17.4479L6.4458 11.2793L7.81659 9.90847L9.87615 11.968L11.2458 13.3377ZM11.2474 10.5968L16.048 5.79612L17.415 7.1631L12.6144 11.9637L11.2474 10.5968ZM8.50748 16.0782L7.13784 17.4479L0.969264 11.2793L2.34006 9.90847L3.70969 11.2782L3.70854 11.2793L8.50748 16.0782Z" fill="white"/>
+                <path
+                  d="M11.2458 13.3377L12.6144 14.7063L20.82 6.50061L22.1909 7.8714L12.6144 17.4479L6.4458 11.2793L7.81659 9.90847L9.87615 11.968L11.2458 13.3377ZM11.2474 10.5968L16.048 5.79612L17.415 7.1631L12.6144 11.9637L11.2474 10.5968ZM8.50748 16.0782L7.13784 17.4479L0.969264 11.2793L2.34006 9.90847L3.70969 11.2782L3.70854 11.2793L8.50748 16.0782Z"
+                  fill="white" />
               </svg>
             </div>
             <span class="mobile-brand-text">Mail Track</span>
@@ -272,12 +274,90 @@
             </div>
           </div>
 
-          <!-- Mobile User Profile Avatar Button (Visible on mobile - Node 223:12370) -->
-          <button class="mobile-profile-btn" id="mobileProfileBtn" type="button" aria-label="Account Options"
-            title="Account Options">
-            <img src="" id="mobileUserAvatar" class="mobile-avatar-img" alt="" style="display: none;" />
-            <span class="user-avatar-initial" id="mobileUserInitial">N</span>
-          </button>
+          <!-- Mobile User Profile Avatar Container + Dropdown Menu (Figma mobile profile options) -->
+          <div class="mobile-profile-container" id="mobileProfileContainer">
+            <button class="mobile-profile-btn" id="mobileProfileBtn" type="button" aria-label="Account Options"
+              title="Account Options" aria-expanded="false" aria-haspopup="true">
+              <img src="" id="mobileUserAvatar" class="mobile-avatar-img" alt="" style="display: none;" />
+              <span class="user-avatar-initial" id="mobileUserInitial">N</span>
+            </button>
+
+            <!-- Mobile Profile Dropdown Menu -->
+            <div class="mobile-profile-dropdown" id="mobileProfileDropdown" aria-hidden="true">
+              <div class="mobile-dropdown-header">
+                <div class="mobile-dropdown-user-info">
+                  <span class="mobile-dropdown-name" id="mobileDropdownName">User</span>
+                  <span class="mobile-dropdown-email" id="mobileDropdownEmail" title=""></span>
+                </div>
+              </div>
+              <div class="user-dropdown-divider"></div>
+
+              <!-- Option 1: Dark Mode Toggle -->
+              <button class="user-dropdown-item" id="mobileDropdownThemeToggle" type="button" role="switch"
+                aria-checked="false" aria-label="Toggle dark mode">
+                <span class="dropdown-item-icon">
+                  <svg class="theme-icon light-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                  </svg>
+                  <svg class="theme-icon dark-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                  </svg>
+                </span>
+                <span class="dropdown-item-label" id="mobileDropdownThemeText">Light Mode</span>
+                <span class="dropdown-toggle-switch" id="mobileDropdownThemeSwitch" aria-hidden="true">
+                  <span class="dropdown-toggle-thumb"></span>
+                </span>
+              </button>
+
+              <!-- Option 2: Get Started -->
+              <button class="user-dropdown-item" id="mobileDropdownGetStarted" type="button">
+                <span class="dropdown-item-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                  </svg>
+                </span>
+                <span class="dropdown-item-label">Get Started</span>
+              </button>
+
+              <!-- Option 3: Privacy Notice -->
+              <button class="user-dropdown-item" id="mobileDropdownPrivacyNotice" type="button">
+                <span class="dropdown-item-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                  </svg>
+                </span>
+                <span class="dropdown-item-label">Privacy Notice</span>
+              </button>
+
+              <div class="user-dropdown-divider"></div>
+
+              <!-- Option 4: Logout -->
+              <a href="/auth/logout" class="user-dropdown-item logout-item" id="mobileDropdownLogout">
+                <span class="dropdown-item-icon">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                  </svg>
+                </span>
+                <span class="dropdown-item-label">Logout</span>
+              </a>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -333,11 +413,16 @@
             <div class="mobile-search-bar-wrap" id="mobileEmailSearchWrap">
               <div class="mobile-search-bar-inner">
                 <svg class="mobile-search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
-                  <path d="M11.875 6.875C11.875 9.63642 9.63642 11.875 6.875 11.875C4.11358 11.875 1.875 9.63642 1.875 6.875C1.875 4.11358 4.11358 1.875 6.875 1.875C9.63642 1.875 11.875 4.11358 11.875 6.875Z" stroke="#94A3B8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path d="M13.125 13.125L10.4062 10.4062" stroke="#94A3B8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path
+                    d="M11.875 6.875C11.875 9.63642 9.63642 11.875 6.875 11.875C4.11358 11.875 1.875 9.63642 1.875 6.875C1.875 4.11358 4.11358 1.875 6.875 1.875C9.63642 1.875 11.875 4.11358 11.875 6.875Z"
+                    stroke="#94A3B8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M13.125 13.125L10.4062 10.4062" stroke="#94A3B8" stroke-width="1.25" stroke-linecap="round"
+                    stroke-linejoin="round" />
                 </svg>
-                <input type="text" id="mobileEmailSearchInput" class="mobile-search-input" placeholder="Search by recipient, subject, or email..." />
-                <button class="mobile-clear-search-btn" id="mobileClearSearchBtn" type="button" style="display: none;" title="Clear search">✕</button>
+                <input type="text" id="mobileEmailSearchInput" class="mobile-search-input"
+                  placeholder="Search by recipient, subject, or email..." />
+                <button class="mobile-clear-search-btn" id="mobileClearSearchBtn" type="button" style="display: none;"
+                  title="Clear search">✕</button>
               </div>
             </div>
 
@@ -504,11 +589,6 @@
                     <h3 class="panel-section-title">Settings &amp; Preferences</h3>
                     <p class="panel-section-desc">Manage your account profile, timezone preferences, and mobile Gmail
                       tracking in one place.</p>
-                  </div>
-                  <div class="settings-header-action-wrap">
-                    <span class="save-status-indicator" id="unifiedSaveStatus"></span>
-                    <button type="submit" form="unifiedSettingsForm" class="btn-figma-save"
-                      id="saveUnifiedSettingsBtn">Save Settings</button>
                   </div>
                 </div>
 
@@ -683,73 +763,140 @@
                     </div>
                   </div>
                 </div>
-            </div>
-            </form>
-          </div>
 
-          <!-- 2. Danger Zone: Delete Account & Permanent Data Removal (Node 186:9668) -->
-          <div class="figma-table-card danger-card">
-            <div class="panel-inner-header">
-              <div>
-                <h3 class="panel-section-title danger-heading">Delete Account &amp; Permanent Data Removal</h3>
-                <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and
-                  all account data.</p>
+                <!-- Footer with Save Button directly above Delete Account -->
+                <div class="settings-form-actions-footer">
+                  <span class="save-status-indicator" id="unifiedSaveStatus"></span>
+                  <button type="submit" form="unifiedSettingsForm" class="btn-figma-save"
+                    id="saveUnifiedSettingsBtn">Save Settings</button>
+                </div>
+              </form>
+            </div>
+
+            <!-- 2. Danger Zone: Delete Account & Permanent Data Removal (Node 186:9668) -->
+            <div class="figma-table-card danger-card">
+              <div class="panel-inner-header">
+                <div>
+                  <h3 class="panel-section-title danger-heading">Delete Account &amp; Permanent Data Removal</h3>
+                  <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and
+                    all account data.</p>
+                </div>
+              </div>
+              <div class="panel-inner-body">
+                <!--  <div class="settings-section-divider"></div> -->
+                <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails,
+                  open logs, clicks, and API credentials will be permanently erased from both local storage and cloud
+                  database.</p>
+                <button class="btn-figma-danger" id="deleteAccountBtn" type="button">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.17"
+                    stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.75 3.5H2.91667H12.25" />
+                    <path
+                      d="M11.0833 3.5V11.6667C11.0833 11.9761 10.9604 12.2728 10.7416 12.4916C10.5228 12.7104 10.2261 12.8333 9.91667 12.8333H4.08333C3.77391 12.8333 3.47717 12.7104 3.25838 12.4916C3.03958 12.2728 2.91667 11.9761 2.91667 11.6667V3.5M4.66667 3.5V2.33333C4.66667 2.02391 4.78958 1.72717 5.00838 1.50838C5.22717 1.28958 5.52391 1.16667 5.83333 1.16667H8.16667C8.47609 1.16667 8.77283 1.28958 8.99162 1.50838C9.21042 1.72717 9.33333 2.02391 9.33333 2.33333V3.5" />
+                  </svg>
+                  <span>Delete My Account &amp; All Data</span>
+                </button>
               </div>
             </div>
-            <div class="panel-inner-body">
-              <!--  <div class="settings-section-divider"></div> -->
-              <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails,
-                open logs, clicks, and API credentials will be permanently erased from both local storage and cloud
-                database.</p>
-              <button class="btn-figma-danger" id="deleteAccountBtn" type="button">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.17"
-                  stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1.75 3.5H2.91667H12.25" />
-                  <path
-                    d="M11.0833 3.5V11.6667C11.0833 11.9761 10.9604 12.2728 10.7416 12.4916C10.5228 12.7104 10.2261 12.8333 9.91667 12.8333H4.08333C3.77391 12.8333 3.47717 12.7104 3.25838 12.4916C3.03958 12.2728 2.91667 11.9761 2.91667 11.6667V3.5M4.66667 3.5V2.33333C4.66667 2.02391 4.78958 1.72717 5.00838 1.50838C5.22717 1.28958 5.52391 1.16667 5.83333 1.16667H8.16667C8.47609 1.16667 8.77283 1.28958 8.99162 1.50838C9.21042 1.72717 9.33333 2.02391 9.33333 2.33333V3.5" />
-                </svg>
-                <span>Delete My Account &amp; All Data</span>
-              </button>
-            </div>
           </div>
-      </div>
-      </section>
+        </section>
 
-      <!-- TAB 4: HELP & SUPPORT -->
-      <section class="tab-panel" id="tabContentHelp">
-        <div class="figma-table-card">
-          <div class="panel-inner-header">
-            <div>
-              <h3 class="panel-section-title">Help & Support</h3>
-              <p class="panel-section-desc">Learn how Mail Track operates, troubleshooting tips, and how tracking
-                beacons function.</p>
+        <!-- TAB 4: HELP & SUPPORT -->
+        <section class="tab-panel" id="tabContentHelp">
+          <div class="help-card-stack">
+            <!-- Help Header & Quick Action Cards -->
+            <div class="figma-table-card">
+              <div class="panel-inner-header">
+                <div>
+                  <h3 class="panel-section-title">Help &amp; Support</h3>
+                  <p class="panel-section-desc">Learn how Mail Track operates, troubleshooting guides, beacon architecture, and support.</p>
+                </div>
+              </div>
+              <div class="panel-inner-body">
+                <div class="help-actions-grid">
+                  <!-- Action Card 1: Quick Start Guide -->
+                  <div class="help-action-card">
+                    <div class="help-action-icon-wrap primary">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polygon points="10 8 16 12 10 16 10 8"></polygon>
+                      </svg>
+                    </div>
+                    <div class="help-action-info">
+                      <h4 class="help-action-title">Quick Start Guide</h4>
+                      <p class="help-action-desc">Learn how to install the extension, compose in Gmail, and verify tracking checks.</p>
+                    </div>
+                    <button type="button" class="btn-help-action" id="helpOpenGuideBtn">View Guide</button>
+                  </div>
+
+                  <!-- Action Card 2: System Health -->
+                  <div class="help-action-card">
+                    <div class="help-action-icon-wrap success">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"></path>
+                      </svg>
+                    </div>
+                    <div class="help-action-info">
+                      <h4 class="help-action-title">System &amp; Server Health</h4>
+                      <p class="help-action-desc"><span class="help-status-dot online"></span> All tracking engines &amp; WebSockets active</p>
+                    </div>
+                    <button type="button" class="btn-help-action secondary" id="helpCheckHealthBtn">Check Status</button>
+                  </div>
+
+                  <!-- Action Card 3: Privacy & Security -->
+                  <div class="help-action-card">
+                    <div class="help-action-icon-wrap warning">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                      </svg>
+                    </div>
+                    <div class="help-action-info">
+                      <h4 class="help-action-title">Privacy &amp; Security Notice</h4>
+                      <p class="help-action-desc">Learn how we encrypt logs, filter self-opens, and safeguard user telemetry.</p>
+                    </div>
+                    <button type="button" class="btn-help-action" id="helpOpenPrivacyBtn">Read Notice</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="figma-table-card">
+              <div class="panel-inner-header">
+                <div>
+                  <h3 class="panel-section-title">Frequently Asked Questions</h3>
+                  <p class="panel-section-desc">Quick answers about read receipts, links, self-opens, and mobile sync.</p>
+                </div>
+              </div>
+              <div class="figma-faq-grid">
+                <div class="faq-tile">
+                  <h4>How does email tracking work?</h4>
+                  <p>When you send an email with Mail Track, a transparent 1x1 tracking beacon image is securely embedded. When the recipient views the email, their email client fetches the beacon, registering a real-time read receipt.</p>
+                </div>
+                <div class="faq-tile">
+                  <h4>Are self-opens counted?</h4>
+                  <p>No. Mail Track uses intelligent sender IP filtering, user-agent verification, and a 10-second grace window to automatically filter out your own sent preview reads.</p>
+                </div>
+                <div class="faq-tile">
+                  <h4>How do link clicks track?</h4>
+                  <p>Tracked links route through your custom tracking redirector. When clicked, the redirector records the recipient and timestamp before instantaneously forwarding to the destination URL.</p>
+                </div>
+                <div class="faq-tile">
+                  <h4>How do double checkmarks (✓✓) work?</h4>
+                  <p>A single check (✓) indicates the email has been sent and registered. A double check (✓✓) indicates the recipient has opened and read your email.</p>
+                </div>
+                <div class="faq-tile">
+                  <h4>Does Mail Track work on mobile devices?</h4>
+                  <p>Yes! With Mobile Double Checkmarks Sync enabled, Mail Track automatically applies labels and checkmarks directly in the official Gmail mobile app on iOS and Android.</p>
+                </div>
+                <div class="faq-tile">
+                  <h4>Need direct support or custom setup?</h4>
+                  <p>Contact our support team directly at <a href="mailto:support@mailtrack.cc" class="help-email-link">support@mailtrack.cc</a> anytime for assistance with setup or bug reports.</p>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="figma-faq-grid">
-            <div class="faq-tile">
-              <h4>How does email tracking work?</h4>
-              <p>When you send an email with Mail Track, a transparent 1x1 tracking beacon image is securely embedded.
-                When the recipient views the email, their email client fetches the beacon, registering a real-time
-                read receipt.</p>
-            </div>
-            <div class="faq-tile">
-              <h4>Are self-opens counted?</h4>
-              <p>No. Mail Track uses intelligent sender IP filtering, user-agent verification, and a 10-second grace
-                window to automatically filter out your own sent preview reads.</p>
-            </div>
-            <div class="faq-tile">
-              <h4>How do link clicks track?</h4>
-              <p>Tracked links route through your custom tracking redirector. When clicked, the redirector records the
-                recipient and timestamp before instantaneously forwarding to the destination URL.</p>
-            </div>
-            <div class="faq-tile">
-              <h4>How do double checkmarks (✓✓) work?</h4>
-              <p>A single check (✓) indicates the email has been sent and registered. A double check (✓✓) indicates
-                the recipient has opened and read your email.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+        </section>
   </div>
   </main>
 
@@ -1042,7 +1189,7 @@
   <div class="toast-container" id="toastContainer"></div>
   </div>
 
-  <script src="app.js?v=figma_mobile_v1"></script>
+  <script src="app.js?v=figma_mobile_v2"></script>
 </body>
 
 </html>

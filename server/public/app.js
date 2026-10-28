@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const dropdownThemeToggle = document.getElementById('dropdownThemeToggle');
   const dropdownThemeText = document.getElementById('dropdownThemeText');
   const dropdownThemeSwitch = document.getElementById('dropdownThemeSwitch');
+  const mobileDropdownThemeToggle = document.getElementById('mobileDropdownThemeToggle');
+  const mobileDropdownThemeText = document.getElementById('mobileDropdownThemeText');
+  const mobileDropdownThemeSwitch = document.getElementById('mobileDropdownThemeSwitch');
 
   function initTheme() {
     const savedTheme = localStorage.getItem('mt_theme') || 'light';
@@ -37,6 +40,16 @@ document.addEventListener('DOMContentLoaded', () => {
     if (dropdownThemeText) {
       dropdownThemeText.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
     }
+    if (mobileDropdownThemeToggle) {
+      mobileDropdownThemeToggle.setAttribute('aria-checked', theme === 'dark' ? 'true' : 'false');
+      mobileDropdownThemeToggle.title = theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+    }
+    if (mobileDropdownThemeSwitch) {
+      mobileDropdownThemeSwitch.classList.toggle('active', theme === 'dark');
+    }
+    if (mobileDropdownThemeText) {
+      mobileDropdownThemeText.textContent = theme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    }
   }
 
   const toggleTheme = () => {
@@ -50,6 +63,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   if (dropdownThemeToggle) {
     dropdownThemeToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleTheme();
+    });
+  }
+  if (mobileDropdownThemeToggle) {
+    mobileDropdownThemeToggle.addEventListener('click', (e) => {
       e.stopPropagation();
       toggleTheme();
     });
@@ -234,10 +253,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  const mobileProfileContainer = document.getElementById('mobileProfileContainer');
+  const mobileProfileDropdown = document.getElementById('mobileProfileDropdown');
+  const mobileDropdownGetStarted = document.getElementById('mobileDropdownGetStarted');
+  const mobileDropdownPrivacyNotice = document.getElementById('mobileDropdownPrivacyNotice');
+
+  function toggleMobileProfileDropdown(forceState) {
+    if (!mobileProfileDropdown) return;
+    const shouldOpen = forceState !== undefined ? forceState : !mobileProfileDropdown.classList.contains('open');
+    mobileProfileDropdown.classList.toggle('open', shouldOpen);
+    if (mobileProfileBtn) {
+      mobileProfileBtn.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+    }
+    mobileProfileDropdown.setAttribute('aria-hidden', shouldOpen ? 'false' : 'true');
+  }
+
+  function closeMobileProfileDropdown() {
+    toggleMobileProfileDropdown(false);
+  }
+
   if (mobileProfileBtn) {
     mobileProfileBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      toggleMobileDrawer();
+      toggleMobileProfileDropdown();
+    });
+  }
+
+  if (mobileDropdownGetStarted) {
+    mobileDropdownGetStarted.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMobileProfileDropdown();
+      if (getStartedModal) getStartedModal.classList.add('open');
+    });
+  }
+
+  if (mobileDropdownPrivacyNotice) {
+    mobileDropdownPrivacyNotice.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMobileProfileDropdown();
+      if (privacyNoticeModal) privacyNoticeModal.classList.add('open');
     });
   }
 
@@ -248,8 +302,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   document.addEventListener('click', (e) => {
+    if (mobileProfileDropdown && mobileProfileDropdown.classList.contains('open')) {
+      if (!mobileProfileContainer || !mobileProfileContainer.contains(e.target)) {
+        closeMobileProfileDropdown();
+      }
+    }
     if (window.innerWidth <= 1024 && sideDrawer && sideDrawer.classList.contains('open')) {
-      if (!sideDrawer.contains(e.target) && (!mobileMenuBtn || !mobileMenuBtn.contains(e.target)) && (!mobileProfileBtn || !mobileProfileBtn.contains(e.target))) {
+      if (!sideDrawer.contains(e.target) && (!mobileMenuBtn || !mobileMenuBtn.contains(e.target))) {
         toggleMobileDrawer(false);
       }
     }
@@ -380,6 +439,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (userNameDisplay) userNameDisplay.textContent = user.name || 'User';
     if (userEmailDisplay) userEmailDisplay.textContent = user.email || '';
+
+    const mobileDropdownName = document.getElementById('mobileDropdownName');
+    const mobileDropdownEmail = document.getElementById('mobileDropdownEmail');
+    if (mobileDropdownName) mobileDropdownName.textContent = user.name || 'User';
+    if (mobileDropdownEmail) {
+      mobileDropdownEmail.textContent = user.email || '';
+      mobileDropdownEmail.title = user.email || '';
+    }
 
     const initial = (user.name || user.email || 'U').charAt(0).toUpperCase();
 
@@ -610,6 +677,55 @@ document.addEventListener('DOMContentLoaded', () => {
   if (privacyNoticeModal) {
     privacyNoticeModal.addEventListener('click', (e) => {
       if (e.target === privacyNoticeModal) privacyNoticeModal.classList.remove('open');
+    });
+  }
+
+  // Help & Support Interactive Triggers
+  const helpOpenGuideBtn = document.getElementById('helpOpenGuideBtn');
+  const helpCheckHealthBtn = document.getElementById('helpCheckHealthBtn');
+  const helpOpenPrivacyBtn = document.getElementById('helpOpenPrivacyBtn');
+
+  if (helpOpenGuideBtn) {
+    helpOpenGuideBtn.addEventListener('click', () => {
+      if (getStartedModal) getStartedModal.classList.add('open');
+    });
+  }
+
+  if (helpOpenPrivacyBtn) {
+    helpOpenPrivacyBtn.addEventListener('click', () => {
+      if (privacyNoticeModal) privacyNoticeModal.classList.add('open');
+    });
+  }
+
+  if (helpCheckHealthBtn) {
+    helpCheckHealthBtn.addEventListener('click', async () => {
+      helpCheckHealthBtn.disabled = true;
+      const originalText = helpCheckHealthBtn.textContent;
+      helpCheckHealthBtn.textContent = 'Pinging...';
+      const start = performance.now();
+      try {
+        const res = await fetch('/health');
+        const latency = Math.round(performance.now() - start);
+        if (res.ok) {
+          helpCheckHealthBtn.textContent = `Online (${latency}ms)`;
+          setTimeout(() => {
+            helpCheckHealthBtn.textContent = originalText;
+            helpCheckHealthBtn.disabled = false;
+          }, 3000);
+        } else {
+          helpCheckHealthBtn.textContent = 'Degraded';
+          setTimeout(() => {
+            helpCheckHealthBtn.textContent = originalText;
+            helpCheckHealthBtn.disabled = false;
+          }, 3000);
+        }
+      } catch {
+        helpCheckHealthBtn.textContent = 'Offline';
+        setTimeout(() => {
+          helpCheckHealthBtn.textContent = originalText;
+          helpCheckHealthBtn.disabled = false;
+        }, 3000);
+      }
     });
   }
 
