@@ -2854,7 +2854,11 @@ body {
 .mobile-bottom-nav,
 .mobile-profile-btn,
 .mobile-filter-chips-bar,
-.sidebar-backdrop {
+.mobile-brand-group,
+.mobile-search-bar-wrap,
+.sidebar-backdrop,
+.card-chevron-col,
+.card-footer-stats-cell {
   display: none !important;
 }
 
@@ -2912,11 +2916,11 @@ body {
     bottom: 0;
     left: 0;
     right: 0;
-    height: calc(60px + env(safe-area-inset-bottom, 0px));
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    height: calc(75px + env(safe-area-inset-bottom, 0px));
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px)) 8px;
     background: var(--bg-header);
     border-top: 1px solid var(--border-header);
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0px -4px 10px rgba(0, 0, 0, 0.08);
     z-index: 950;
     align-items: center;
     justify-content: space-around;
@@ -2926,24 +2930,25 @@ body {
 
   .mobile-nav-btn {
     flex: 1;
-    height: 100%;
+    height: 59px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 3px;
-    color: var(--text-subtitle);
-    background: none;
+    color: #94a3b8;
+    background: transparent;
     border: none;
+    border-radius: 8px;
     cursor: pointer;
     padding: 6px 0;
-    transition: color 0.15s ease, transform 0.12s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
     position: relative;
     -webkit-tap-highlight-color: transparent;
   }
 
   .mobile-nav-btn:active {
-    transform: scale(0.92);
+    transform: scale(0.96);
   }
 
   .mobile-nav-icon-wrap {
@@ -2951,19 +2956,23 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 20px;
+    height: 20px;
   }
 
   .mobile-nav-icon-wrap svg {
-    stroke-width: 2.2px;
-    transition: stroke 0.15s ease, transform 0.15s ease;
+    stroke: #94a3b8;
+    stroke-width: 1.83px;
+    transition: stroke 0.15s ease;
   }
 
   .mobile-nav-label {
     font-family: 'Inter', sans-serif;
     font-size: 10.5px;
     font-weight: 500;
-    line-height: 1;
+    line-height: 10.5px;
     letter-spacing: -0.1px;
+    color: #94a3b8;
     transition: color 0.15s ease, font-weight 0.15s ease;
   }
 
@@ -2998,13 +3007,18 @@ body {
     animation: pulse-ring 1.8s infinite;
   }
 
+  /* Active Tab: Exact Figma Node 223:12272 & 223:13475 */
   .mobile-nav-btn.active {
+    background: rgba(5, 150, 105, 0.08);
     color: var(--color-green);
+  }
+
+  [data-theme="dark"] .mobile-nav-btn.active {
+    background: rgba(16, 185, 129, 0.14);
   }
 
   .mobile-nav-btn.active .mobile-nav-icon-wrap svg {
     stroke: var(--color-green);
-    transform: translateY(-1px);
   }
 
   .mobile-nav-btn.active .mobile-nav-label {
@@ -3037,20 +3051,19 @@ body {
   }
 
   /* ---------------------------------------------------- */
-  /* 2. TOP APP BAR HEADER (ROW 1: TITLE+AVATAR, ROW 2: SEARCH) */
+  /* 2. TOP APP BAR HEADER (Exact Figma Node 223:11764 & 223:13361) */
   /* ---------------------------------------------------- */
   .figma-top-header {
-    height: auto;
+    height: 60px;
     min-height: 54px;
     padding: 10px 14px;
     position: sticky;
     top: 0;
     z-index: 100;
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     justify-content: space-between;
-    gap: 8px 0;
     background: var(--bg-header);
     border-bottom: 1px solid var(--border-header);
     backdrop-filter: blur(16px);
@@ -3060,44 +3073,79 @@ body {
   .header-left {
     display: flex;
     align-items: center;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
-    order: 1;
-  }
-
-  .header-title-group {
+    gap: 8px;
     flex: 1;
     min-width: 0;
   }
 
-  .header-title {
-    font-size: 17px;
+  /* Mobile Brand Group: Logo Squircle (Node 223:12303) + Title (Node 223:12367) */
+  .mobile-brand-group {
+    display: flex !important;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .mobile-logo-squircle {
+    width: 34px;
+    height: 34px;
+    background: #059669;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .mobile-logo-squircle svg {
+    width: 23.26px;
+    height: 23.26px;
+    display: block;
+  }
+
+  .mobile-brand-text {
+    font-family: 'Inter', sans-serif;
     font-weight: 700;
-    line-height: 1.25;
+    font-size: 14px;
+    line-height: 21.25px;
+    letter-spacing: -0.44px;
+    color: var(--text-title);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .header-subtitle {
-    display: none;
+  .mobile-toggle-btn {
+    display: none !important;
   }
 
-  /* Allow header-right children to participate directly in header flex-wrap */
+  .header-title-group {
+    display: none !important;
+  }
+
   .header-right {
-    display: contents;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
   }
 
-  /* Mobile Profile Button - Pinned to Row 1 Top Right */
+  /* Desktop elements hidden on mobile */
+  .figma-search-box#headerSearchBox {
+    display: none !important;
+  }
+
+  .filter-dropdown-container {
+    display: none !important;
+  }
+
+  /* Mobile Profile Button - Exact Figma Node 223:12370 */
   .mobile-profile-btn {
     display: flex !important;
-    order: 2;
-    margin-left: auto;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    border: 1px solid var(--border-user-card);
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: none;
     background: var(--color-green);
     color: #ffffff;
     align-items: center;
@@ -3105,13 +3153,21 @@ body {
     cursor: pointer;
     padding: 0;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: transform 0.15s ease;
     flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: transform 0.15s ease;
   }
 
   .mobile-profile-btn:active {
     transform: scale(0.92);
+  }
+
+  .mobile-avatar-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    object-fit: cover;
+    display: block;
   }
 
   .mobile-profile-btn .user-avatar-initial {
@@ -3119,31 +3175,11 @@ body {
     font-weight: 700;
     font-size: 13px;
     color: #ffffff;
-  }
-
-  /* Search Box - Full Width on Row 2 directly under header */
-  .figma-search-box {
-    order: 3;
-    width: 100%;
-    height: 38px;
-    border-radius: 10px;
-    background: var(--bg-search);
-    border: 1px solid var(--border-input);
-    margin-top: 2px;
-  }
-
-  .figma-search-box input {
-    font-size: 13.5px;
-  }
-
-  /* Desktop Filter Popover Toggle hidden on mobile (quick chips used instead) */
-  .filter-dropdown-container {
-    display: none !important;
+    line-height: 1;
   }
 
   /* Back Button on Mobile */
   .btn-back-to-list {
-    order: 1;
     padding: 6px 12px;
     background: var(--bg-card);
     border: 1px solid var(--border-card);
@@ -3163,12 +3199,12 @@ body {
 
   /* Main Content Area */
   .figma-content-area {
-    padding: 10px 14px;
+    padding: 14px;
     width: 100%;
   }
 
   /* ---------------------------------------------------- */
-  /* 3. HORIZONTAL FILTER CHIPS BAR                       */
+  /* 3. HORIZONTAL FILTER CHIPS BAR (Figma Node 223:11790) */
   /* ---------------------------------------------------- */
   .mobile-filter-chips-bar {
     display: flex !important;
@@ -3197,12 +3233,16 @@ body {
     font-family: 'Inter', sans-serif;
     font-size: 12.5px;
     font-weight: 500;
-    color: var(--text-nav);
+    color: #475569;
     white-space: nowrap;
     cursor: pointer;
     transition: all 0.15s ease;
     flex-shrink: 0;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.03);
+  }
+
+  [data-theme="dark"] .mobile-filter-chip {
+    color: var(--text-subtitle);
   }
 
   .mobile-filter-chip:active {
@@ -3214,24 +3254,81 @@ body {
     font-weight: 600;
     padding: 1px 6px;
     border-radius: 9999px;
-    background: var(--bg-chip);
-    color: var(--text-muted);
+    background: rgba(148, 163, 184, 0.15);
+    color: #64748b;
   }
 
+  /* Active Filter Chip: Exact Figma Node 223:11792 */
   .mobile-filter-chip.active {
-    background: var(--color-green);
-    border-color: var(--color-green);
+    background: #059669;
+    border-color: #059669;
     color: #ffffff;
     box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
   }
 
   .mobile-filter-chip.active .chip-count {
-    background: rgba(255, 255, 255, 0.25);
+    display: inline-block !important;
+    background: rgba(255, 255, 255, 0.16);
     color: #ffffff;
   }
 
+  /* Mobile Search Bar in Emails Tab: Exact Figma Node 223:12439 */
+  .mobile-search-bar-wrap {
+    display: flex !important;
+    width: 100%;
+    padding: 4px 0 10px 0;
+    margin-bottom: 2px;
+  }
+
+  .mobile-search-bar-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    height: 38px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-input);
+    padding: 0 12px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  }
+
+  .mobile-search-icon {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+
+  .mobile-search-input {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    border: none;
+    background: transparent;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 13.5px;
+    color: var(--text-title);
+  }
+
+  .mobile-search-input::placeholder {
+    color: #94a3b8;
+  }
+
+  .mobile-clear-search-btn {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   /* ---------------------------------------------------- */
-  /* 4. EMAIL TRACKING TABLE -> COMPACT NATIVE MOBILE CARDS */
+  /* 4. EMAIL TRACKING TABLE -> EXACT FIGMA NODE 223:11813 */
   /* ---------------------------------------------------- */
   .figma-table-card {
     background: transparent !important;
@@ -3256,25 +3353,25 @@ body {
   }
 
   .figma-data-table tbody {
-    display: block;
+    display: flex;
+    flex-direction: column;
     width: 100%;
+    gap: 12px;
   }
 
-  /* Compact Native Card */
+  /* Compact Native Card: Exact Figma Node 223:11813 */
   .email-row-clickable {
     display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
+    flex-direction: column;
     width: 100%;
-    height: auto !important;
-    min-height: 84px;
+    min-height: auto;
     background: var(--bg-card);
     border: 1px solid var(--border-card);
     border-radius: 12px;
-    padding: 11px 32px 11px 13px;
-    margin-bottom: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0px 1px 1.5px rgba(0, 0, 0, 0.04);
+    padding: 12px 13px;
+    margin-bottom: 0;
+    gap: 6px;
     position: relative;
     cursor: pointer;
     transition: transform 0.12s ease, background-color 0.15s ease, box-shadow 0.15s ease;
@@ -3286,21 +3383,12 @@ body {
     background: var(--bg-table-hover);
   }
 
-  /* Right arrow chevron indicating tapped details */
+  /* Disable old ::after chevron since chevron SVG is explicitly inside card */
   .email-row-clickable::after {
-    content: "›";
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 20px;
-    line-height: 1;
-    color: var(--text-subtitle);
-    font-weight: 300;
-    pointer-events: none;
+    display: none !important;
   }
 
-  /* Top Sent Timestamp in Card */
+  /* Row 1: Sent at: 28 Oct, 02:29 pm */
   .email-row-clickable td.cell-sent-at {
     display: block;
     width: 100%;
@@ -3309,36 +3397,62 @@ body {
     order: 1;
     font-size: 11px;
     font-weight: 500;
-    color: var(--text-subtitle);
-    margin-bottom: 3px;
+    color: #94a3b8;
+    line-height: 19.68px;
+    margin: 0;
   }
 
-  /* Subject & Recipient Block in Card */
+  .sent-time-label {
+    color: #94a3b8;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .sent-time-val {
+    color: #6c7787;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  [data-theme="dark"] .sent-time-val {
+    color: var(--text-subtitle);
+  }
+
+  /* Row 2: Subject & Recipient + Right Chevron (Node 223:12481) */
   .email-row-clickable td.td-subject-cell {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6px;
     width: 100%;
     padding: 0;
     border: none;
     order: 2;
-    margin-bottom: 7px;
-    min-height: auto;
+    margin: 0;
+  }
+
+  .card-subject-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
   }
 
   .subject-line-row {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 3px;
     width: 100%;
   }
 
   .subject-title-text {
+    font-family: 'Inter', sans-serif;
     font-size: 14.5px;
     font-weight: 600;
     color: var(--text-title);
-    line-height: 1.35;
-    max-width: 100%;
+    line-height: 19.575px;
     word-break: break-word;
     overflow-wrap: anywhere;
   }
@@ -3346,65 +3460,151 @@ body {
   .recipient-chips-row {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 4px;
-    margin-top: 2px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #475569;
+    line-height: 17.76px;
+  }
+
+  [data-theme="dark"] .recipient-chips-row {
+    color: var(--text-subtitle);
   }
 
   .rec-chip {
     font-size: 11px;
-    height: 22px;
-    padding: 1px 7px;
-    border-radius: 6px;
-    max-width: 190px;
+    height: auto;
+    padding: 0;
+    border-radius: 0;
+    background: transparent;
+    border: none;
+    color: inherit;
+    max-width: 280px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  /* Bottom Horizontal Metadata Stats Line */
+  /* Right Chevron Arrow (Node 223:12478) */
+  .card-chevron-col {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: #94a3b8;
+    opacity: 0.6;
+    margin-top: 1px;
+  }
+
+  /* Row 3 Divider & Footer Row (Node 223:12467) */
   .email-row-clickable td.cell-opens,
   .email-row-clickable td.cell-clicks-col,
   .email-row-clickable td.cell-last-opened-col {
+    display: none !important;
+  }
+
+  .email-row-clickable td.card-footer-stats-cell {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 6px 0 0 0;
+    border: none;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.08);
+    order: 3;
+    margin-top: 2px;
+  }
+
+  [data-theme="dark"] .email-row-clickable td.card-footer-stats-cell {
+    border-top-color: var(--border-card);
+  }
+
+  .card-footer-left-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  /* Figma Node 223:12539 Opens Badge */
+  .figma-badge.badge-opened {
+    background: rgba(5, 150, 105, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    color: #059669;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 17.76px;
+    height: 22px;
+    padding: 2px 7px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
-    padding: 0;
-    border: none;
-    margin-right: 6px;
-    margin-top: 0;
   }
 
-  .email-row-clickable td.cell-opens {
-    order: 3;
-    width: auto;
-  }
-
-  .email-row-clickable td.cell-clicks-col {
-    order: 4;
-    width: auto;
-  }
-
-  .email-row-clickable td.cell-last-opened-col {
-    order: 5;
-    width: auto;
+  /* Figma Node 223:12544 Unread Badge */
+  .figma-badge.badge-unread {
+    background: rgba(144, 144, 144, 0.07);
+    border: 1px solid rgba(144, 144, 144, 0.25);
+    color: #909090;
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
-    color: var(--text-muted);
+    font-weight: 500;
+    line-height: 17.76px;
+    height: 22px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Figma Node 223:12541 Clicks Badge */
+  .cell-clicks {
+    background: rgba(59, 130, 246, 0.08);
+    color: #3b82f6;
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 18.72px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Figma Node 223:12472 Last Opened Block */
+  .card-last-opened-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    text-align: right;
     margin-left: auto;
   }
 
-  .cell-clicks {
-    font-size: 11px;
-    padding: 2px 6px;
-    border-radius: 5px;
-    background: rgba(59, 130, 246, 0.08);
-    color: var(--color-blue);
-    font-weight: 500;
+  .last-opened-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    color: #475569;
+    line-height: 17.76px;
   }
 
-  .figma-badge {
-    height: 22px;
-    padding: 2px 7px;
+  [data-theme="dark"] .last-opened-label {
+    color: var(--text-muted);
+  }
+
+  .last-opened-time {
+    font-family: 'Inter', sans-serif;
     font-size: 11px;
-    border-radius: 6px;
+    font-weight: 600;
+    color: #059669;
+    line-height: 19.68px;
   }
 
   .figma-empty-state {
@@ -3687,44 +3887,186 @@ body {
   }
 
   /* ---------------------------------------------------- */
-  /* 6. ACTIVITY FEED TAB ON MOBILE                       */
+  /* 6. ACTIVITY FEED TAB ON MOBILE (Exact Figma Node 223:13358) */
   /* ---------------------------------------------------- */
-  .activity-feed-item,
-  .activity-event-card {
-    padding: 11px 13px;
-    border-radius: 12px;
-    margin-bottom: 8px;
-    gap: 10px;
-    align-items: flex-start;
+  .panel-inner-header.activity-panel-header,
+  #tabContentActivity .panel-inner-header {
+    border-bottom: 1px solid var(--border-header);
+    padding-bottom: 20px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    width: 100%;
   }
 
-  .feed-header-line {
+  #tabContentActivity .panel-section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-title);
+    line-height: normal;
+  }
+
+  #tabContentActivity .panel-section-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #94a3b8;
+    padding-top: 4px;
+    line-height: normal;
+  }
+
+  .figma-activity-list {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 2px;
+    gap: 10px;
+    width: 100%;
   }
 
-  .feed-recipient,
-  .activity-event-title {
-    font-size: 13px;
+  /* Activity Event Card: Exact Figma Node 223:13526 */
+  .activity-feed-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 11px 13px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0;
+    width: 100%;
+    box-shadow: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.12s ease;
+  }
+
+  [data-theme="dark"] .activity-feed-item {
+    background: var(--bg-card);
+    border-color: var(--border-card);
+  }
+
+  .activity-feed-item:active {
+    transform: scale(0.985);
+  }
+
+  /* Left Icon Box: Exact Figma Node 223:13527 (28px squircle) */
+  .feed-icon-wrap {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 6.22px !important;
+    background: rgba(5, 150, 105, 0.15) !important;
+    border: 0.78px solid rgba(16, 185, 129, 0.25) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .feed-icon-wrap.click {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-color: rgba(59, 130, 246, 0.25) !important;
+  }
+
+  .feed-icon-wrap svg {
+    width: 13px;
+    height: 13px;
+    stroke: #059669;
+  }
+
+  .feed-icon-wrap.click svg {
+    stroke: #3b82f6;
+  }
+
+  .feed-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Line 1: [recipient] Opened your email (Node 223:13544) */
+  .feed-header-line {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+  }
+
+  .feed-recipient-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    line-height: normal;
+    color: var(--text-title);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .feed-recipient {
     font-weight: 600;
-    word-break: break-all;
+    color: var(--text-title);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
-  .feed-time,
-  .activity-event-time {
-    font-size: 10.5px;
-    color: var(--text-muted);
+  .feed-action-text {
+    font-weight: 400;
+    color: var(--text-title);
+    white-space: nowrap;
   }
 
+  /* Line 2: 28 Oct 2026, 03:11 pm (Node 223:13536) */
+  .feed-time {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #636f80;
+    line-height: normal;
+    white-space: nowrap;
+  }
+
+  [data-theme="dark"] .feed-time {
+    color: var(--text-subtitle);
+  }
+
+  /* Line 3: Subject: [Subject Value] (Node 223:13537) */
   .feed-subject {
-    font-size: 12.5px;
-    word-break: break-word;
-    overflow-wrap: anywhere;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    line-height: normal;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  .feed-subject .subject-prefix {
+    font-weight: 400;
+    color: #475569;
+  }
+
+  [data-theme="dark"] .feed-subject .subject-prefix {
+    color: var(--text-subtitle);
+  }
+
+  .feed-subject .subject-val {
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.74);
+  }
+
+  [data-theme="dark"] .feed-subject .subject-val {
+    color: var(--text-title);
   }
 
   .feed-link-target {
     font-size: 11.5px;
+    color: #3b82f6;
     word-break: break-all;
   }
 

@@ -383,20 +383,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const initial = (user.name || user.email || 'U').charAt(0).toUpperCase();
 
-    if (user.avatarUrl && userAvatar) {
-      userAvatar.src = user.avatarUrl;
-      userAvatar.style.display = 'inline-block';
-      if (userInitial) userInitial.style.display = 'none';
-      if (mobileUserInitial) {
-        mobileUserInitial.innerHTML = `<img src="${user.avatarUrl}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" alt="" />`;
+    const mobileUserAvatar = document.getElementById('mobileUserAvatar');
+
+    if (user.avatarUrl && (userAvatar || mobileUserAvatar)) {
+      if (userAvatar) {
+        userAvatar.src = user.avatarUrl;
+        userAvatar.style.display = 'inline-block';
       }
-    } else if (userInitial) {
-      userInitial.textContent = initial;
-      userInitial.style.display = 'inline-flex';
-      if (userAvatar) userAvatar.style.display = 'none';
+      if (mobileUserAvatar) {
+        mobileUserAvatar.src = user.avatarUrl;
+        mobileUserAvatar.style.display = 'block';
+      }
+      if (userInitial) userInitial.style.display = 'none';
+      if (mobileUserInitial) mobileUserInitial.style.display = 'none';
+    } else {
+      if (userInitial) {
+        userInitial.textContent = initial;
+        userInitial.style.display = 'inline-flex';
+      }
       if (mobileUserInitial) {
         mobileUserInitial.textContent = initial;
+        mobileUserInitial.style.display = 'inline-flex';
       }
+      if (userAvatar) userAvatar.style.display = 'none';
+      if (mobileUserAvatar) mobileUserAvatar.style.display = 'none';
     }
 
     // Populate Settings Form
@@ -1167,11 +1177,18 @@ document.addEventListener('DOMContentLoaded', () => {
   // -------------------------------------------------------------
   // SEARCH & FILTER LOGIC
   // -------------------------------------------------------------
+  const mobileEmailSearchInput = document.getElementById('mobileEmailSearchInput');
+  const mobileClearSearchBtn = document.getElementById('mobileClearSearchBtn');
+
   if (emailSearchInput) {
     emailSearchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value.toLowerCase().trim();
+      if (mobileEmailSearchInput) mobileEmailSearchInput.value = e.target.value;
       if (clearSearchBtn) {
         clearSearchBtn.style.display = searchQuery ? 'inline-flex' : 'none';
+      }
+      if (mobileClearSearchBtn) {
+        mobileClearSearchBtn.style.display = searchQuery ? 'inline-flex' : 'none';
       }
       renderDashboard();
     });
@@ -1180,9 +1197,37 @@ document.addEventListener('DOMContentLoaded', () => {
   if (clearSearchBtn && emailSearchInput) {
     clearSearchBtn.addEventListener('click', () => {
       emailSearchInput.value = '';
+      if (mobileEmailSearchInput) mobileEmailSearchInput.value = '';
       searchQuery = '';
       clearSearchBtn.style.display = 'none';
+      if (mobileClearSearchBtn) mobileClearSearchBtn.style.display = 'none';
       emailSearchInput.focus();
+      renderDashboard();
+    });
+  }
+
+  if (mobileEmailSearchInput) {
+    mobileEmailSearchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value.toLowerCase().trim();
+      if (emailSearchInput) emailSearchInput.value = e.target.value;
+      if (mobileClearSearchBtn) {
+        mobileClearSearchBtn.style.display = searchQuery ? 'inline-flex' : 'none';
+      }
+      if (clearSearchBtn) {
+        clearSearchBtn.style.display = searchQuery ? 'inline-flex' : 'none';
+      }
+      renderDashboard();
+    });
+  }
+
+  if (mobileClearSearchBtn && mobileEmailSearchInput) {
+    mobileClearSearchBtn.addEventListener('click', () => {
+      mobileEmailSearchInput.value = '';
+      if (emailSearchInput) emailSearchInput.value = '';
+      searchQuery = '';
+      mobileClearSearchBtn.style.display = 'none';
+      if (clearSearchBtn) clearSearchBtn.style.display = 'none';
+      mobileEmailSearchInput.focus();
       renderDashboard();
     });
   }
@@ -1204,7 +1249,12 @@ document.addEventListener('DOMContentLoaded', () => {
     item.addEventListener('click', () => {
       activeFilter = item.dataset.filter || 'all';
       filterMenuItems.forEach(m => {
-        m.classList.toggle('active', (m.dataset.filter || 'all') === activeFilter);
+        const isMatch = (m.dataset.filter || 'all') === activeFilter;
+        m.classList.toggle('active', isMatch);
+        const chipCount = m.querySelector('.chip-count');
+        if (chipCount && m.classList.contains('mobile-filter-chip')) {
+          chipCount.style.display = isMatch ? 'inline-block' : 'none';
+        }
       });
       if (activeFilterBadge) {
         const labels = { all: 'All', opened: 'Opened', unopened: 'Unread', clicked: 'Clicked' };
@@ -1299,21 +1349,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const displayedRecs = recList.slice(0, 2);
       const remainingRecs = recList.length - 2;
 
-      const recChipsHtml = displayedRecs.map(rec => `
-        <span class="rec-chip" title="${escapeHtml(rec)}">
-          <span>${escapeHtml(rec)}</span>
-        </span>
-      `).join('') + (remainingRecs > 0 ? `
-        <span class="rec-chip" title="${remainingRecs} more recipients">
-          <span>+${remainingRecs}</span>
-        </span>
-      ` : '');
+      const recText = displayedRecs.map(r => escapeHtml(r)).join(', ') + (remainingRecs > 0 ? ` +${remainingRecs}` : '');
+      const recChipsHtml = `<span class="rec-chip" title="${escapeHtml(recList.join(', '))}">${recText}</span>`;
 
       const opensBadgeHtml = openCount > 0
         ? `<span class="figma-badge badge-opened">${openCount} open${openCount > 1 ? 's' : ''}</span>`
         : `<span class="figma-badge badge-unread">Unread</span>`;
 
-      const clicksHtml = `<span class="cell-clicks">${clickCount > 0 ? `${clickCount} click${clickCount > 1 ? 's' : ''}` : '0 Clicks'}</span>`;
+      const clicksHtml = `<span class="cell-clicks">${clickCount > 0 ? `${clickCount} Clicks` : '0 Clicks'}</span>`;
 
       const lastOpenedHtml = lastOpenTime
         ? `<span class="cell-last-opened">${formatDate(lastOpenTime)}</span>`
@@ -1321,19 +1364,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
       return `
         <tr class="email-row-clickable" data-id="${email.id}">
+          <td class="cell-sent-at">
+            <span class="sent-time-label">Sent at: </span>
+            <span class="sent-time-val">${sentDateStr}</span>
+          </td>
           <td class="td-subject-cell">
-            <div class="subject-line-row">
-              <span class="subject-title-text">${escapeHtml(email.subject || '(No Subject)')}</span>
-              ${showRedDot ? `<span class="figma-red-dot" title="Recent activity"></span>` : ''}
+            <div class="card-subject-content">
+              <div class="subject-line-row">
+                <span class="subject-title-text">${escapeHtml(email.subject || '(No Subject)')}</span>
+                ${showRedDot ? `<span class="figma-red-dot" title="Recent activity"></span>` : ''}
+              </div>
+              <div class="recipient-chips-row">
+                ${recChipsHtml}
+              </div>
             </div>
-            <div class="recipient-chips-row">
-              ${recChipsHtml}
+            <div class="card-chevron-col">
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M6.75 13.5L11.25 9L6.75 4.5" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
             </div>
           </td>
-          <td class="cell-sent-at">${sentDateStr}</td>
           <td class="cell-opens">${opensBadgeHtml}</td>
           <td class="cell-clicks-col">${clicksHtml}</td>
           <td class="cell-last-opened-col">${lastOpenedHtml}</td>
+          <td class="card-footer-stats-cell">
+            <div class="card-footer-left-badges">
+              ${opensBadgeHtml}
+              ${clickCount > 0 ? clicksHtml : ''}
+            </div>
+            <div class="card-last-opened-group">
+              <span class="last-opened-label">Last Opened</span>
+              <span class="last-opened-time">${lastOpenTime ? formatDate(lastOpenTime) : '-'}</span>
+            </div>
+          </td>
         </tr>
       `;
     }).join('');
@@ -1424,19 +1487,22 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="activity-feed-item" data-email-id="${evt.emailId}">
           <div class="feed-icon-wrap ${isClick ? 'click' : 'open'}">
             ${isClick 
-              ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>` 
-              : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>`}
+              ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>` 
+              : `<svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M9.75 4.33333C9.75 3.47128 9.40759 2.64448 8.79809 2.03498C8.18859 1.42548 7.36179 1.08333 6.5 1.08333C5.63821 1.08333 4.81141 1.42548 4.20191 2.03498C3.59241 2.64448 3.25 3.47128 3.25 4.33333C3.25 8.125 1.625 9.20833 1.625 9.20833H11.375C11.375 9.20833 9.75 8.125 9.75 4.33333Z" stroke="#059669" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M7.438 11.375C7.342 11.539 7.205 11.675 7.041 11.77C6.876 11.865 6.69 11.914 6.5 11.914C6.31 11.914 6.124 11.865 5.959 11.77C5.795 11.675 5.658 11.539 5.562 11.375" stroke="#059669" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
           </div>
           <div class="feed-content">
             <div class="feed-header-line">
-              <div class="feed-left-meta">
+              <div class="feed-recipient-row">
                 <span class="feed-recipient">${escapeHtml(evt.recipient)}</span>
-                <span class="badge-tag ${isClick ? 'badge-clicks' : 'badge-opens'}">${isClick ? 'Clicked Link' : 'Opened your email'}</span>
+                <span class="feed-action-text">${isClick ? 'Clicked a link' : 'Opened your email'}</span>
               </div>
-              <span class="feed-time">${timeStr}</span>
             </div>
-            <div class="feed-subject">Subject: <strong>${escapeHtml(evt.subject || '(No Subject)')}</strong></div>
-            ${isClick ? `<div class="feed-link-target">🔗 ${escapeHtml(evt.url)}</div>` : ''}
+            <div class="feed-time">${timeStr}</div>
+            <div class="feed-subject">
+              <span class="subject-prefix">Subject: </span>
+              <span class="subject-val">${escapeHtml(evt.subject || '(No Subject)')}</span>
+            </div>
+            ${isClick && evt.url ? `<div class="feed-link-target">🔗 ${escapeHtml(evt.url)}</div>` : ''}
           </div>
         </div>
       `;

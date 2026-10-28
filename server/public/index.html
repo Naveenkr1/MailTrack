@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=settings_figma_v2">
+  <link rel="stylesheet" href="style.css?v=figma_mobile_v1">
 </head>
 
 <body>
@@ -192,9 +192,19 @@
          MAIN VIEWPORT
          ====================================================================== -->
     <main class="figma-main-content">
-      <!-- 1. Header (Node 60:3830) -->
+      <!-- 1. Header (Node 60:3830 & Mobile Node 223:11764) -->
       <header class="figma-top-header">
         <div class="header-left">
+          <!-- Mobile Brand Group (Exact Figma Node 223:11764 & 223:13361) -->
+          <div class="mobile-brand-group" id="mobileBrandGroup">
+            <div class="mobile-logo-squircle">
+              <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
+                <path d="M11.2458 13.3377L12.6144 14.7063L20.82 6.50061L22.1909 7.8714L12.6144 17.4479L6.4458 11.2793L7.81659 9.90847L9.87615 11.968L11.2458 13.3377ZM11.2474 10.5968L16.048 5.79612L17.415 7.1631L12.6144 11.9637L11.2474 10.5968ZM8.50748 16.0782L7.13784 17.4479L0.969264 11.2793L2.34006 9.90847L3.70969 11.2782L3.70854 11.2793L8.50748 16.0782Z" fill="white"/>
+              </svg>
+            </div>
+            <span class="mobile-brand-text">Mail Track</span>
+          </div>
+
           <button class="mobile-toggle-btn" id="mobileMenuBtn" aria-label="Open Navigation">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="3" y1="12" x2="21" y2="12"></line>
@@ -262,17 +272,12 @@
             </div>
           </div>
 
-          <!-- Mobile User Profile Avatar Button (Visible on mobile) -->
+          <!-- Mobile User Profile Avatar Button (Visible on mobile - Node 223:12370) -->
           <button class="mobile-profile-btn" id="mobileProfileBtn" type="button" aria-label="Account Options"
             title="Account Options">
+            <img src="" id="mobileUserAvatar" class="mobile-avatar-img" alt="" style="display: none;" />
             <span class="user-avatar-initial" id="mobileUserInitial">N</span>
           </button>
-
-          <!-- Live Connection Status
-         <div class="ws-status" id="wsStatus">
-            <span class="status-dot"></span>
-            <span class="status-label">Live Connected</span>
-          </div> -->
         </div>
       </header>
 
@@ -304,7 +309,7 @@
 
           <!-- 1A: TABLE VIEW -->
           <div class="figma-table-card" id="emailTableView">
-            <!-- Mobile Horizontal Filter Chips Bar -->
+            <!-- Mobile Horizontal Filter Chips Bar (Node 223:11790) -->
             <div class="mobile-filter-chips-bar" id="mobileFilterChipsBar">
               <button class="mobile-filter-chip active" data-filter="all" type="button">
                 <span>All</span>
@@ -312,16 +317,28 @@
               </button>
               <button class="mobile-filter-chip" data-filter="opened" type="button">
                 <span>Opened</span>
-                <span class="chip-count" id="mobileCountOpened">0</span>
+                <span class="chip-count" id="mobileCountOpened" style="display:none;">0</span>
               </button>
               <button class="mobile-filter-chip" data-filter="unopened" type="button">
                 <span>Unread</span>
-                <span class="chip-count" id="mobileCountUnread">0</span>
+                <span class="chip-count" id="mobileCountUnread" style="display:none;">0</span>
               </button>
               <button class="mobile-filter-chip" data-filter="clicked" type="button">
                 <span>Clicked</span>
-                <span class="chip-count" id="mobileCountClicked">0</span>
+                <span class="chip-count" id="mobileCountClicked" style="display:none;">0</span>
               </button>
+            </div>
+
+            <!-- Mobile Search Bar (Exact Figma Node 223:12439) -->
+            <div class="mobile-search-bar-wrap" id="mobileEmailSearchWrap">
+              <div class="mobile-search-bar-inner">
+                <svg class="mobile-search-icon" width="15" height="15" viewBox="0 0 15 15" fill="none">
+                  <path d="M11.875 6.875C11.875 9.63642 9.63642 11.875 6.875 11.875C4.11358 11.875 1.875 9.63642 1.875 6.875C1.875 4.11358 4.11358 1.875 6.875 1.875C9.63642 1.875 11.875 4.11358 11.875 6.875Z" stroke="#94A3B8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M13.125 13.125L10.4062 10.4062" stroke="#94A3B8" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <input type="text" id="mobileEmailSearchInput" class="mobile-search-input" placeholder="Search by recipient, subject, or email..." />
+                <button class="mobile-clear-search-btn" id="mobileClearSearchBtn" type="button" style="display: none;" title="Clear search">✕</button>
+              </div>
             </div>
 
             <div class="table-scroll-container">
@@ -490,7 +507,8 @@
                   </div>
                   <div class="settings-header-action-wrap">
                     <span class="save-status-indicator" id="unifiedSaveStatus"></span>
-                    <button type="submit" form="unifiedSettingsForm" class="btn-figma-save" id="saveUnifiedSettingsBtn">Save Settings</button>
+                    <button type="submit" form="unifiedSettingsForm" class="btn-figma-save"
+                      id="saveUnifiedSettingsBtn">Save Settings</button>
                   </div>
                 </div>
 
@@ -561,12 +579,15 @@
                       </div>
 
                       <p class="sync-description">
-                        Play an audible notification chime in real-time whenever a recipient opens or reads your tracked email.
+                        Play an audible notification chime in real-time whenever a recipient opens or reads your tracked
+                        email.
                       </p>
 
                       <div class="settings-sound-preview-row">
-                        <button type="button" class="btn-sound-preview" id="testSoundBtn" title="Test notification sound chime">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <button type="button" class="btn-sound-preview" id="testSoundBtn"
+                          title="Test notification sound chime">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
                             <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
                           </svg>
@@ -610,423 +631,418 @@
                           </svg>
                           <span>Connect Gmail for Mobile Checkmarks</span>
                         </a>
-                        <div class="auto-sync-status-indicator" id="autoSyncStatusIndicator" style="display:none;">
-                          <span class="auto-sync-pulse-dot"></span>
-                          <span>Auto-synced in background</span>
-                        </div>
-                        <button type="button" class="btn-sync-mobile" id="syncExistingMobileBtn"
-                          title="Auto-sync is continuously active. Click to run a manual refresh anytime.">
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path
-                              d="M7 2.33333C5.48888 2.33333 4.1452 3.05114 3.2916 4.1666L4.66667 5.54167H1.16667V2.04167L2.46087 3.33587C3.52952 2.01367 5.16576 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7H11.6667C11.6667 4.42267 9.57734 2.33333 7 2.33333ZM2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667C8.51113 11.6667 9.85483 10.9489 10.7084 9.83343L9.33333 8.45833H12.8333V11.9583L11.5392 10.6642C10.4705 11.9863 8.83423 12.8333 7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7H2.33333Z"
-                              fill="currentColor" />
-                          </svg>
-                          <span>Sync emails to mobile</span>
-                        </button>
+                        <!--  <div class="auto-sync-status-indicator" id="autoSyncStatusIndicator" style="display:none;"> -->
+                        <span class="auto-sync-pulse-dot"></span>
+                        <span>Auto-synced in background</span>
                       </div>
-
-                      <div class="sync-inner-divider"></div>
-
-                      <div class="sync-tag-appearance-wrap">
-                        <p class="sync-appearance-title">Checkmark Tag Appearance</p>
-                        <div class="sync-tag-list">
-                          <div class="sync-tag-item">
-                            <div class="sync-tag-chip grey">✓</div>
-                            <span class="sync-tag-label">Delivered / Unread (Grey Single Tick)</span>
-                          </div>
-                          <div class="sync-tag-item">
-                            <div class="sync-tag-chip green">
-                              <svg width="18" height="14" viewBox="0 0 18.2207 14" fill="none"
-                                xmlns="http://www.w3.org/2000/svg">
-                                <path
-                                  d="M0 7.73065L1.10156 6.62518L2.91016 8.40253L6.92188 4.40643L8.03125 5.5119L2.91016 10.6057L0 7.73065Z"
-                                  fill="white" />
-                                <path
-                                  d="M10.1895 7.73065L11.291 6.62518L13.0996 8.40253L17.1113 4.40643L18.2207 5.5119L13.0996 10.6057L10.1895 7.73065Z"
-                                  fill="white" />
-                              </svg>
-                            </div>
-                            <span class="sync-tag-label">Recipient Opened Email (Vibrant Green Double Tick)</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div class="sync-tip-note">
+                      <button type="button" class="btn-sync-mobile" id="syncExistingMobileBtn"
+                        title="Auto-sync is continuously active. Click to run a manual refresh anytime.">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path
-                            d="M7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7C1.16667 3.77834 3.77834 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7C12.8333 10.2216 10.2216 12.8333 7 12.8333ZM7 11.6667C9.57734 11.6667 11.6667 9.57734 11.6667 7C11.6667 4.42267 9.57734 2.33333 7 2.33333C4.42267 2.33333 2.33333 4.42267 2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667ZM6.41667 4.08333H7.58333V5.25H6.41667V4.08333ZM6.41667 6.41667H7.58333V9.91667H6.41667V6.41667Z"
-                            fill="#7F8389" />
+                            d="M7 2.33333C5.48888 2.33333 4.1452 3.05114 3.2916 4.1666L4.66667 5.54167H1.16667V2.04167L2.46087 3.33587C3.52952 2.01367 5.16576 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7H11.6667C11.6667 4.42267 9.57734 2.33333 7 2.33333ZM2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667C8.51113 11.6667 9.85483 10.9489 10.7084 9.83343L9.33333 8.45833H12.8333V11.9583L11.5392 10.6642C10.4705 11.9863 8.83423 12.8333 7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7H2.33333Z"
+                            fill="currentColor" />
                         </svg>
-                        <span>For checkmarks to appear on sent threads, enable Conversation View in Gmail
-                          settings.</span>
+                        <span>Sync emails to mobile</span>
+                      </button>
+                    </div>
+
+                    <div class="sync-inner-divider"></div>
+
+                    <div class="sync-tag-appearance-wrap">
+                      <p class="sync-appearance-title">Checkmark Tag Appearance</p>
+                      <div class="sync-tag-list">
+                        <div class="sync-tag-item">
+                          <div class="sync-tag-chip grey">✓</div>
+                          <span class="sync-tag-label">Delivered / Unread (Grey Single Tick)</span>
+                        </div>
+                        <div class="sync-tag-item">
+                          <div class="sync-tag-chip green">
+                            <svg width="18" height="14" viewBox="0 0 18.2207 14" fill="none"
+                              xmlns="http://www.w3.org/2000/svg">
+                              <path
+                                d="M0 7.73065L1.10156 6.62518L2.91016 8.40253L6.92188 4.40643L8.03125 5.5119L2.91016 10.6057L0 7.73065Z"
+                                fill="white" />
+                              <path
+                                d="M10.1895 7.73065L11.291 6.62518L13.0996 8.40253L17.1113 4.40643L18.2207 5.5119L13.0996 10.6057L10.1895 7.73065Z"
+                                fill="white" />
+                            </svg>
+                          </div>
+                          <span class="sync-tag-label">Recipient Opened Email (Vibrant Green Double Tick)</span>
+                        </div>
                       </div>
+                    </div>
+
+                    <div class="sync-tip-note">
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7C1.16667 3.77834 3.77834 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7C12.8333 10.2216 10.2216 12.8333 7 12.8333ZM7 11.6667C9.57734 11.6667 11.6667 9.57734 11.6667 7C11.6667 4.42267 9.57734 2.33333 7 2.33333C4.42267 2.33333 2.33333 4.42267 2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667ZM6.41667 4.08333H7.58333V5.25H6.41667V4.08333ZM6.41667 6.41667H7.58333V9.91667H6.41667V6.41667Z"
+                          fill="#7F8389" />
+                      </svg>
+                      <span>For checkmarks to appear on sent threads, enable Conversation View in Gmail
+                        settings.</span>
                     </div>
                   </div>
                 </div>
-              </form>
             </div>
-
-            <!-- 2. Danger Zone: Delete Account & Permanent Data Removal (Node 186:9668) -->
-            <div class="figma-table-card danger-card">
-              <div class="panel-inner-header">
-                <div>
-                  <h3 class="panel-section-title danger-heading">Delete Account &amp; Permanent Data Removal</h3>
-                  <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and
-                    all account data.</p>
-                </div>
-              </div>
-              <div class="panel-inner-body">
-                <!--  <div class="settings-section-divider"></div> -->
-                <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails,
-                  open logs, clicks, and API credentials will be permanently erased from both local storage and cloud
-                  database.</p>
-                <button class="btn-figma-danger" id="deleteAccountBtn" type="button">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.17"
-                    stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1.75 3.5H2.91667H12.25" />
-                    <path
-                      d="M11.0833 3.5V11.6667C11.0833 11.9761 10.9604 12.2728 10.7416 12.4916C10.5228 12.7104 10.2261 12.8333 9.91667 12.8333H4.08333C3.77391 12.8333 3.47717 12.7104 3.25838 12.4916C3.03958 12.2728 2.91667 11.9761 2.91667 11.6667V3.5M4.66667 3.5V2.33333C4.66667 2.02391 4.78958 1.72717 5.00838 1.50838C5.22717 1.28958 5.52391 1.16667 5.83333 1.16667H8.16667C8.47609 1.16667 8.77283 1.28958 8.99162 1.50838C9.21042 1.72717 9.33333 2.02391 9.33333 2.33333V3.5" />
-                  </svg>
-                  <span>Delete My Account &amp; All Data</span>
-                </button>
-              </div>
-            </div>
+            </form>
           </div>
-        </section>
 
-        <!-- TAB 4: HELP & SUPPORT -->
-        <section class="tab-panel" id="tabContentHelp">
-          <div class="figma-table-card">
+          <!-- 2. Danger Zone: Delete Account & Permanent Data Removal (Node 186:9668) -->
+          <div class="figma-table-card danger-card">
             <div class="panel-inner-header">
               <div>
-                <h3 class="panel-section-title">Help & Support</h3>
-                <p class="panel-section-desc">Learn how Mail Track operates, troubleshooting tips, and how tracking
-                  beacons function.</p>
+                <h3 class="panel-section-title danger-heading">Delete Account &amp; Permanent Data Removal</h3>
+                <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and
+                  all account data.</p>
               </div>
             </div>
-            <div class="figma-faq-grid">
-              <div class="faq-tile">
-                <h4>How does email tracking work?</h4>
-                <p>When you send an email with Mail Track, a transparent 1x1 tracking beacon image is securely embedded.
-                  When the recipient views the email, their email client fetches the beacon, registering a real-time
-                  read receipt.</p>
-              </div>
-              <div class="faq-tile">
-                <h4>Are self-opens counted?</h4>
-                <p>No. Mail Track uses intelligent sender IP filtering, user-agent verification, and a 10-second grace
-                  window to automatically filter out your own sent preview reads.</p>
-              </div>
-              <div class="faq-tile">
-                <h4>How do link clicks track?</h4>
-                <p>Tracked links route through your custom tracking redirector. When clicked, the redirector records the
-                  recipient and timestamp before instantaneously forwarding to the destination URL.</p>
-              </div>
-              <div class="faq-tile">
-                <h4>How do double checkmarks (✓✓) work?</h4>
-                <p>A single check (✓) indicates the email has been sent and registered. A double check (✓✓) indicates
-                  the recipient has opened and read your email.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </main>
-
-    <!-- Details Modal -->
-    <div class="modal-backdrop" id="detailsModal">
-      <div class="modal-window">
-        <div class="modal-window-header">
-          <div class="modal-headline">
-            <span class="modal-badge-status" id="modalStatusBadge">✓✓ Opened</span>
-            <h3 id="modalSubject">Email Details</h3>
-          </div>
-          <button class="modal-close-button" id="closeDetailsModalBtn">&times;</button>
-        </div>
-        <div class="modal-window-body" id="modalDetailsBody"></div>
-      </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="modal-backdrop" id="deleteConfirmModal">
-      <div class="modal-window danger-modal">
-        <div class="modal-window-header">
-          <h3 class="danger-heading">Permanently Delete Account?</h3>
-          <button class="modal-close-button" id="closeDeleteModalBtn">&times;</button>
-        </div>
-        <div class="modal-window-body">
-          <p>Are you sure you want to delete your account? This action cannot be undone. All your tracked emails,
-            recipient open histories, and API access will be permanently deleted immediately.</p>
-          <div class="modal-actions-footer">
-            <button class="btn-modal-cancel" id="cancelDeleteBtn">Cancel</button>
-            <button class="btn-modal-delete" id="confirmDeleteAccountBtn">Yes, Permanently Delete</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- GET STARTED MODAL -->
-    <div class="modal-backdrop" id="getStartedModal">
-      <div class="modal-window">
-        <div class="modal-window-header">
-          <div class="modal-headline">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <polygon points="10 8 16 12 10 16 10 8"></polygon>
-            </svg>
-            <h3>Get Started with Mail Track</h3>
-          </div>
-          <button class="modal-close-button" id="closeGetStartedModalBtn">&times;</button>
-        </div>
-        <div class="modal-window-body">
-          <div class="get-started-steps">
-            <div class="gs-step">
-              <div class="gs-step-num">1</div>
-              <div class="gs-step-content">
-                <h4>Pin the Mail Track Extension</h4>
-                <p>Click the Chrome puzzle piece icon <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2">
-                    <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                  </svg> in your browser toolbar and pin <strong>Mail Track</strong> for easy access.</p>
-              </div>
-            </div>
-
-            <div class="gs-step">
-              <div class="gs-step-num">2</div>
-              <div class="gs-step-content">
-                <h4>Compose an Email in Gmail</h4>
-                <p>Open <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer"
-                    style="color:var(--color-green);text-decoration:underline;">Gmail</a> and click
-                  <strong>Compose</strong>. You'll see the sleek green <strong>Track ON</strong> badge active in the
-                  send bar.
-                </p>
-              </div>
-            </div>
-
-            <div class="gs-step">
-              <div class="gs-step-num">3</div>
-              <div class="gs-step-content">
-                <h4>Send to Any Recipient</h4>
-                <p>Send your message normally. Delivered emails show a grey single checkmark (<span
-                    class="preview-chip grey" style="padding:1px 6px;">✓</span>) in your Sent list.</p>
-              </div>
-            </div>
-
-            <div class="gs-step">
-              <div class="gs-step-num">4</div>
-              <div class="gs-step-content">
-                <h4>Track Opens on Desktop &amp; Mobile!</h4>
-                <p>The instant your recipient opens the message, checkmarks flip to green double ticks (<span
-                    class="preview-chip green" style="padding:1px 6px;">✓✓</span>) on both desktop Gmail and your
-                  official Gmail mobile app!</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="modal-actions-footer">
-            <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer" class="btn-figma-primary"
-              style="text-decoration:none;">Open Gmail</a>
-            <button class="btn-modal-cancel" id="dismissGetStartedBtn">Got It</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PRIVACY NOTICE MODAL -->
-    <div class="modal-backdrop" id="privacyNoticeModal">
-      <div class="modal-window">
-        <div class="modal-window-header">
-          <div class="modal-headline">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2"
-              stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            <h3>Mail Track Privacy Notice</h3>
-          </div>
-          <button class="modal-close-button" id="closePrivacyModalBtn">&times;</button>
-        </div>
-        <div class="modal-window-body">
-          <div class="privacy-notice-content">
-            <div class="privacy-item">
-              <div class="privacy-item-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)"
-                  stroke-width="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            <div class="panel-inner-body">
+              <!--  <div class="settings-section-divider"></div> -->
+              <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails,
+                open logs, clicks, and API credentials will be permanently erased from both local storage and cloud
+                database.</p>
+              <button class="btn-figma-danger" id="deleteAccountBtn" type="button">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.17"
+                  stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1.75 3.5H2.91667H12.25" />
+                  <path
+                    d="M11.0833 3.5V11.6667C11.0833 11.9761 10.9604 12.2728 10.7416 12.4916C10.5228 12.7104 10.2261 12.8333 9.91667 12.8333H4.08333C3.77391 12.8333 3.47717 12.7104 3.25838 12.4916C3.03958 12.2728 2.91667 11.9761 2.91667 11.6667V3.5M4.66667 3.5V2.33333C4.66667 2.02391 4.78958 1.72717 5.00838 1.50838C5.22717 1.28958 5.52391 1.16667 5.83333 1.16667H8.16667C8.47609 1.16667 8.77283 1.28958 8.99162 1.50838C9.21042 1.72717 9.33333 2.02391 9.33333 2.33333V3.5" />
                 </svg>
-              </div>
-              <div class="privacy-item-text">
-                <h4>Zero Email Content Stored</h4>
-                <p>Mail Track never reads, parses, or stores your private message content or attachments. Only minimal
-                  delivery and read beacon timestamps are recorded.</p>
-              </div>
-            </div>
-
-            <div class="privacy-item">
-              <div class="privacy-item-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)"
-                  stroke-width="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-                  <path d="M2 17l10 5 10-5"></path>
-                  <path d="M2 12l10 5 10-5"></path>
-                </svg>
-              </div>
-              <div class="privacy-item-text">
-                <h4>Google API Limited Use Compliance</h4>
-                <p>Mail Track's use of information received from Google APIs adheres to the Google API Services User
-                  Data Policy, including Limited Use requirements.</p>
-              </div>
-            </div>
-
-            <div class="privacy-item">
-              <div class="privacy-item-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)"
-                  stroke-width="2">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
-                </svg>
-              </div>
-              <div class="privacy-item-text">
-                <h4>No Data Selling or Advertising</h4>
-                <p>We do not monetize your data, sell telemetry to advertisers, or inject tracking cookies across the
-                  web.</p>
-              </div>
-            </div>
-
-            <div class="privacy-item">
-              <div class="privacy-item-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)"
-                  stroke-width="2">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </div>
-              <div class="privacy-item-text">
-                <h4>Complete 1-Click Data Erasure</h4>
-                <p>You can permanently delete your linked Google credentials and all historical tracking logs at any
-                  time from the Settings tab.</p>
-              </div>
+                <span>Delete My Account &amp; All Data</span>
+              </button>
             </div>
           </div>
-
-          <div class="modal-actions-footer"
-            style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <a href="/privacy" target="_blank" rel="noopener noreferrer"
-              style="font-size: 13px; color: var(--color-green); font-weight: 500; text-decoration: underline;">View
-              Full Privacy Policy →</a>
-            <button class="btn-figma-primary" id="dismissPrivacyModalBtn">I Understand</button>
-          </div>
-        </div>
       </div>
-    </div>
+      </section>
 
-    <!-- FIRST-TIME / CONNECT MOBILE CHECKMARKS MODAL -->
-    <div class="modal-backdrop" id="mobileSyncPromptModal">
-      <div class="modal-window">
-        <div class="modal-window-header">
-          <div class="modal-headline">
-            <span style="font-size: 20px; line-height: 1;">📱</span>
-            <h3>Enable Mobile Checkmarks (✓✓)</h3>
-          </div>
-          <button class="modal-close-button" id="closeMobilePromptBtn" type="button"
-            aria-label="Close modal">&times;</button>
-        </div>
-        <div class="modal-window-body">
-          <p style="font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 16px;">
-            Would you like to see delivery and read receipts directly inside your official <strong>Gmail mobile
-              app</strong> on iPhone & Android?
-          </p>
-
-          <div class="mobile-preview-box" style="margin-bottom: 16px;">
-            <div class="mp-title">How checkmarks appear in your phone's Gmail:</div>
-            <div class="mp-items">
-              <div class="mp-item">
-                <span class="preview-chip grey">✓</span>
-                <span class="mp-label">Delivered / Unread (Grey Single Tick)</span>
-              </div>
-              <div class="mp-item">
-                <span class="preview-chip green">✓✓</span>
-                <span class="mp-label">Recipient Opened Email (Green Double Tick)</span>
-              </div>
+      <!-- TAB 4: HELP & SUPPORT -->
+      <section class="tab-panel" id="tabContentHelp">
+        <div class="figma-table-card">
+          <div class="panel-inner-header">
+            <div>
+              <h3 class="panel-section-title">Help & Support</h3>
+              <p class="panel-section-desc">Learn how Mail Track operates, troubleshooting tips, and how tracking
+                beacons function.</p>
             </div>
           </div>
-
-          <div
-            style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.22); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 12px; color: #065f46; line-height: 1.45;">
-            <strong>Google OAuth Notice:</strong><br />
-            Google will request permission to modify email labels. If you see <em>"Google hasn't verified this
-              app"</em>, simply click <strong>"Advanced"</strong> → <strong>"Go to mail-track-pink.vercel.app
-              (unsafe)"</strong> to confirm.
-          </div>
-
-          <div class="modal-actions-footer">
-            <a href="/auth/google/mobile-sync" class="btn-figma-primary" id="enableMobilePromptBtn"
-              style="text-decoration:none;">Connect Mobile Gmail</a>
-            <button class="btn-modal-cancel" id="dismissMobilePromptBtn" type="button">Maybe Later</button>
+          <div class="figma-faq-grid">
+            <div class="faq-tile">
+              <h4>How does email tracking work?</h4>
+              <p>When you send an email with Mail Track, a transparent 1x1 tracking beacon image is securely embedded.
+                When the recipient views the email, their email client fetches the beacon, registering a real-time
+                read receipt.</p>
+            </div>
+            <div class="faq-tile">
+              <h4>Are self-opens counted?</h4>
+              <p>No. Mail Track uses intelligent sender IP filtering, user-agent verification, and a 10-second grace
+                window to automatically filter out your own sent preview reads.</p>
+            </div>
+            <div class="faq-tile">
+              <h4>How do link clicks track?</h4>
+              <p>Tracked links route through your custom tracking redirector. When clicked, the redirector records the
+                recipient and timestamp before instantaneously forwarding to the destination URL.</p>
+            </div>
+            <div class="faq-tile">
+              <h4>How do double checkmarks (✓✓) work?</h4>
+              <p>A single check (✓) indicates the email has been sent and registered. A double check (✓✓) indicates
+                the recipient has opened and read your email.</p>
+            </div>
           </div>
         </div>
+      </section>
+  </div>
+  </main>
+
+  <!-- Details Modal -->
+  <div class="modal-backdrop" id="detailsModal">
+    <div class="modal-window">
+      <div class="modal-window-header">
+        <div class="modal-headline">
+          <span class="modal-badge-status" id="modalStatusBadge">✓✓ Opened</span>
+          <h3 id="modalSubject">Email Details</h3>
+        </div>
+        <button class="modal-close-button" id="closeDetailsModalBtn">&times;</button>
       </div>
+      <div class="modal-window-body" id="modalDetailsBody"></div>
     </div>
-
-    <!-- Mobile Bottom App Navigation Bar (Visible only on mobile devices) -->
-    <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
-      <button class="nav-button mobile-nav-btn active" data-tab="email-tracking" type="button"
-        aria-label="Email Tracking Tab">
-        <div class="mobile-nav-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-            <polyline points="22,6 12,13 2,6"></polyline>
-          </svg>
-          <span class="mobile-nav-badge" id="mobileTabEmailCount" style="display:none;"></span>
-        </div>
-        <span class="mobile-nav-label">Emails</span>
-      </button>
-
-      <button class="nav-button mobile-nav-btn" data-tab="activity" type="button" aria-label="Activity Feed Tab">
-        <div class="mobile-nav-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-          </svg>
-          <span class="mobile-pulse-dot" id="mobileActivityPulseDot" style="display:none;"></span>
-        </div>
-        <span class="mobile-nav-label">Activity</span>
-      </button>
-
-      <button class="nav-button mobile-nav-btn" data-tab="settings" type="button" aria-label="Settings Tab">
-        <div class="mobile-nav-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path
-              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
-            </path>
-          </svg>
-        </div>
-        <span class="mobile-nav-label">Settings</span>
-      </button>
-
-      <button class="nav-button mobile-nav-btn" data-tab="help" type="button" aria-label="Help Tab">
-        <div class="mobile-nav-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-            <line x1="12" y1="17" x2="12.01" y2="17"></line>
-          </svg>
-        </div>
-        <span class="mobile-nav-label">Help</span>
-      </button>
-    </nav>
-
-    <!-- Toast Notification Container -->
-    <div class="toast-container" id="toastContainer"></div>
   </div>
 
-  <script src="app.js?v=settings_figma_v2"></script>
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" id="deleteConfirmModal">
+    <div class="modal-window danger-modal">
+      <div class="modal-window-header">
+        <h3 class="danger-heading">Permanently Delete Account?</h3>
+        <button class="modal-close-button" id="closeDeleteModalBtn">&times;</button>
+      </div>
+      <div class="modal-window-body">
+        <p>Are you sure you want to delete your account? This action cannot be undone. All your tracked emails,
+          recipient open histories, and API access will be permanently deleted immediately.</p>
+        <div class="modal-actions-footer">
+          <button class="btn-modal-cancel" id="cancelDeleteBtn">Cancel</button>
+          <button class="btn-modal-delete" id="confirmDeleteAccountBtn">Yes, Permanently Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GET STARTED MODAL -->
+  <div class="modal-backdrop" id="getStartedModal">
+    <div class="modal-window">
+      <div class="modal-window-header">
+        <div class="modal-headline">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="10 8 16 12 10 16 10 8"></polygon>
+          </svg>
+          <h3>Get Started with Mail Track</h3>
+        </div>
+        <button class="modal-close-button" id="closeGetStartedModalBtn">&times;</button>
+      </div>
+      <div class="modal-window-body">
+        <div class="get-started-steps">
+          <div class="gs-step">
+            <div class="gs-step-num">1</div>
+            <div class="gs-step-content">
+              <h4>Pin the Mail Track Extension</h4>
+              <p>Click the Chrome puzzle piece icon <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                </svg> in your browser toolbar and pin <strong>Mail Track</strong> for easy access.</p>
+            </div>
+          </div>
+
+          <div class="gs-step">
+            <div class="gs-step-num">2</div>
+            <div class="gs-step-content">
+              <h4>Compose an Email in Gmail</h4>
+              <p>Open <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer"
+                  style="color:var(--color-green);text-decoration:underline;">Gmail</a> and click
+                <strong>Compose</strong>. You'll see the sleek green <strong>Track ON</strong> badge active in the
+                send bar.
+              </p>
+            </div>
+          </div>
+
+          <div class="gs-step">
+            <div class="gs-step-num">3</div>
+            <div class="gs-step-content">
+              <h4>Send to Any Recipient</h4>
+              <p>Send your message normally. Delivered emails show a grey single checkmark (<span
+                  class="preview-chip grey" style="padding:1px 6px;">✓</span>) in your Sent list.</p>
+            </div>
+          </div>
+
+          <div class="gs-step">
+            <div class="gs-step-num">4</div>
+            <div class="gs-step-content">
+              <h4>Track Opens on Desktop &amp; Mobile!</h4>
+              <p>The instant your recipient opens the message, checkmarks flip to green double ticks (<span
+                  class="preview-chip green" style="padding:1px 6px;">✓✓</span>) on both desktop Gmail and your
+                official Gmail mobile app!</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions-footer">
+          <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer" class="btn-figma-primary"
+            style="text-decoration:none;">Open Gmail</a>
+          <button class="btn-modal-cancel" id="dismissGetStartedBtn">Got It</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRIVACY NOTICE MODAL -->
+  <div class="modal-backdrop" id="privacyNoticeModal">
+    <div class="modal-window">
+      <div class="modal-window-header">
+        <div class="modal-headline">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <h3>Mail Track Privacy Notice</h3>
+        </div>
+        <button class="modal-close-button" id="closePrivacyModalBtn">&times;</button>
+      </div>
+      <div class="modal-window-body">
+        <div class="privacy-notice-content">
+          <div class="privacy-item">
+            <div class="privacy-item-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
+            <div class="privacy-item-text">
+              <h4>Zero Email Content Stored</h4>
+              <p>Mail Track never reads, parses, or stores your private message content or attachments. Only minimal
+                delivery and read beacon timestamps are recorded.</p>
+            </div>
+          </div>
+
+          <div class="privacy-item">
+            <div class="privacy-item-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                <path d="M2 17l10 5 10-5"></path>
+                <path d="M2 12l10 5 10-5"></path>
+              </svg>
+            </div>
+            <div class="privacy-item-text">
+              <h4>Google API Limited Use Compliance</h4>
+              <p>Mail Track's use of information received from Google APIs adheres to the Google API Services User
+                Data Policy, including Limited Use requirements.</p>
+            </div>
+          </div>
+
+          <div class="privacy-item">
+            <div class="privacy-item-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+              </svg>
+            </div>
+            <div class="privacy-item-text">
+              <h4>No Data Selling or Advertising</h4>
+              <p>We do not monetize your data, sell telemetry to advertisers, or inject tracking cookies across the
+                web.</p>
+            </div>
+          </div>
+
+          <div class="privacy-item">
+            <div class="privacy-item-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-green)" stroke-width="2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+            </div>
+            <div class="privacy-item-text">
+              <h4>Complete 1-Click Data Erasure</h4>
+              <p>You can permanently delete your linked Google credentials and all historical tracking logs at any
+                time from the Settings tab.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions-footer"
+          style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <a href="/privacy" target="_blank" rel="noopener noreferrer"
+            style="font-size: 13px; color: var(--color-green); font-weight: 500; text-decoration: underline;">View
+            Full Privacy Policy →</a>
+          <button class="btn-figma-primary" id="dismissPrivacyModalBtn">I Understand</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIRST-TIME / CONNECT MOBILE CHECKMARKS MODAL -->
+  <div class="modal-backdrop" id="mobileSyncPromptModal">
+    <div class="modal-window">
+      <div class="modal-window-header">
+        <div class="modal-headline">
+          <span style="font-size: 20px; line-height: 1;">📱</span>
+          <h3>Enable Mobile Checkmarks (✓✓)</h3>
+        </div>
+        <button class="modal-close-button" id="closeMobilePromptBtn" type="button"
+          aria-label="Close modal">&times;</button>
+      </div>
+      <div class="modal-window-body">
+        <p style="font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 16px;">
+          Would you like to see delivery and read receipts directly inside your official <strong>Gmail mobile
+            app</strong> on iPhone & Android?
+        </p>
+
+        <div class="mobile-preview-box" style="margin-bottom: 16px;">
+          <div class="mp-title">How checkmarks appear in your phone's Gmail:</div>
+          <div class="mp-items">
+            <div class="mp-item">
+              <span class="preview-chip grey">✓</span>
+              <span class="mp-label">Delivered / Unread (Grey Single Tick)</span>
+            </div>
+            <div class="mp-item">
+              <span class="preview-chip green">✓✓</span>
+              <span class="mp-label">Recipient Opened Email (Green Double Tick)</span>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.22); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 12px; color: #065f46; line-height: 1.45;">
+          <strong>Google OAuth Notice:</strong><br />
+          Google will request permission to modify email labels. If you see <em>"Google hasn't verified this
+            app"</em>, simply click <strong>"Advanced"</strong> → <strong>"Go to mail-track-pink.vercel.app
+            (unsafe)"</strong> to confirm.
+        </div>
+
+        <div class="modal-actions-footer">
+          <a href="/auth/google/mobile-sync" class="btn-figma-primary" id="enableMobilePromptBtn"
+            style="text-decoration:none;">Connect Mobile Gmail</a>
+          <button class="btn-modal-cancel" id="dismissMobilePromptBtn" type="button">Maybe Later</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom App Navigation Bar (Visible only on mobile devices) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
+    <button class="nav-button mobile-nav-btn active" data-tab="email-tracking" type="button"
+      aria-label="Email Tracking Tab">
+      <div class="mobile-nav-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+          <polyline points="22,6 12,13 2,6"></polyline>
+        </svg>
+        <span class="mobile-nav-badge" id="mobileTabEmailCount" style="display:none;"></span>
+      </div>
+      <span class="mobile-nav-label">Emails</span>
+    </button>
+
+    <button class="nav-button mobile-nav-btn" data-tab="activity" type="button" aria-label="Activity Feed Tab">
+      <div class="mobile-nav-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+        </svg>
+        <span class="mobile-pulse-dot" id="mobileActivityPulseDot" style="display:none;"></span>
+      </div>
+      <span class="mobile-nav-label">Activity</span>
+    </button>
+
+    <button class="nav-button mobile-nav-btn" data-tab="settings" type="button" aria-label="Settings Tab">
+      <div class="mobile-nav-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path
+            d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+          </path>
+        </svg>
+      </div>
+      <span class="mobile-nav-label">Settings</span>
+    </button>
+
+    <button class="nav-button mobile-nav-btn" data-tab="help" type="button" aria-label="Help Tab">
+      <div class="mobile-nav-icon-wrap">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <span class="mobile-nav-label">Help</span>
+    </button>
+  </nav>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script src="app.js?v=figma_mobile_v1"></script>
 </body>
 
 </html>
