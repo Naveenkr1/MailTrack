@@ -141,6 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const settingTimezone = document.getElementById('settingTimezone');
   const settingTimeFormat = document.getElementById('settingTimeFormat');
   const mobileCheckmarksToggle = document.getElementById('mobileCheckmarksToggle');
+  const soundNotificationToggle = document.getElementById('soundNotificationToggle');
+  const soundNotificationBadge = document.getElementById('soundNotificationBadge');
+  const testSoundBtn = document.getElementById('testSoundBtn');
 
   // Modals: Get Started & Privacy Notice
   const getStartedModal = document.getElementById('getStartedModal');
@@ -411,7 +414,36 @@ document.addEventListener('DOMContentLoaded', () => {
       mobileCheckmarksToggle.checked = settings.mobileAlerts;
     }
 
+    const soundEnabled = (typeof settings.soundNotifications === 'boolean') 
+      ? settings.soundNotifications 
+      : (localStorage.getItem('mt_sound_notifications') !== 'false');
+    if (soundNotificationToggle) soundNotificationToggle.checked = soundEnabled;
+    updateSoundBadge(soundEnabled);
+
     refreshMobileSyncStatus();
+  }
+
+  // Sound Notification Toggle Change Handler
+  if (soundNotificationToggle) {
+    soundNotificationToggle.addEventListener('change', () => {
+      const enabled = soundNotificationToggle.checked;
+      updateSoundBadge(enabled);
+      localStorage.setItem('mt_sound_notifications', enabled ? 'true' : 'false');
+      if (enabled) {
+        playNotificationSound(true);
+      }
+    });
+  }
+
+  // Test Sound Preview Button Handler
+  if (testSoundBtn) {
+    testSoundBtn.addEventListener('click', () => {
+      testSoundBtn.classList.add('playing');
+      playNotificationSound(true);
+      setTimeout(() => {
+        if (testSoundBtn) testSoundBtn.classList.remove('playing');
+      }, 550);
+    });
   }
 
   // -------------------------------------------------------------
@@ -424,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const timezone = settingTimezone ? settingTimezone.value : 'auto';
       const timeFormat = settingTimeFormat ? settingTimeFormat.value : '12h';
       const mobileAlerts = mobileCheckmarksToggle ? mobileCheckmarksToggle.checked : true;
+      const soundNotifications = soundNotificationToggle ? soundNotificationToggle.checked : true;
 
       if (!newName) return;
 
@@ -441,12 +474,14 @@ document.addEventListener('DOMContentLoaded', () => {
             name: newName,
             timezone,
             timeFormat,
-            mobileAlerts
+            mobileAlerts,
+            soundNotifications
           })
         });
         const data = await res.json();
         if (data.success && data.user) {
           currentUser = data.user;
+          localStorage.setItem('mt_sound_notifications', soundNotifications ? 'true' : 'false');
           populateUserData(currentUser);
           if (unifiedSaveStatus) {
             unifiedSaveStatus.textContent = 'Settings saved successfully!';
@@ -768,6 +803,26 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       const data = await res.json();
       if (data.success) {
+        if (silent && emails.length > 0) {
+          const prevMap = new Map(emails.map(e => [e.id, (e.openCount || (e.opens ? e.opens.length : 0))]));
+          const incoming = data.emails || [];
+          for (const ne of incoming) {
+            const prevCount = prevMap.get(ne.id);
+            const newCount = ne.openCount || (ne.opens ? ne.opens.length : 0);
+            if (prevCount !== undefined && newCount > prevCount) {
+              playNotificationSound();
+              showToastNotification({
+                title: 'Email Opened!',
+                subtitle: `"${ne.subject}" was read by ${ne.recipient}`,
+                timestamp: new Date().toISOString()
+              });
+              ne.isNewOpen = true;
+              unseenOpenEmailIds.add(ne.id);
+              updateEmailTrackingBadge();
+              break;
+            }
+          }
+        }
         emails = data.emails || [];
         renderDashboard();
         if (activeTab === 'activity') renderActivityFeed();
@@ -994,21 +1049,91 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function playNotificationSound() {
+  let sharedAudioCtx = null;
+  function getAudioContext() {
+    if (!sharedAudioCtx) {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (AudioCtx) {
+        sharedAudioCtx = new AudioCtx();
+      }
+    }
+    if (sharedAudioCtx && sharedAudioCtx.state === 'suspended') {
+      sharedAudioCtx.resume().catch(() => {});
+    }
+    return sharedAudioCtx;
+  }
+
+  // Pre-unlock AudioContext on first user interaction so sounds play seamlessly
+  const unlockAudioOnGesture = () => {
+    getAudioContext();
+    document.removeEventListener('click', unlockAudioOnGesture);
+    document.removeEventListener('keydown', unlockAudioOnGesture);
+    document.removeEventListener('touchstart', unlockAudioOnGesture);
+  };
+  document.addEventListener('click', unlockAudioOnGesture, { passive: true });
+  document.addEventListener('keydown', unlockAudioOnGesture, { passive: true });
+  document.addEventListener('touchstart', unlockAudioOnGesture, { passive: true });
+
+  function isSoundNotificationEnabled() {
+    const localVal = localStorage.getItem('mt_sound_notifications');
+    if (localVal !== null) {
+      return localVal === 'true';
+    }
+    if (currentUser && currentUser.settings && typeof currentUser.settings.soundNotifications === 'boolean') {
+      return currentUser.settings.soundNotifications;
+    }
+    return true; // Enabled by default
+  }
+
+  function updateSoundBadge(enabled) {
+    if (!soundNotificationBadge) return;
+    if (enabled) {
+      soundNotificationBadge.textContent = 'Active';
+      soundNotificationBadge.className = 'sync-active-badge connected';
+    } else {
+      soundNotificationBadge.textContent = 'Muted';
+      soundNotificationBadge.className = 'sync-active-badge disconnected';
+    }
+  }
+
+  function playNotificationSound(force = false) {
+    if (!force && !isSoundNotificationEnabled()) return;
     try {
-      const ctx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(587.33, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.08, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
-      osc.start();
-      osc.stop(ctx.currentTime + 0.3);
-    } catch {}
+      const ctx = getAudioContext();
+      if (!ctx) return;
+      if (ctx.state === 'suspended') {
+        ctx.resume().catch(() => {});
+      }
+
+      const now = ctx.currentTime;
+
+      // Note 1: 587.33 Hz (D5) - warm bell chime
+      const osc1 = ctx.createOscillator();
+      const gain1 = ctx.createGain();
+      osc1.type = 'sine';
+      osc1.frequency.setValueAtTime(587.33, now);
+      gain1.gain.setValueAtTime(0.12, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+      osc1.connect(gain1);
+      gain1.connect(ctx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.25);
+
+      // Note 2: 880 Hz (A5) - uplifting melodic second tone
+      const osc2 = ctx.createOscillator();
+      const gain2 = ctx.createGain();
+      osc2.type = 'sine';
+      osc2.frequency.setValueAtTime(880, now + 0.08);
+      gain2.gain.setValueAtTime(0.001, now);
+      gain2.gain.setValueAtTime(0.14, now + 0.08);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+      osc2.connect(gain2);
+      gain2.connect(ctx.destination);
+      osc2.start(now + 0.08);
+      osc2.stop(now + 0.45);
+    } catch (e) {
+      console.warn('Notification audio notice:', e);
+    }
   }
 
   function showToastNotification({ title, subtitle, timestamp }) {

@@ -501,20 +501,39 @@
     newOpenedEmailIds.add(openedEmail.id);
     readNotificationIds.delete(openedEmail.id);
 
-    // Subtle audio chime
-    try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.frequency.setValueAtTime(587, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15);
-      gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
-      osc.start();
-      osc.stop(audioCtx.currentTime + 0.3);
-    } catch { }
+    // Subtle audio chime (respects user sound preference)
+    const soundEnabled = currentAuthUser?.settings?.soundNotifications !== false;
+    if (soundEnabled) {
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+        const now = audioCtx.currentTime;
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(587.33, now);
+        gain1.gain.setValueAtTime(0.12, now);
+        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(now);
+        osc1.stop(now + 0.25);
+
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(880, now + 0.08);
+        gain2.gain.setValueAtTime(0.001, now);
+        gain2.gain.setValueAtTime(0.14, now + 0.08);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.08);
+        osc2.stop(now + 0.45);
+      } catch { }
+    }
 
     const openCount = openedEmail.openCount || (openedEmail.opens ? openedEmail.opens.length : 1);
     const countPill = openCount > 1 ? `<span class="mt-count-pill">${openCount}</span>` : '';

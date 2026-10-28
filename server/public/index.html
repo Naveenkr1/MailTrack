@@ -27,7 +27,9 @@
         <div class="brand-group">
           <div class="brand-badge-icon" aria-label="Mail Track Logo">
             <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
+              <path
+                d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z"
+                fill="white" />
             </svg>
           </div>
           <div class="brand-title-wrap">
@@ -100,7 +102,8 @@
         <!-- Upward Dropdown Menu -->
         <div class="user-profile-dropdown" id="userProfileDropdown">
           <!-- Option 1: Dark Mode Toggle Switch -->
-          <button class="user-dropdown-item" id="dropdownThemeToggle" type="button" role="switch" aria-checked="false" aria-label="Toggle dark mode">
+          <button class="user-dropdown-item" id="dropdownThemeToggle" type="button" role="switch" aria-checked="false"
+            aria-label="Toggle dark mode">
             <span class="dropdown-item-icon">
               <svg class="theme-icon light-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2">
@@ -260,7 +263,8 @@
           </div>
 
           <!-- Mobile User Profile Avatar Button (Visible on mobile) -->
-          <button class="mobile-profile-btn" id="mobileProfileBtn" type="button" aria-label="Account Options" title="Account Options">
+          <button class="mobile-profile-btn" id="mobileProfileBtn" type="button" aria-label="Account Options"
+            title="Account Options">
             <span class="user-avatar-initial" id="mobileUserInitial">N</span>
           </button>
 
@@ -286,12 +290,15 @@
                   <span>Enable Mobile Checkmarks</span>
                   <span class="preview-chip green" style="font-size:10.5px;padding:1px 6px;">✓✓</span>
                 </div>
-                <div class="ms-banner-desc">See delivery and read checkmarks directly in the official Gmail mobile app on your phone.</div>
+                <div class="ms-banner-desc">See delivery and read checkmarks directly in the official Gmail mobile app
+                  on your phone.</div>
               </div>
             </div>
             <div class="ms-banner-actions">
-              <a href="/auth/google/mobile-sync" class="btn-figma-primary btn-sm ms-connect-btn">Connect Mobile Gmail</a>
-              <button class="ms-banner-close" id="closeMobileSyncBanner" type="button" aria-label="Dismiss banner">&times;</button>
+              <a href="/auth/google/mobile-sync" class="btn-figma-primary btn-sm ms-connect-btn">Connect Mobile
+                Gmail</a>
+              <button class="ms-banner-close" id="closeMobileSyncBanner" type="button"
+                aria-label="Dismiss banner">&times;</button>
             </div>
           </div>
 
@@ -477,7 +484,8 @@
               <div class="panel-inner-header">
                 <div>
                   <h3 class="panel-section-title">Settings &amp; Preferences</h3>
-                  <p class="panel-section-desc">Manage your account profile, timezone preferences, and mobile Gmail tracking in one place.</p>
+                  <p class="panel-section-desc">Manage your account profile, timezone preferences, and mobile Gmail
+                    tracking in one place.</p>
                 </div>
               </div>
 
@@ -533,7 +541,41 @@
 
                   <div class="settings-section-divider"></div>
 
-                  <!-- Section 3: Mobile Checkmarks Status (Node 186:9597) -->
+                  <!-- Section 3: Sound & Notifications -->
+                  <div class="settings-form-section">
+                    <h4 class="settings-section-subtitle">Sound &amp; Notifications</h4>
+                    <div class="settings-toggle-card">
+                      <div class="sync-top-line">
+                        <div class="sync-title-badge-wrap">
+                          <p class="sync-title">Notification Sound on Email View</p>
+                          <span class="sync-active-badge connected" id="soundNotificationBadge">Active</span>
+                        </div>
+                        <label class="figma-switch-toggle" title="Toggle Sound Notification on Email Open">
+                          <input type="checkbox" id="soundNotificationToggle" checked />
+                          <span class="switch-slider"></span>
+                        </label>
+                      </div>
+
+                      <p class="sync-description">
+                        Play an audible notification chime in real-time whenever a recipient opens or reads your tracked email.
+                      </p>
+
+                      <div class="settings-sound-preview-row">
+                        <button type="button" class="btn-sound-preview" id="testSoundBtn" title="Test notification sound chime">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                          </svg>
+                          <span>Play Preview Sound</span>
+                        </button>
+                        <span class="sound-preview-hint">Test the chime alert in your browser</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="settings-section-divider"></div>
+
+                  <!-- Section 4: Mobile Checkmarks Status (Node 186:9597) -->
                   <div class="settings-form-section">
                     <h4 class="settings-section-subtitle">Mobile Checkmarks Status</h4>
                     <div class="mobile-sync-card">
@@ -549,13 +591,16 @@
                       </div>
 
                       <p class="sync-description" id="mobileSyncDesc">
-                        Gmail mobile sync is active for your connected Gmail account (<span class="sync-account-email" id="syncAccountEmail">user@gmail.com</span>). All sent and opened emails are automatically synced in real-time with checkmarks in the Gmail mobile app.
+                        Gmail mobile sync is active for your connected Gmail account (<span class="sync-account-email"
+                          id="syncAccountEmail">user@gmail.com</span>). All sent and opened emails are automatically
+                        synced in real-time with checkmarks in the Gmail mobile app.
                       </p>
 
                       <div class="mobile-sync-actions-row" id="mobileSyncActionsRow">
                         <a href="/auth/google/mobile-sync" class="btn-figma-primary btn-sm" id="connectMobileGmailBtn"
                           style="display:none; text-decoration:none;">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
                             <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
                           </svg>
@@ -565,9 +610,13 @@
                           <span class="auto-sync-pulse-dot"></span>
                           <span>Auto-synced in background</span>
                         </div>
-                        <button type="button" class="btn-sync-mobile" id="syncExistingMobileBtn" title="Auto-sync is continuously active. Click to run a manual refresh anytime.">
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M7 2.33333C5.48888 2.33333 4.1452 3.05114 3.2916 4.1666L4.66667 5.54167H1.16667V2.04167L2.46087 3.33587C3.52952 2.01367 5.16576 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7H11.6667C11.6667 4.42267 9.57734 2.33333 7 2.33333ZM2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667C8.51113 11.6667 9.85483 10.9489 10.7084 9.83343L9.33333 8.45833H12.8333V11.9583L11.5392 10.6642C10.4705 11.9863 8.83423 12.8333 7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7H2.33333Z" fill="currentColor"/>
+                        <button type="button" class="btn-sync-mobile" id="syncExistingMobileBtn"
+                          title="Auto-sync is continuously active. Click to run a manual refresh anytime.">
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path
+                              d="M7 2.33333C5.48888 2.33333 4.1452 3.05114 3.2916 4.1666L4.66667 5.54167H1.16667V2.04167L2.46087 3.33587C3.52952 2.01367 5.16576 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7H11.6667C11.6667 4.42267 9.57734 2.33333 7 2.33333ZM2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667C8.51113 11.6667 9.85483 10.9489 10.7084 9.83343L9.33333 8.45833H12.8333V11.9583L11.5392 10.6642C10.4705 11.9863 8.83423 12.8333 7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7H2.33333Z"
+                              fill="currentColor" />
                           </svg>
                           <span>Sync emails to mobile</span>
                         </button>
@@ -584,9 +633,14 @@
                           </div>
                           <div class="sync-tag-item">
                             <div class="sync-tag-chip green">
-                              <svg width="18" height="14" viewBox="0 0 18.2207 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M0 7.73065L1.10156 6.62518L2.91016 8.40253L6.92188 4.40643L8.03125 5.5119L2.91016 10.6057L0 7.73065Z" fill="white"/>
-                                <path d="M10.1895 7.73065L11.291 6.62518L13.0996 8.40253L17.1113 4.40643L18.2207 5.5119L13.0996 10.6057L10.1895 7.73065Z" fill="white"/>
+                              <svg width="18" height="14" viewBox="0 0 18.2207 14" fill="none"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                  d="M0 7.73065L1.10156 6.62518L2.91016 8.40253L6.92188 4.40643L8.03125 5.5119L2.91016 10.6057L0 7.73065Z"
+                                  fill="white" />
+                                <path
+                                  d="M10.1895 7.73065L11.291 6.62518L13.0996 8.40253L17.1113 4.40643L18.2207 5.5119L13.0996 10.6057L10.1895 7.73065Z"
+                                  fill="white" />
                               </svg>
                             </div>
                             <span class="sync-tag-label">Recipient Opened Email (Vibrant Green Double Tick)</span>
@@ -596,9 +650,12 @@
 
                       <div class="sync-tip-note">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7C1.16667 3.77834 3.77834 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7C12.8333 10.2216 10.2216 12.8333 7 12.8333ZM7 11.6667C9.57734 11.6667 11.6667 9.57734 11.6667 7C11.6667 4.42267 9.57734 2.33333 7 2.33333C4.42267 2.33333 2.33333 4.42267 2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667ZM6.41667 4.08333H7.58333V5.25H6.41667V4.08333ZM6.41667 6.41667H7.58333V9.91667H6.41667V6.41667Z" fill="#7F8389"/>
+                          <path
+                            d="M7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7C1.16667 3.77834 3.77834 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7C12.8333 10.2216 10.2216 12.8333 7 12.8333ZM7 11.6667C9.57734 11.6667 11.6667 9.57734 11.6667 7C11.6667 4.42267 9.57734 2.33333 7 2.33333C4.42267 2.33333 2.33333 4.42267 2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667ZM6.41667 4.08333H7.58333V5.25H6.41667V4.08333ZM6.41667 6.41667H7.58333V9.91667H6.41667V6.41667Z"
+                            fill="#7F8389" />
                         </svg>
-                        <span>For checkmarks to appear on sent threads, enable Conversation View in Gmail settings.</span>
+                        <span>For checkmarks to appear on sent threads, enable Conversation View in Gmail
+                          settings.</span>
                       </div>
                     </div>
                   </div>
@@ -617,16 +674,21 @@
               <div class="panel-inner-header">
                 <div>
                   <h3 class="panel-section-title danger-heading">Delete Account &amp; Permanent Data Removal</h3>
-                  <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and all account data.</p>
+                  <p class="panel-section-desc">Permanently remove your Gmail link, tracking receipts, open history, and
+                    all account data.</p>
                 </div>
               </div>
               <div class="panel-inner-body">
-                <div class="settings-section-divider"></div>
-                <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails, open logs, clicks, and API credentials will be permanently erased from both local storage and cloud database.</p>
+                <!--  <div class="settings-section-divider"></div> -->
+                <p class="danger-paragraph">Once you delete your account, there is no going back. All tracked emails,
+                  open logs, clicks, and API credentials will be permanently erased from both local storage and cloud
+                  database.</p>
                 <button class="btn-figma-danger" id="deleteAccountBtn" type="button">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.17" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1.75 3.5H2.91667H12.25"/>
-                    <path d="M11.0833 3.5V11.6667C11.0833 11.9761 10.9604 12.2728 10.7416 12.4916C10.5228 12.7104 10.2261 12.8333 9.91667 12.8333H4.08333C3.77391 12.8333 3.47717 12.7104 3.25838 12.4916C3.03958 12.2728 2.91667 11.9761 2.91667 11.6667V3.5M4.66667 3.5V2.33333C4.66667 2.02391 4.78958 1.72717 5.00838 1.50838C5.22717 1.28958 5.52391 1.16667 5.83333 1.16667H8.16667C8.47609 1.16667 8.77283 1.28958 8.99162 1.50838C9.21042 1.72717 9.33333 2.02391 9.33333 2.33333V3.5"/>
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.17"
+                    stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M1.75 3.5H2.91667H12.25" />
+                    <path
+                      d="M11.0833 3.5V11.6667C11.0833 11.9761 10.9604 12.2728 10.7416 12.4916C10.5228 12.7104 10.2261 12.8333 9.91667 12.8333H4.08333C3.77391 12.8333 3.47717 12.7104 3.25838 12.4916C3.03958 12.2728 2.91667 11.9761 2.91667 11.6667V3.5M4.66667 3.5V2.33333C4.66667 2.02391 4.78958 1.72717 5.00838 1.50838C5.22717 1.28958 5.52391 1.16667 5.83333 1.16667H8.16667C8.47609 1.16667 8.77283 1.28958 8.99162 1.50838C9.21042 1.72717 9.33333 2.02391 9.33333 2.33333V3.5" />
                   </svg>
                   <span>Delete My Account &amp; All Data</span>
                 </button>
@@ -850,8 +912,11 @@
             </div>
           </div>
 
-          <div class="modal-actions-footer" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <a href="/privacy" target="_blank" rel="noopener noreferrer" style="font-size: 13px; color: var(--color-green); font-weight: 500; text-decoration: underline;">View Full Privacy Policy →</a>
+          <div class="modal-actions-footer"
+            style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <a href="/privacy" target="_blank" rel="noopener noreferrer"
+              style="font-size: 13px; color: var(--color-green); font-weight: 500; text-decoration: underline;">View
+              Full Privacy Policy →</a>
             <button class="btn-figma-primary" id="dismissPrivacyModalBtn">I Understand</button>
           </div>
         </div>
@@ -866,11 +931,13 @@
             <span style="font-size: 20px; line-height: 1;">📱</span>
             <h3>Enable Mobile Checkmarks (✓✓)</h3>
           </div>
-          <button class="modal-close-button" id="closeMobilePromptBtn" type="button" aria-label="Close modal">&times;</button>
+          <button class="modal-close-button" id="closeMobilePromptBtn" type="button"
+            aria-label="Close modal">&times;</button>
         </div>
         <div class="modal-window-body">
           <p style="font-size: 13.5px; color: var(--color-text-secondary); line-height: 1.5; margin-bottom: 16px;">
-            Would you like to see delivery and read receipts directly inside your official <strong>Gmail mobile app</strong> on iPhone & Android?
+            Would you like to see delivery and read receipts directly inside your official <strong>Gmail mobile
+              app</strong> on iPhone & Android?
           </p>
 
           <div class="mobile-preview-box" style="margin-bottom: 16px;">
@@ -887,13 +954,17 @@
             </div>
           </div>
 
-          <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.22); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 12px; color: #065f46; line-height: 1.45;">
-            <strong>Google OAuth Notice:</strong><br/>
-            Google will request permission to modify email labels. If you see <em>"Google hasn't verified this app"</em>, simply click <strong>"Advanced"</strong> → <strong>"Go to mail-track-pink.vercel.app (unsafe)"</strong> to confirm.
+          <div
+            style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.22); border-radius: 10px; padding: 12px; margin-bottom: 20px; font-size: 12px; color: #065f46; line-height: 1.45;">
+            <strong>Google OAuth Notice:</strong><br />
+            Google will request permission to modify email labels. If you see <em>"Google hasn't verified this
+              app"</em>, simply click <strong>"Advanced"</strong> → <strong>"Go to mail-track-pink.vercel.app
+              (unsafe)"</strong> to confirm.
           </div>
 
           <div class="modal-actions-footer">
-            <a href="/auth/google/mobile-sync" class="btn-figma-primary" id="enableMobilePromptBtn" style="text-decoration:none;">Connect Mobile Gmail</a>
+            <a href="/auth/google/mobile-sync" class="btn-figma-primary" id="enableMobilePromptBtn"
+              style="text-decoration:none;">Connect Mobile Gmail</a>
             <button class="btn-modal-cancel" id="dismissMobilePromptBtn" type="button">Maybe Later</button>
           </div>
         </div>
@@ -902,9 +973,11 @@
 
     <!-- Mobile Bottom App Navigation Bar (Visible only on mobile devices) -->
     <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Mobile Navigation">
-      <button class="nav-button mobile-nav-btn active" data-tab="email-tracking" type="button" aria-label="Email Tracking Tab">
+      <button class="nav-button mobile-nav-btn active" data-tab="email-tracking" type="button"
+        aria-label="Email Tracking Tab">
         <div class="mobile-nav-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
             <polyline points="22,6 12,13 2,6"></polyline>
           </svg>
@@ -915,7 +988,8 @@
 
       <button class="nav-button mobile-nav-btn" data-tab="activity" type="button" aria-label="Activity Feed Tab">
         <div class="mobile-nav-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
           </svg>
@@ -926,9 +1000,12 @@
 
       <button class="nav-button mobile-nav-btn" data-tab="settings" type="button" aria-label="Settings Tab">
         <div class="mobile-nav-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
           </svg>
         </div>
         <span class="mobile-nav-label">Settings</span>
@@ -936,7 +1013,8 @@
 
       <button class="nav-button mobile-nav-btn" data-tab="help" type="button" aria-label="Help Tab">
         <div class="mobile-nav-icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
             <line x1="12" y1="17" x2="12.01" y2="17"></line>

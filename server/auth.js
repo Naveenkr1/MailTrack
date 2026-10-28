@@ -290,7 +290,7 @@ router.get('/me', async (req, res) => {
 // 5. UPDATE PROFILE & DELETE ACCOUNT
 // -------------------------------------------------------------
 router.patch('/profile', requireAuth, async (req, res) => {
-  const { name, timezone, timeFormat, mobileAlerts } = req.body;
+  const { name, timezone, timeFormat, mobileAlerts, soundNotifications } = req.body;
   const user = req.user;
 
   if (name && typeof name === 'string') {
@@ -300,7 +300,8 @@ router.patch('/profile', requireAuth, async (req, res) => {
   await db.updateUserSettings(user.id, { 
     ...(timezone ? { timezone } : {}), 
     ...(timeFormat ? { timeFormat } : {}), 
-    ...(typeof mobileAlerts === 'boolean' ? { mobileAlerts } : {}) 
+    ...(typeof mobileAlerts === 'boolean' ? { mobileAlerts } : {}),
+    ...(typeof soundNotifications === 'boolean' ? { soundNotifications } : {})
   });
 
   const refreshed = await db.findUserById(user.id);

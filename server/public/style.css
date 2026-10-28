@@ -1642,6 +1642,72 @@ body {
 }
 
 /* ==========================================================================
+   Sound & Notification Settings Card
+   ========================================================================== */
+.settings-toggle-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px;
+  background: rgba(247, 249, 251, 0.38);
+  border: 1px solid var(--border-sidebar);
+  border-radius: 10px;
+}
+
+[data-theme="dark"] .settings-toggle-card {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.settings-sound-preview-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 4px;
+}
+
+.btn-sound-preview {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 6px;
+  background: #ffffff;
+  border: 1px solid var(--border-sidebar);
+  color: var(--text-title);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+[data-theme="dark"] .btn-sound-preview {
+  background: var(--bg-card);
+  color: var(--text-title);
+  border-color: var(--border-sidebar);
+}
+
+.btn-sound-preview:hover {
+  background: var(--bg-table-head);
+  border-color: #cbd5e1;
+  color: #059669;
+}
+
+.btn-sound-preview.playing {
+  color: #059669;
+  border-color: rgba(5, 150, 105, 0.4);
+  background: rgba(5, 150, 105, 0.06);
+}
+
+.sound-preview-hint {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  color: var(--text-subtitle);
+}
+
+/* ==========================================================================
    Mobile Features Sync Card (Figma Node 186:9600)
    ========================================================================== */
 .mobile-sync-card {
