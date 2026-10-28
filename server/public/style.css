@@ -1207,7 +1207,7 @@ body {
 }
 
 .figma-activity-list {
-  /* padding: 20px 24px; */
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -4320,6 +4320,7 @@ body {
   }
 
   .figma-activity-list {
+    padding: 0 !important;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -4476,6 +4477,11 @@ body {
   /* ---------------------------------------------------- */
   /* 7. SETTINGS & FORM UX ON MOBILE                      */
   /* ---------------------------------------------------- */
+  .panel-inner-body,
+  #tabContentSettings .panel-inner-body {
+    padding: 0 !important;
+  }
+
   .form-row-grid {
     grid-template-columns: 1fr;
     gap: 12px;
