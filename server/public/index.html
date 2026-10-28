@@ -481,16 +481,20 @@
           <div class="settings-card-stack">
             <!-- 1. Settings & Preferences Card (Node 186:9539) -->
             <div class="figma-table-card">
-              <div class="panel-inner-header">
-                <div>
-                  <h3 class="panel-section-title">Settings &amp; Preferences</h3>
-                  <p class="panel-section-desc">Manage your account profile, timezone preferences, and mobile Gmail
-                    tracking in one place.</p>
+              <form id="unifiedSettingsForm" class="figma-form">
+                <div class="panel-inner-header">
+                  <div>
+                    <h3 class="panel-section-title">Settings &amp; Preferences</h3>
+                    <p class="panel-section-desc">Manage your account profile, timezone preferences, and mobile Gmail
+                      tracking in one place.</p>
+                  </div>
+                  <div class="settings-header-action-wrap">
+                    <span class="save-status-indicator" id="unifiedSaveStatus"></span>
+                    <button type="submit" form="unifiedSettingsForm" class="btn-figma-save" id="saveUnifiedSettingsBtn">Save Settings</button>
+                  </div>
                 </div>
-              </div>
 
-              <div class="panel-inner-body">
-                <form id="unifiedSettingsForm" class="figma-form">
+                <div class="panel-inner-body">
                   <!-- Section 1: Account Profile (Node 186:9551) -->
                   <div class="settings-form-section">
                     <h4 class="settings-section-subtitle">Account Profile</h4>
@@ -659,14 +663,8 @@
                       </div>
                     </div>
                   </div>
-
-                  <!-- SINGLE SAVE BUTTON (Node 186:9661) -->
-                  <div class="form-actions-bar settings-single-save-bar">
-                    <button type="submit" class="btn-figma-save" id="saveUnifiedSettingsBtn">Save Settings</button>
-                    <span class="save-status-indicator" id="unifiedSaveStatus"></span>
-                  </div>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
 
             <!-- 2. Danger Zone: Delete Account & Permanent Data Removal (Node 186:9668) -->

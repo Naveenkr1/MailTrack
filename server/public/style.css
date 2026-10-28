@@ -1169,6 +1169,15 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+}
+
+.settings-header-action-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .panel-section-title {
@@ -3733,6 +3742,19 @@ body {
     font-size: 16px; /* Prevents iOS auto-zoom on focus */
     border-radius: 10px;
     width: 100%;
+  }
+
+  .panel-inner-header:has(.settings-header-action-wrap) {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .settings-header-action-wrap {
+    margin-left: 0;
+    width: 100%;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 8px;
   }
 
   .btn-figma-save {
