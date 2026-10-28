@@ -549,7 +549,7 @@
                       </div>
 
                       <p class="sync-description" id="mobileSyncDesc">
-                        Gmail mobile sync is active for your connected Gmail account (<span class="sync-account-email" id="syncAccountEmail">user@gmail.com</span>). Sent emails show a single checkmark when delivered and a green double checkmark when opened in the Gmail mobile app.
+                        Gmail mobile sync is active for your connected Gmail account (<span class="sync-account-email" id="syncAccountEmail">user@gmail.com</span>). All sent and opened emails are automatically synced in real-time with checkmarks in the Gmail mobile app.
                       </p>
 
                       <div class="mobile-sync-actions-row" id="mobileSyncActionsRow">
@@ -561,7 +561,11 @@
                           </svg>
                           <span>Connect Gmail for Mobile Checkmarks</span>
                         </a>
-                        <button type="button" class="btn-sync-mobile" id="syncExistingMobileBtn">
+                        <div class="auto-sync-status-indicator" id="autoSyncStatusIndicator" style="display:none;">
+                          <span class="auto-sync-pulse-dot"></span>
+                          <span>Auto-synced in background</span>
+                        </div>
+                        <button type="button" class="btn-sync-mobile" id="syncExistingMobileBtn" title="Auto-sync is continuously active. Click to run a manual refresh anytime.">
                           <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7 2.33333C5.48888 2.33333 4.1452 3.05114 3.2916 4.1666L4.66667 5.54167H1.16667V2.04167L2.46087 3.33587C3.52952 2.01367 5.16576 1.16667 7 1.16667C10.2216 1.16667 12.8333 3.77834 12.8333 7H11.6667C11.6667 4.42267 9.57734 2.33333 7 2.33333ZM2.33333 7C2.33333 9.57734 4.42267 11.6667 7 11.6667C8.51113 11.6667 9.85483 10.9489 10.7084 9.83343L9.33333 8.45833H12.8333V11.9583L11.5392 10.6642C10.4705 11.9863 8.83423 12.8333 7 12.8333C3.77834 12.8333 1.16667 10.2216 1.16667 7H2.33333Z" fill="currentColor"/>
                           </svg>

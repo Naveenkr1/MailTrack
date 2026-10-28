@@ -865,6 +865,9 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
       gmail.applySentLabel(user.id, newEmail.id, threadId || null).catch(err => {
         console.warn('[GMAIL MOBILE SYNC] Non-blocking applySentLabel error:', err.message);
       });
+      // Schedule follow-up auto-sync to ensure thread is tagged once indexed by Gmail
+      setTimeout(() => gmail.autoSyncUserThrottled(user.id, true), 3500);
+      setTimeout(() => gmail.autoSyncUserThrottled(user.id, true), 12000);
     }
   }
 
@@ -884,13 +887,17 @@ app.get('/api/mobile-sync/status', optionalAuth, async (req, res) => {
   const user = req.user;
   if (!user) return res.status(401).json({ success: false, error: 'Unauthorized' });
   const status = await gmail.getConnectionStatus(user.id);
+  // Proactively auto-sync in background if connected
+  if (status.connected) {
+    gmail.autoSyncUserThrottled(user.id);
+  }
   res.json({ success: true, ...status });
 });
 
 app.post('/api/mobile-sync/sync-now', optionalAuth, async (req, res) => {
   const user = req.user;
   if (!user) return res.status(401).json({ success: false, error: 'Unauthorized' });
-  const result = await gmail.syncAllRecentEmails(user.id);
+  const result = await gmail.syncAllRecentEmails(user.id, true);
   res.json(result);
 });
 
@@ -932,6 +939,11 @@ app.get('/api/emails', optionalAuth, async (req, res) => {
 
   registerUserIp(user.id, req.headers['x-forwarded-for'] || req.socket.remoteAddress);
 
+  // Proactively auto-sync mobile checkmarks in background for connected user
+  if (user && user.id) {
+    gmail.autoSyncUserThrottled(user.id);
+  }
+
   const effectiveBaseUrl = getRequestBaseUrl(req);
   const emails = await db.getUserEmails(user.id);
   res.json({
@@ -962,6 +974,10 @@ app.get('/api/emails/pulse', optionalAuth, async (req, res) => {
 
   const since = req.query.since || new Date(Date.now() - 30000).toISOString();
   const updatedEmails = await db.getEmailsUpdatedSince(user.id, since);
+
+  if (updatedEmails.length > 0 && user && user.id) {
+    gmail.autoSyncUserThrottled(user.id);
+  }
 
   res.json({
     success: true,
@@ -1135,6 +1151,12 @@ function startCloudflareTunnel() {
     }, 15000);
   }
 }
+
+// Proactive continuous auto-sync worker for Gmail mobile checkmarks
+const mobileAutoSyncTimer = setInterval(() => {
+  gmail.autoSyncAllUsers().catch(() => {});
+}, 30000);
+if (mobileAutoSyncTimer.unref) mobileAutoSyncTimer.unref();
 
 if (!process.env.VERCEL && require.main === module) {
   server.listen(PORT, () => {

@@ -572,6 +572,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileSyncDesc = document.getElementById('mobileSyncDesc');
   const connectMobileGmailBtn = document.getElementById('connectMobileGmailBtn');
   const syncExistingMobileBtn = document.getElementById('syncExistingMobileBtn');
+  const autoSyncStatusIndicator = document.getElementById('autoSyncStatusIndicator');
+  let lastClientAutoSyncTime = 0;
 
   async function refreshMobileSyncStatus() {
     try {
@@ -580,18 +582,26 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data && data.success) {
         if (data.connected) {
           if (mobileSyncStatusBadge) {
-            mobileSyncStatusBadge.textContent = 'Active';
+            mobileSyncStatusBadge.textContent = 'Active (Auto-Syncing)';
             mobileSyncStatusBadge.className = 'sync-active-badge connected';
           }
           if (mobileSyncDesc) {
             const emailStr = escapeHtml(data.email || (currentUser && currentUser.email) || '');
             mobileSyncDesc.innerHTML = `
-              Gmail mobile sync is active for your connected Gmail account (${emailStr ? `<span class="sync-account-email">${emailStr}</span>` : 'your account'}). Sent emails show a single checkmark when delivered and a green double checkmark when opened in the Gmail mobile app.
+              Gmail mobile sync is active for your connected Gmail account (${emailStr ? `<span class="sync-account-email">${emailStr}</span>` : 'your account'}). All sent and opened emails are <strong>automatically synced in real-time</strong> in the background (no button press required).
             `;
           }
           if (connectMobileGmailBtn) connectMobileGmailBtn.style.display = 'none';
+          if (autoSyncStatusIndicator) autoSyncStatusIndicator.style.display = 'inline-flex';
           if (syncExistingMobileBtn) syncExistingMobileBtn.style.display = 'inline-flex';
           if (mobileSyncBanner) mobileSyncBanner.style.display = 'none';
+
+          // Automatic background sync without needing button click (debounced)
+          const now = Date.now();
+          if (now - lastClientAutoSyncTime > 30000) {
+            lastClientAutoSyncTime = now;
+            fetch('/api/mobile-sync/sync-now', { method: 'POST' }).catch(() => {});
+          }
         } else {
           if (mobileSyncStatusBadge) {
             mobileSyncStatusBadge.textContent = 'Connection Required';
@@ -603,6 +613,7 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
           }
           if (connectMobileGmailBtn) connectMobileGmailBtn.style.display = 'inline-flex';
+          if (autoSyncStatusIndicator) autoSyncStatusIndicator.style.display = 'none';
           if (syncExistingMobileBtn) syncExistingMobileBtn.style.display = 'none';
 
           // Show callout banner if not dismissed in this session
@@ -622,6 +633,13 @@ document.addEventListener('DOMContentLoaded', () => {
       console.warn('Failed to fetch mobile sync status:', e);
     }
   }
+
+  // Periodic continuous auto-sync while dashboard is open (every 40s)
+  setInterval(() => {
+    if (currentUser && mobileSyncStatusBadge && mobileSyncStatusBadge.classList.contains('connected')) {
+      fetch('/api/mobile-sync/sync-now', { method: 'POST' }).catch(() => {});
+    }
+  }, 40000);
 
   // Dismiss mobile banner handler
   if (closeMobileSyncBanner) {

@@ -22,6 +22,11 @@ const LABEL_DOUBLE_NAME = '✓✓';
 // In-memory label cache per user
 const labelCache = new Map();
 
+// In-memory cache of synced threads and their current label state: Map<userId:threadId, 'sent' | 'opened'>
+const syncedThreadStatus = new Map();
+const userLastSyncMap = new Map();
+const isSyncingMap = new Map();
+
 /**
  * Obtain a valid Google Access Token for the user, auto-refreshing via refresh token if expired.
  */
@@ -339,8 +344,8 @@ async function applySentLabel(userId, emailId, threadId = null, attempt = 1) {
   }
 
   // If email was just sent via browser, Gmail may take 2-4 seconds to index into Sent box
-  if (!targetThreadId && attempt < 4) {
-    const delays = [2500, 5000, 10000];
+  if (!targetThreadId && attempt < 6) {
+    const delays = [2000, 4000, 8000, 15000, 30000];
     const delay = delays[attempt - 1] || 5000;
     setTimeout(() => {
       applySentLabel(userId, emailId, null, attempt + 1);
@@ -349,7 +354,7 @@ async function applySentLabel(userId, emailId, threadId = null, attempt = 1) {
   }
 
   if (!targetThreadId) {
-    console.log(`[GMAIL MOBILE SYNC] Could not locate thread for "${emailRecord?.subject}" (${emailId}) after ${attempt} attempts.`);
+    console.log(`[GMAIL MOBILE SYNC] Could not locate thread for "${emailRecord?.subject}" (${emailId}) after ${attempt} attempts, will auto-sync later.`);
     return;
   }
 
@@ -358,7 +363,7 @@ async function applySentLabel(userId, emailId, threadId = null, attempt = 1) {
 
   try {
     // Apply single checkmark to thread
-    await fetch(`${GMAIL_API_BASE}/threads/${targetThreadId}/modify`, {
+    const res = await fetch(`${GMAIL_API_BASE}/threads/${targetThreadId}/modify`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -369,6 +374,10 @@ async function applySentLabel(userId, emailId, threadId = null, attempt = 1) {
         removeLabelIds: [labels.doubleCheckId]
       })
     });
+
+    if (res.ok) {
+      syncedThreadStatus.set(`${userId}:${targetThreadId}`, 'sent');
+    }
 
     if (targetMessageId) {
       await fetch(`${GMAIL_API_BASE}/messages/${targetMessageId}/modify`, {
@@ -417,7 +426,10 @@ async function applyOpenedLabel(userId, emailId) {
   }
 
   if (!targetThreadId) {
-    console.log(`[GMAIL MOBILE SYNC] Could not find thread to update to double checkmark for email ${emailId}`);
+    console.log(`[GMAIL MOBILE SYNC] Thread for opened email ${emailId} not yet indexed, scheduling auto-sync retry...`);
+    setTimeout(() => {
+      autoSyncUserThrottled(userId, true);
+    }, 3500);
     return;
   }
 
@@ -453,6 +465,7 @@ async function applyOpenedLabel(userId, emailId) {
     }
 
     if (res.ok) {
+      syncedThreadStatus.set(`${userId}:${targetThreadId}`, 'opened');
       console.log(`\n======================================================`);
       console.log(`🔥 [GMAIL MOBILE SYNC ACTIVE] ✓✓ DOUBLE CHECKMARK APPLIED!`);
       console.log(`   Thread: ${targetThreadId} | Email: "${emailRecord?.subject}"`);
@@ -468,16 +481,20 @@ async function applyOpenedLabel(userId, emailId) {
 }
 
 /**
- * Sync all recent tracked emails to Gmail labels (retroactive sync)
+ * Sync all recent tracked emails to Gmail labels (retroactive & automatic sync)
  */
-async function syncAllRecentEmails(userId) {
+async function syncAllRecentEmails(userId, forceAll = false) {
   const user = await db.findUserById(userId);
   if (!user) return { success: false, error: 'User not found' };
+
+  let userSettings = {};
+  try { userSettings = JSON.parse(user.settings || '{}'); } catch {}
+  if (userSettings.mobileAlerts === false) return { success: false, error: 'Mobile sync disabled by user' };
 
   const labels = await ensureLabels(userId);
   if (!labels) return { success: false, error: 'Gmail API not connected or permissions missing' };
 
-  const emails = (await db.getUserEmails(userId)).slice(0, 30);
+  const emails = (await db.getUserEmails(userId)).slice(0, 50);
   let syncedCount = 0;
 
   for (const email of emails) {
@@ -490,9 +507,18 @@ async function syncAllRecentEmails(userId) {
 
       if (threadId) {
         const isOpened = email.status === 'opened' || (email.opens && email.opens.length > 0);
+        const desiredState = isOpened ? 'opened' : 'sent';
+        const cacheKey = `${userId}:${threadId}`;
+
+        // If not forced and already marked with this state, skip redundant API call
+        if (!forceAll && syncedThreadStatus.get(cacheKey) === desiredState) {
+          syncedCount++;
+          continue;
+        }
+
         const accessToken = await getValidAccessToken(userId);
         if (accessToken) {
-          await fetch(`${GMAIL_API_BASE}/threads/${threadId}/modify`, {
+          const res = await fetch(`${GMAIL_API_BASE}/threads/${threadId}/modify`, {
             method: 'POST',
             headers: {
               Authorization: `Bearer ${accessToken}`,
@@ -503,7 +529,11 @@ async function syncAllRecentEmails(userId) {
               removeLabelIds: [isOpened ? labels.singleCheckId : labels.doubleCheckId]
             })
           });
-          syncedCount++;
+
+          if (res.ok) {
+            syncedThreadStatus.set(cacheKey, desiredState);
+            syncedCount++;
+          }
         }
       }
     } catch (e) {
@@ -512,6 +542,48 @@ async function syncAllRecentEmails(userId) {
   }
 
   return { success: true, count: syncedCount, total: emails.length };
+}
+
+/**
+ * Throttled background auto-sync for a single user (runs non-blocking)
+ */
+async function autoSyncUserThrottled(userId, force = false) {
+  if (!userId) return;
+  const now = Date.now();
+  const lastSync = userLastSyncMap.get(userId) || 0;
+
+  // Throttle: minimum 15 seconds between runs per user (or 3 seconds if force)
+  if (!force && (now - lastSync < 15000)) return;
+  if (force && (now - lastSync < 3000)) return;
+  if (isSyncingMap.get(userId)) return;
+
+  isSyncingMap.set(userId, true);
+  userLastSyncMap.set(userId, now);
+
+  try {
+    const res = await syncAllRecentEmails(userId, force);
+    if (res && res.success && res.count > 0) {
+      console.log(`[GMAIL AUTO-SYNC] Automatically synced ${res.count}/${res.total} emails to mobile for user ${userId}`);
+    }
+  } catch (err) {
+    console.warn('[GMAIL AUTO-SYNC] Background sync notice:', err.message);
+  } finally {
+    isSyncingMap.delete(userId);
+  }
+}
+
+/**
+ * Auto-sync all connected users (invoked by background timer)
+ */
+async function autoSyncAllUsers() {
+  try {
+    const users = await db.getUsersWithGoogleTokens();
+    for (const u of users) {
+      await autoSyncUserThrottled(u.id);
+    }
+  } catch (err) {
+    console.warn('[GMAIL AUTO-SYNC] Exception in autoSyncAllUsers:', err.message);
+  }
 }
 
 /**
@@ -562,6 +634,8 @@ module.exports = {
   applySentLabel,
   applyOpenedLabel,
   syncAllRecentEmails,
+  autoSyncUserThrottled,
+  autoSyncAllUsers,
   getConnectionStatus,
   LABEL_SINGLE_NAME,
   LABEL_DOUBLE_NAME

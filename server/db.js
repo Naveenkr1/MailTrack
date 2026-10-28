@@ -425,6 +425,24 @@ async function saveUserGoogleTokens(userId, { accessToken, refreshToken, expiry 
   return findUserById(userId);
 }
 
+async function getUsersWithGoogleTokens() {
+  if (turso) {
+    try {
+      const res = await turso.execute({
+        sql: "SELECT * FROM users WHERE google_refresh_token IS NOT NULL OR google_access_token IS NOT NULL",
+        args: []
+      });
+      return res.rows || [];
+    } catch {}
+  }
+  if (db) {
+    try {
+      return db.prepare("SELECT * FROM users WHERE google_refresh_token IS NOT NULL OR google_access_token IS NOT NULL").all() || [];
+    } catch {}
+  }
+  return [];
+}
+
 async function saveUserGmailLabels(userId, { singleLabelId, doubleLabelId }) {
   const user = await findUserById(userId);
   if (!user) return null;
@@ -863,6 +881,7 @@ module.exports = {
   recordOpen,
   recordClick,
   saveUserGoogleTokens,
+  getUsersWithGoogleTokens,
   saveUserGmailLabels,
   updateEmailThreadId,
   registerUserIp,
