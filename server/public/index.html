@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=figma_mobile_v2">
+  <link rel="stylesheet" href="style.css?v=figma_mobile_v3">
 </head>
 
 <body>
@@ -455,9 +455,20 @@
             </div>
           </div>
 
-          <!-- 1B: EMAIL TRACKING DETAILS VIEW (Exact Figma Node 82:4805) -->
+          <!-- 1B: EMAIL TRACKING DETAILS VIEW (Exact Figma Node 82:4805 & Mobile Node 225:13693) -->
           <div class="email-details-page-view" id="emailTrackingDetailsView" style="display: none;">
-            <!-- Hero Subject & Opens Pill (Node 82:5676) -->
+            <!-- Mobile Back Button (Exact Figma Node 225:14071) -->
+            <button class="mobile-details-back-btn" id="mobileDetailsBackBtn" type="button"
+              aria-label="Back to Tracked Email" title="Back to Tracked Email">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="19" y1="12" x2="5" y2="12"></line>
+                <polyline points="12 19 5 12 12 5"></polyline>
+              </svg>
+              <span>Back to Tracked Email</span>
+            </button>
+
+            <!-- Hero Subject & Opens Pill (Node 82:5676 & Mobile Node 225:14041) -->
             <div class="details-hero-header">
               <div class="details-subject-line">
                 <h2 class="details-subject-title" id="detEmailSubject">It's a testing email</h2>
@@ -1189,7 +1200,7 @@
   <div class="toast-container" id="toastContainer"></div>
   </div>
 
-  <script src="app.js?v=figma_mobile_v2"></script>
+  <script src="app.js?v=figma_mobile_v3"></script>
 </body>
 
 </html>

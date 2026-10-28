@@ -195,8 +195,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const modalDetailsBody = document.getElementById('modalDetailsBody');
   const toastContainer = document.getElementById('toastContainer');
 
-  // Email Tracking Details View Elements (Exact Figma Node 82:4805)
+  // Email Tracking Details View Elements (Exact Figma Node 82:4805 & Mobile Node 225:13693)
   const backToTrackingListBtn = document.getElementById('backToTrackingListBtn');
+  const mobileDetailsBackBtn = document.getElementById('mobileDetailsBackBtn');
   const headerTitleGroup = document.getElementById('headerTitleGroup');
   const headerRightActions = document.getElementById('headerRightActions');
   const emailTableView = document.getElementById('emailTableView');
@@ -1674,6 +1675,9 @@ document.addEventListener('DOMContentLoaded', () => {
   if (backToTrackingListBtn) {
     backToTrackingListBtn.addEventListener('click', closeEmailDetails);
   }
+  if (mobileDetailsBackBtn) {
+    mobileDetailsBackBtn.addEventListener('click', closeEmailDetails);
+  }
 
   function renderTimeline(email, selectedRecipient = 'all') {
     if (!detTimelineList) return;
@@ -1985,11 +1989,16 @@ document.addEventListener('DOMContentLoaded', () => {
       switchTab('email-tracking');
     }
 
-    // Toggle views matching Figma
+    // Toggle views matching Figma (Desktop vs Mobile Node 225:13693)
     if (emailTableView) emailTableView.style.display = 'none';
-    if (headerTitleGroup) headerTitleGroup.style.display = 'none';
-    if (headerRightActions) headerRightActions.style.display = 'none';
-    if (backToTrackingListBtn) backToTrackingListBtn.style.display = 'inline-flex';
+    if (window.innerWidth > 768) {
+      if (headerTitleGroup) headerTitleGroup.style.display = 'none';
+      if (headerRightActions) headerRightActions.style.display = 'none';
+      if (backToTrackingListBtn) backToTrackingListBtn.style.display = 'inline-flex';
+    } else {
+      if (headerRightActions) headerRightActions.style.display = 'flex';
+      if (backToTrackingListBtn) backToTrackingListBtn.style.display = 'none';
+    }
     if (emailTrackingDetailsView) emailTrackingDetailsView.style.display = 'flex';
 
     renderEmailDetailsView(email);
