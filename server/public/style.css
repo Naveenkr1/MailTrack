@@ -3020,6 +3020,8 @@ body {
 .mobile-filter-chips-bar,
 .mobile-brand-group,
 .mobile-search-bar-wrap,
+.mobile-install-banner,
+.ios-install-modal-backdrop,
 .sidebar-backdrop,
 .card-chevron-col,
 .card-footer-stats-cell {
@@ -3543,6 +3545,306 @@ body {
     padding: 0 4px;
     display: flex;
     align-items: center;
+    justify-content: center;
+  }
+
+  /* ---------------------------------------------------- */
+  /* 3B. MOBILE ADD TO HOME SCREEN ALERT BANNER & IOS MODAL */
+  /* ---------------------------------------------------- */
+  .mobile-install-banner {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    animation: installBannerSlideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes installBannerSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .install-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .install-banner-icon-box {
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(16, 185, 129, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .install-banner-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+
+  .install-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .install-banner-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .install-banner-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-title);
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .install-banner-badge {
+    font-family: 'Inter', sans-serif;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--color-green);
+    background: var(--bg-badge-open);
+    border: 1px solid var(--border-badge-open);
+    padding: 1px 5px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.2px;
+    flex-shrink: 0;
+  }
+
+  .install-banner-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: #94a3b8;
+    line-height: 1.3;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .install-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .btn-install-app {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--color-green);
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(16, 185, 129, 0.3);
+    transition: transform 0.12s ease, background 0.15s ease;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-install-app:active {
+    transform: scale(0.96);
+  }
+
+  .btn-install-app svg {
+    stroke: #ffffff;
+    flex-shrink: 0;
+  }
+
+  .btn-install-close {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 18px;
+    line-height: 1;
+    padding: 4px 6px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.12s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .btn-install-close:active {
+    color: var(--text-title);
+  }
+
+  /* iOS Add to Home Screen Sheet Modal */
+  .ios-install-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    display: flex !important;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+
+  .ios-install-sheet {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-card);
+    border-radius: 20px 20px 0 0;
+    width: 100%;
+    max-width: 440px;
+    padding: 20px 18px 28px 18px;
+    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideUpSheet 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes slideUpSheet {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .ios-install-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .ios-install-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ios-install-logo {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+  }
+
+  .ios-install-text-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .ios-install-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-title);
+    margin: 0;
+  }
+
+  .ios-install-subtitle {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  .ios-install-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+
+  .ios-install-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--bg-table-head);
+    border: 1px solid var(--border-table-row);
+    border-radius: 12px;
+    padding: 14px;
+  }
+
+  .ios-step-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    color: var(--text-title);
+  }
+
+  .ios-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    background: var(--color-green);
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .ios-step-content {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    line-height: 1.4;
+  }
+
+  .ios-step-content strong {
+    font-weight: 600;
+    color: var(--text-title);
+  }
+
+  .ios-share-glyph {
+    vertical-align: middle;
+  }
+
+  .ios-got-it-btn {
+    width: 100%;
+    height: 42px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 10px;
     justify-content: center;
   }
 

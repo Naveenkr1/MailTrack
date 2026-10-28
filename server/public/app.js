@@ -2116,6 +2116,121 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------------------------------------------------------------
+  // PWA & MOBILE ADD TO HOME SCREEN PROMPT
+  // -------------------------------------------------------------
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js').catch(err => {
+        console.warn('[PWA] Service worker registration error:', err);
+      });
+    });
+  }
+
+  let deferredInstallPrompt = null;
+  const mobileInstallBanner = document.getElementById('mobileInstallBanner');
+  const installAppBtn = document.getElementById('installAppBtn');
+  const closeInstallBannerBtn = document.getElementById('closeInstallBannerBtn');
+  const mobileDropdownInstallApp = document.getElementById('mobileDropdownInstallApp');
+  const iosInstallModal = document.getElementById('iosInstallModal');
+  const closeIosInstallModal = document.getElementById('closeIosInstallModal');
+  const iosInstallGotItBtn = document.getElementById('iosInstallGotItBtn');
+
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  function shouldShowInstallBanner() {
+    if (isStandalone) return false;
+    if (window.innerWidth > 768) return false;
+    const dismissedAt = localStorage.getItem('mt_dismiss_install_banner');
+    if (dismissedAt) {
+      const elapsed = Date.now() - parseInt(dismissedAt, 10);
+      if (elapsed < 7 * 24 * 60 * 60 * 1000) return false;
+    }
+    return true;
+  }
+
+  function showInstallBanner() {
+    if (mobileInstallBanner && shouldShowInstallBanner()) {
+      mobileInstallBanner.style.display = 'flex';
+    }
+  }
+
+  function hideInstallBanner() {
+    if (mobileInstallBanner) {
+      mobileInstallBanner.style.display = 'none';
+    }
+  }
+
+  // Handle Chrome / Android native install prompt capture
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    showInstallBanner();
+  });
+
+  // For iOS or browsers without beforeinstallprompt, display prompt on mobile view after brief delay
+  if (shouldShowInstallBanner()) {
+    setTimeout(showInstallBanner, 1500);
+  }
+
+  function triggerInstallFlow() {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          hideInstallBanner();
+        }
+        deferredInstallPrompt = null;
+      });
+    } else if (isIOS) {
+      if (iosInstallModal) iosInstallModal.style.display = 'flex';
+    } else {
+      if (iosInstallModal) {
+        iosInstallModal.style.display = 'flex';
+      }
+    }
+  }
+
+  if (installAppBtn) {
+    installAppBtn.addEventListener('click', triggerInstallFlow);
+  }
+
+  if (mobileDropdownInstallApp) {
+    mobileDropdownInstallApp.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMobileProfileDropdown();
+      triggerInstallFlow();
+    });
+  }
+
+  if (closeInstallBannerBtn) {
+    closeInstallBannerBtn.addEventListener('click', () => {
+      hideInstallBanner();
+      localStorage.setItem('mt_dismiss_install_banner', Date.now().toString());
+    });
+  }
+
+  if (closeIosInstallModal) {
+    closeIosInstallModal.addEventListener('click', () => {
+      if (iosInstallModal) iosInstallModal.style.display = 'none';
+    });
+  }
+
+  if (iosInstallGotItBtn) {
+    iosInstallGotItBtn.addEventListener('click', () => {
+      if (iosInstallModal) iosInstallModal.style.display = 'none';
+    });
+  }
+
+  if (iosInstallModal) {
+    iosInstallModal.addEventListener('click', (e) => {
+      if (e.target === iosInstallModal) {
+        iosInstallModal.style.display = 'none';
+      }
+    });
+  }
+
+  // -------------------------------------------------------------
   // INITIALIZATION
   // -------------------------------------------------------------
   const urlParams = new URLSearchParams(window.location.search);
