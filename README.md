@@ -1,5 +1,7 @@
 # Mail Track (Reverse-Engineered Mailsuite / Mailtrack Clone)
 
+[![Featured on Made with REA](https://madewithrea.com/badges/featured.svg)](https://madewithrea.com/builds/mail-track-mailsuite-extension-mechanics-reverse-engineered-with-rea-a)
+
 A lightweight, real-time email tracking engine with Google Chrome extension integration, double checkmarks (`✓✓`), web beacon tracking, link click redirects, and live WebSocket dashboard.
 
 ---
