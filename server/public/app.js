@@ -2130,19 +2130,32 @@ document.addEventListener('DOMContentLoaded', () => {
   const mobileInstallBanner = document.getElementById('mobileInstallBanner');
   const installAppBtn = document.getElementById('installAppBtn');
   const closeInstallBannerBtn = document.getElementById('closeInstallBannerBtn');
+  const dontShowBannerCheck = document.getElementById('dontShowBannerCheck');
   const mobileDropdownInstallApp = document.getElementById('mobileDropdownInstallApp');
   const iosInstallModal = document.getElementById('iosInstallModal');
   const closeIosInstallModal = document.getElementById('closeIosInstallModal');
   const iosInstallGotItBtn = document.getElementById('iosInstallGotItBtn');
+  const dontShowIosCheck = document.getElementById('dontShowIosCheck');
 
   const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
+  function isNeverShowInstallAgain() {
+    return localStorage.getItem('mt_dont_show_install_again') === 'true';
+  }
+
+  function markNeverShowInstallAgain() {
+    localStorage.setItem('mt_dont_show_install_again', 'true');
+    localStorage.setItem('mt_dismiss_install_banner', 'permanent');
+  }
+
   function shouldShowInstallBanner() {
     if (isStandalone) return false;
     if (window.innerWidth > 768) return false;
+    if (isNeverShowInstallAgain()) return false;
     const dismissedAt = localStorage.getItem('mt_dismiss_install_banner');
     if (dismissedAt) {
+      if (dismissedAt === 'permanent') return false;
       const elapsed = Date.now() - parseInt(dismissedAt, 10);
       if (elapsed < 7 * 24 * 60 * 60 * 1000) return false;
     }
@@ -2151,13 +2164,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function showInstallBanner() {
     if (mobileInstallBanner && shouldShowInstallBanner()) {
-      mobileInstallBanner.style.display = 'flex';
+      mobileInstallBanner.classList.remove('hidden');
+      mobileInstallBanner.style.setProperty('display', 'flex', 'important');
     }
   }
 
-  function hideInstallBanner() {
+  function hideInstallBanner(permanent = false) {
     if (mobileInstallBanner) {
-      mobileInstallBanner.style.display = 'none';
+      mobileInstallBanner.classList.add('hidden');
+      mobileInstallBanner.style.setProperty('display', 'none', 'important');
+    }
+    if (permanent) {
+      markNeverShowInstallAgain();
+    } else {
+      localStorage.setItem('mt_dismiss_install_banner', Date.now().toString());
     }
   }
 
@@ -2178,21 +2198,24 @@ document.addEventListener('DOMContentLoaded', () => {
       deferredInstallPrompt.prompt();
       deferredInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-          hideInstallBanner();
+          hideInstallBanner(true);
         }
         deferredInstallPrompt = null;
       });
     } else if (isIOS) {
-      if (iosInstallModal) iosInstallModal.style.display = 'flex';
+      if (iosInstallModal) iosInstallModal.style.setProperty('display', 'flex', 'important');
     } else {
       if (iosInstallModal) {
-        iosInstallModal.style.display = 'flex';
+        iosInstallModal.style.setProperty('display', 'flex', 'important');
       }
     }
   }
 
   if (installAppBtn) {
-    installAppBtn.addEventListener('click', triggerInstallFlow);
+    installAppBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      triggerInstallFlow();
+    });
   }
 
   if (mobileDropdownInstallApp) {
@@ -2204,28 +2227,60 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (closeInstallBannerBtn) {
-    closeInstallBannerBtn.addEventListener('click', () => {
-      hideInstallBanner();
-      localStorage.setItem('mt_dismiss_install_banner', Date.now().toString());
+    closeInstallBannerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isChecked = dontShowBannerCheck && dontShowBannerCheck.checked;
+      hideInstallBanner(isChecked);
     });
+  }
+
+  if (dontShowBannerCheck) {
+    dontShowBannerCheck.addEventListener('change', () => {
+      if (dontShowBannerCheck.checked) {
+        if (dontShowIosCheck) dontShowIosCheck.checked = true;
+        markNeverShowInstallAgain();
+      }
+    });
+  }
+
+  if (dontShowIosCheck) {
+    dontShowIosCheck.addEventListener('change', () => {
+      if (dontShowIosCheck.checked) {
+        if (dontShowBannerCheck) dontShowBannerCheck.checked = true;
+        markNeverShowInstallAgain();
+      }
+    });
+  }
+
+  function handleCloseIosModal(e) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const isChecked = (dontShowIosCheck && dontShowIosCheck.checked) || (dontShowBannerCheck && dontShowBannerCheck.checked);
+    if (iosInstallModal) {
+      iosInstallModal.style.setProperty('display', 'none', 'important');
+    }
+    if (isChecked) {
+      hideInstallBanner(true);
+    } else {
+      hideInstallBanner(false);
+    }
   }
 
   if (closeIosInstallModal) {
-    closeIosInstallModal.addEventListener('click', () => {
-      if (iosInstallModal) iosInstallModal.style.display = 'none';
-    });
+    closeIosInstallModal.addEventListener('click', handleCloseIosModal);
   }
 
   if (iosInstallGotItBtn) {
-    iosInstallGotItBtn.addEventListener('click', () => {
-      if (iosInstallModal) iosInstallModal.style.display = 'none';
-    });
+    iosInstallGotItBtn.addEventListener('click', handleCloseIosModal);
   }
 
   if (iosInstallModal) {
     iosInstallModal.addEventListener('click', (e) => {
       if (e.target === iosInstallModal) {
-        iosInstallModal.style.display = 'none';
+        handleCloseIosModal(e);
       }
     });
   }

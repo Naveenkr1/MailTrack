@@ -19,7 +19,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=figma_pwa_v6">
+  <link rel="stylesheet" href="style.css?v=figma_pwa_v7">
 </head>
 
 <body>
@@ -384,28 +384,36 @@
       <div class="figma-content-area">
         <!-- Mobile Add to Home Screen Banner Alert -->
         <div id="mobileInstallBanner" class="mobile-install-banner" style="display: none;">
-          <div class="install-banner-left">
-            <div class="install-banner-icon-box">
-              <img src="/icons/icon-48.png" alt="Mail Track" class="install-banner-icon" />
-            </div>
-            <div class="install-banner-text">
-              <div class="install-banner-title-row">
-                <span class="install-banner-title">Add to Home Screen</span>
-                <span class="install-banner-badge">Fast App</span>
+          <div class="install-banner-main-row">
+            <div class="install-banner-left">
+              <div class="install-banner-icon-box">
+                <img src="/icons/icon-48.png" alt="Mail Track" class="install-banner-icon" />
               </div>
-              <p class="install-banner-desc">Install Mail Track for instant 1-tap tracking & receipts.</p>
+              <div class="install-banner-text">
+                <div class="install-banner-title-row">
+                  <span class="install-banner-title">Add to Home Screen</span>
+                  <span class="install-banner-badge">Fast App</span>
+                </div>
+                <p class="install-banner-desc">Install Mail Track for instant 1-tap tracking & receipts.</p>
+              </div>
+            </div>
+            <div class="install-banner-actions">
+              <button class="btn-install-app" id="installAppBtn" type="button">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Add to Home</span>
+              </button>
+              <button class="btn-install-close" id="closeInstallBannerBtn" type="button" aria-label="Dismiss banner">&times;</button>
             </div>
           </div>
-          <div class="install-banner-actions">
-            <button class="btn-install-app" id="installAppBtn" type="button">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              <span>Add to Home</span>
-            </button>
-            <button class="btn-install-close" id="closeInstallBannerBtn" type="button" aria-label="Dismiss banner">&times;</button>
+          <div class="install-banner-sub-row">
+            <label class="install-dont-show-label" for="dontShowBannerCheck">
+              <input type="checkbox" id="dontShowBannerCheck" class="install-checkbox" />
+              <span>Don't show me again</span>
+            </label>
           </div>
         </div>
 
@@ -1290,11 +1298,17 @@
           </div>
         </div>
       </div>
+      <div class="ios-dont-show-row">
+        <label class="install-dont-show-label" for="dontShowIosCheck">
+          <input type="checkbox" id="dontShowIosCheck" class="install-checkbox" />
+          <span>Don't show me again</span>
+        </label>
+      </div>
       <button class="btn-figma-primary ios-got-it-btn" id="iosInstallGotItBtn" type="button">Got it</button>
     </div>
   </div>
 
-  <script src="app.js?v=figma_pwa_v6"></script>
+  <script src="app.js?v=figma_pwa_v7"></script>
 </body>
 
 </html>

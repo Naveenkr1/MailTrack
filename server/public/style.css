@@ -3552,10 +3552,9 @@ body {
   /* 3B. MOBILE ADD TO HOME SCREEN ALERT BANNER & IOS MODAL */
   /* ---------------------------------------------------- */
   .mobile-install-banner {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
     background: var(--bg-card);
     border: 1px solid var(--border-card);
     border-radius: 14px;
@@ -3563,6 +3562,63 @@ body {
     margin-bottom: 14px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
     animation: installBannerSlideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mobile-install-banner.hidden {
+    display: none !important;
+  }
+
+  .install-banner-main-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .install-banner-sub-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border-table-row);
+    width: 100%;
+  }
+
+  .install-dont-show-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 11.5px;
+    color: #94a3b8;
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .install-dont-show-label span {
+    transition: color 0.15s ease;
+  }
+
+  .install-dont-show-label:hover span,
+  .install-dont-show-label input:checked + span {
+    color: var(--text-title);
+    font-weight: 500;
+  }
+
+  .install-checkbox {
+    width: 15px;
+    height: 15px;
+    accent-color: var(--color-green);
+    cursor: pointer;
+    margin: 0;
+  }
+
+  .ios-dont-show-row {
+    display: flex;
+    align-items: center;
+    padding: 2px 4px 4px 4px;
   }
 
   @keyframes installBannerSlideDown {
