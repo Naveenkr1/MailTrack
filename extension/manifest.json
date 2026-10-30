@@ -36,6 +36,8 @@
   ],
   "externally_connectable": {
     "matches": [
+      "https://mailtrack.in/*",
+      "https://www.mailtrack.in/*",
       "https://mail-track-pink.vercel.app/*",
       "https://*.vercel.app/*",
       "http://localhost:4000/*"

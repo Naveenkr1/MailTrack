@@ -1836,6 +1836,7 @@ body {
   height: 40px;
   padding: 9px 14px;
   display: inline-flex;
+  width: fit-content;
   align-items: center;
   gap: 6px;
   font-family: inherit;
@@ -3602,7 +3603,7 @@ body {
   }
 
   .install-dont-show-label:hover span,
-  .install-dont-show-label input:checked + span {
+  .install-dont-show-label input:checked+span {
     color: var(--text-title);
     font-weight: 500;
   }
@@ -3626,6 +3627,7 @@ body {
       opacity: 0;
       transform: translateY(-8px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -3791,8 +3793,13 @@ body {
   }
 
   @keyframes slideUpSheet {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+    from {
+      transform: translateY(100%);
+    }
+
+    to {
+      transform: translateY(0);
+    }
   }
 
   .ios-install-header {

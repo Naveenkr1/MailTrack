@@ -2,7 +2,7 @@
 let ws = null;
 let reconnectInterval = 3000;
 
-const PROD_SERVER_URL = 'https://mail-track-pink.vercel.app';
+const PROD_SERVER_URL = 'https://mailtrack.in';
 const LOCAL_SERVER_URL = 'http://localhost:4000';
 
 let serverMode = 'production'; // 'production' | 'localhost'
@@ -17,16 +17,16 @@ async function getActiveServerUrl() {
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
     const stored = await chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url']);
     
-    // Purge dead ephemeral tunnels or invalid domains from local storage
-    if (stored.mt_active_server_url && (stored.mt_active_server_url.includes('trycloudflare.com') || stored.mt_active_server_url.includes('mailtrack.in'))) {
+    // Purge dead ephemeral tunnels from local storage
+    if (stored.mt_active_server_url && stored.mt_active_server_url.includes('trycloudflare.com')) {
       chrome.storage.local.set({ mt_active_server_url: PROD_SERVER_URL });
     }
-    if (stored.mt_custom_server_url && (stored.mt_custom_server_url.includes('trycloudflare.com') || stored.mt_custom_server_url.includes('mailtrack.in'))) {
+    if (stored.mt_custom_server_url && stored.mt_custom_server_url.includes('trycloudflare.com')) {
       chrome.storage.local.set({ mt_custom_server_url: '' });
       stored.mt_custom_server_url = '';
     }
 
-    if (stored.mt_custom_server_url && !stored.mt_custom_server_url.includes('trycloudflare.com') && !stored.mt_custom_server_url.includes('mailtrack.in')) {
+    if (stored.mt_custom_server_url && !stored.mt_custom_server_url.includes('trycloudflare.com')) {
       activeServerUrl = stored.mt_custom_server_url.replace(/\/+$/, '');
       return activeServerUrl;
     }
@@ -115,7 +115,8 @@ function openOrFocusDashboard() {
   chrome.tabs.query({}, (tabs) => {
     const existing = tabs.find(t => {
       if (!t.url) return false;
-      return t.url.includes('mail-track-pink.vercel.app') ||
+      return t.url.includes('mailtrack.in') ||
+             t.url.includes('mail-track-pink.vercel.app') ||
              t.url.includes('vercel.app') ||
              t.url.startsWith('http://localhost:4000');
     });

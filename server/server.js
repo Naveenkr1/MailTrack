@@ -24,7 +24,7 @@ const PORT = process.env.PORT || 4000;
 let publicBaseUrl = process.env.BASE_URL || 
   (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : 
   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 
-  (process.env.VERCEL ? 'https://mail-track-pink.vercel.app' : `http://localhost:${PORT}`)));
+  (process.env.VERCEL ? 'https://mailtrack.in' : `http://localhost:${PORT}`)));
 let customDomain = (process.env.CUSTOM_DOMAIN || '').trim();
 let tunnelToken = (process.env.CLOUDFLARE_TUNNEL_TOKEN || '').trim();
 
@@ -73,7 +73,7 @@ function getRequestBaseUrl(req) {
   }
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
   if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
-  if (process.env.VERCEL) return 'https://mail-track-pink.vercel.app';
+  if (process.env.VERCEL) return 'https://mailtrack.in';
   return publicBaseUrl;
 }
 

@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const userEmailEl = document.getElementById('userEmail');
   const userAvatarEl = document.getElementById('userAvatar');
 
-  const DEFAULT_PROD_URL = 'https://mail-track-pink.vercel.app';
+  const DEFAULT_PROD_URL = 'https://mailtrack.in';
   const LOCAL_URL = 'http://localhost:4000';
 
   let isRedirecting = false;
@@ -17,11 +17,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function getServerUrl() {
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
       const items = await chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url']);
-      if (items.mt_custom_server_url && !items.mt_custom_server_url.includes('trycloudflare.com') && !items.mt_custom_server_url.includes('mailtrack.in')) {
+      if (items.mt_custom_server_url && !items.mt_custom_server_url.includes('trycloudflare.com')) {
         return items.mt_custom_server_url.replace(/\/+$/, '');
       }
       if (items.mt_server_mode === 'localhost') return LOCAL_URL;
-      if (items.mt_active_server_url && !items.mt_active_server_url.includes('trycloudflare.com') && !items.mt_active_server_url.includes('mailtrack.in')) {
+      if (items.mt_active_server_url && !items.mt_active_server_url.includes('trycloudflare.com')) {
         return items.mt_active_server_url.replace(/\/+$/, '');
       }
     }

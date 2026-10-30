@@ -18,7 +18,8 @@ function getEffectiveBaseUrl(req) {
     }
   }
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
-  if (process.env.VERCEL) return 'https://mail-track-pink.vercel.app';
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.VERCEL) return 'https://mailtrack.in';
   return 'http://localhost:4000';
 }
 
@@ -54,8 +55,8 @@ router.get('/google', (req, res) => {
   authUrl.searchParams.append('redirect_uri', redirectUri);
   authUrl.searchParams.append('response_type', 'code');
 
-  // Request all permissions upfront including gmail.modify for extension & mobile sync
-  const scope = (isMobileSync || isExtension)
+  // Only request sensitive gmail.modify scope if user explicitly requested Mobile Sync
+  const scope = isMobileSync
     ? 'openid email profile https://www.googleapis.com/auth/gmail.modify'
     : 'openid email profile';
   authUrl.searchParams.append('scope', scope);

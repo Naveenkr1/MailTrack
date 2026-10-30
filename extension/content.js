@@ -4,7 +4,7 @@
 
   console.log('[Mail Track] ⚡ Activating Ultra-Fast Gmail Tracking...');
 
-  const DEFAULT_PROD_URL = 'https://mail-track-pink.vercel.app';
+  const DEFAULT_PROD_URL = 'https://mailtrack.in';
   let trackedEmails = [];
   let publicTrackingUrl = DEFAULT_PROD_URL;
   let ws = null;
@@ -12,7 +12,6 @@
 
   function sanitizeServerUrl(url) {
     if (!url || typeof url !== 'string' || 
-        url.includes('mailtrack.in') || 
         url.includes('trycloudflare.com') || 
         url.includes('loca.lt') || 
         url.includes('ngrok')) {
@@ -29,12 +28,12 @@
     chrome.storage.local.get(['mt_server_mode', 'mt_active_server_url', 'mt_custom_server_url'], (items) => {
       if (items.mt_server_mode === 'localhost') {
         publicTrackingUrl = 'http://localhost:4000';
-      } else if (items.mt_custom_server_url && !items.mt_custom_server_url.includes('trycloudflare.com') && !items.mt_custom_server_url.includes('mailtrack.in')) {
+      } else if (items.mt_custom_server_url && !items.mt_custom_server_url.includes('trycloudflare.com')) {
         publicTrackingUrl = sanitizeServerUrl(items.mt_custom_server_url);
       } else {
         publicTrackingUrl = DEFAULT_PROD_URL;
       }
-      if (items.mt_active_server_url && (items.mt_active_server_url.includes('mailtrack.in') || items.mt_active_server_url.includes('trycloudflare.com'))) {
+      if (items.mt_active_server_url && items.mt_active_server_url.includes('trycloudflare.com')) {
         chrome.storage.local.set({ mt_active_server_url: DEFAULT_PROD_URL, mt_custom_server_url: '' });
       }
     });
