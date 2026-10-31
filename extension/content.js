@@ -2004,7 +2004,6 @@
       <div class="mt-dropdown-header">
         <div class="mt-dh-left">
           <span class="mt-dh-title">Mail Track Activity</span>
-          ${activityEmails.length > 0 ? `<span class="mt-dh-count">${activityEmails.length}</span>` : ''}
         </div>
         <button class="mt-dh-close" id="mtDropdownCloseBtn" title="Close">✕</button>
       </div>
