@@ -5024,3 +5024,65 @@ body {
     justify-content: space-between;
   }
 }
+
+/* ==========================================================================
+   SKELETON LOADING SHIMMER ANIMATION
+   ========================================================================== */
+@keyframes mtSkeletonShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  display: inline-block;
+  background: linear-gradient(
+    90deg,
+    #f1f5f9 0%,
+    #e2e8f0 35%,
+    #f8fafc 55%,
+    #f1f5f9 100%
+  );
+  background-size: 250% 100%;
+  animation: mtSkeletonShimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+  vertical-align: middle;
+}
+
+[data-theme="dark"] .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.09) 35%,
+    rgba(255, 255, 255, 0.14) 55%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 250% 100%;
+}
+
+.skeleton-row {
+  cursor: default !important;
+  pointer-events: none !important;
+}
+
+.skeleton-row:hover,
+.skeleton-row:active {
+  background: var(--bg-card) !important;
+  transform: none !important;
+}
+
+.figma-data-table tbody tr.skeleton-row {
+  height: 77px;
+  border-bottom: 1px solid var(--border-table-row);
+}
+
+.activity-feed-item.skeleton-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-table-row);
+}

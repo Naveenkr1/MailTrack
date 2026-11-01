@@ -492,7 +492,147 @@
                   </tr>
                 </thead>
                 <tbody id="emailsTableBody">
-                  <!-- Dynamically populated from emails array -->
+                  <!-- Skeleton Loading Rows (Shown while fetching) -->
+                  <tr class="email-row-clickable skeleton-row" aria-hidden="true">
+                    <td class="cell-sent-at">
+                      <span class="skeleton-shimmer" style="width: 80px; height: 13px;"></span>
+                    </td>
+                    <td class="td-subject-cell">
+                      <div class="card-subject-content" style="width: 100%;">
+                        <div class="subject-line-row">
+                          <span class="skeleton-shimmer" style="width: 68%; height: 15px; margin-bottom: 6px;"></span>
+                        </div>
+                        <div class="recipient-chips-row">
+                          <span class="skeleton-shimmer" style="width: 125px; height: 20px; border-radius: 6px;"></span>
+                        </div>
+                      </div>
+                      <div class="card-chevron-col">
+                        <span class="skeleton-shimmer" style="width: 14px; height: 14px; border-radius: 50%; opacity: 0.35;"></span>
+                      </div>
+                    </td>
+                    <td class="cell-opens">
+                      <span class="skeleton-shimmer" style="width: 62px; height: 22px; border-radius: 12px;"></span>
+                    </td>
+                    <td class="cell-clicks-col">
+                      <span class="skeleton-shimmer" style="width: 50px; height: 13px;"></span>
+                    </td>
+                    <td class="cell-last-opened-col">
+                      <span class="skeleton-shimmer" style="width: 85px; height: 13px;"></span>
+                    </td>
+                    <td class="card-footer-stats-cell">
+                      <div class="card-footer-left-badges">
+                        <span class="skeleton-shimmer" style="width: 62px; height: 20px; border-radius: 10px;"></span>
+                      </div>
+                      <div class="card-last-opened-group">
+                        <span class="skeleton-shimmer" style="width: 80px; height: 12px;"></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="email-row-clickable skeleton-row" aria-hidden="true">
+                    <td class="cell-sent-at">
+                      <span class="skeleton-shimmer" style="width: 75px; height: 13px;"></span>
+                    </td>
+                    <td class="td-subject-cell">
+                      <div class="card-subject-content" style="width: 100%;">
+                        <div class="subject-line-row">
+                          <span class="skeleton-shimmer" style="width: 52%; height: 15px; margin-bottom: 6px;"></span>
+                        </div>
+                        <div class="recipient-chips-row">
+                          <span class="skeleton-shimmer" style="width: 95px; height: 20px; border-radius: 6px;"></span>
+                        </div>
+                      </div>
+                      <div class="card-chevron-col">
+                        <span class="skeleton-shimmer" style="width: 14px; height: 14px; border-radius: 50%; opacity: 0.35;"></span>
+                      </div>
+                    </td>
+                    <td class="cell-opens">
+                      <span class="skeleton-shimmer" style="width: 62px; height: 22px; border-radius: 12px;"></span>
+                    </td>
+                    <td class="cell-clicks-col">
+                      <span class="skeleton-shimmer" style="width: 50px; height: 13px;"></span>
+                    </td>
+                    <td class="cell-last-opened-col">
+                      <span class="skeleton-shimmer" style="width: 85px; height: 13px;"></span>
+                    </td>
+                    <td class="card-footer-stats-cell">
+                      <div class="card-footer-left-badges">
+                        <span class="skeleton-shimmer" style="width: 62px; height: 20px; border-radius: 10px;"></span>
+                      </div>
+                      <div class="card-last-opened-group">
+                        <span class="skeleton-shimmer" style="width: 80px; height: 12px;"></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="email-row-clickable skeleton-row" aria-hidden="true">
+                    <td class="cell-sent-at">
+                      <span class="skeleton-shimmer" style="width: 80px; height: 13px;"></span>
+                    </td>
+                    <td class="td-subject-cell">
+                      <div class="card-subject-content" style="width: 100%;">
+                        <div class="subject-line-row">
+                          <span class="skeleton-shimmer" style="width: 76%; height: 15px; margin-bottom: 6px;"></span>
+                        </div>
+                        <div class="recipient-chips-row">
+                          <span class="skeleton-shimmer" style="width: 145px; height: 20px; border-radius: 6px;"></span>
+                        </div>
+                      </div>
+                      <div class="card-chevron-col">
+                        <span class="skeleton-shimmer" style="width: 14px; height: 14px; border-radius: 50%; opacity: 0.35;"></span>
+                      </div>
+                    </td>
+                    <td class="cell-opens">
+                      <span class="skeleton-shimmer" style="width: 62px; height: 22px; border-radius: 12px;"></span>
+                    </td>
+                    <td class="cell-clicks-col">
+                      <span class="skeleton-shimmer" style="width: 50px; height: 13px;"></span>
+                    </td>
+                    <td class="cell-last-opened-col">
+                      <span class="skeleton-shimmer" style="width: 85px; height: 13px;"></span>
+                    </td>
+                    <td class="card-footer-stats-cell">
+                      <div class="card-footer-left-badges">
+                        <span class="skeleton-shimmer" style="width: 62px; height: 20px; border-radius: 10px;"></span>
+                      </div>
+                      <div class="card-last-opened-group">
+                        <span class="skeleton-shimmer" style="width: 80px; height: 12px;"></span>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr class="email-row-clickable skeleton-row" aria-hidden="true">
+                    <td class="cell-sent-at">
+                      <span class="skeleton-shimmer" style="width: 70px; height: 13px;"></span>
+                    </td>
+                    <td class="td-subject-cell">
+                      <div class="card-subject-content" style="width: 100%;">
+                        <div class="subject-line-row">
+                          <span class="skeleton-shimmer" style="width: 60%; height: 15px; margin-bottom: 6px;"></span>
+                        </div>
+                        <div class="recipient-chips-row">
+                          <span class="skeleton-shimmer" style="width: 110px; height: 20px; border-radius: 6px;"></span>
+                        </div>
+                      </div>
+                      <div class="card-chevron-col">
+                        <span class="skeleton-shimmer" style="width: 14px; height: 14px; border-radius: 50%; opacity: 0.35;"></span>
+                      </div>
+                    </td>
+                    <td class="cell-opens">
+                      <span class="skeleton-shimmer" style="width: 62px; height: 22px; border-radius: 12px;"></span>
+                    </td>
+                    <td class="cell-clicks-col">
+                      <span class="skeleton-shimmer" style="width: 50px; height: 13px;"></span>
+                    </td>
+                    <td class="cell-last-opened-col">
+                      <span class="skeleton-shimmer" style="width: 85px; height: 13px;"></span>
+                    </td>
+                    <td class="card-footer-stats-cell">
+                      <div class="card-footer-left-badges">
+                        <span class="skeleton-shimmer" style="width: 62px; height: 20px; border-radius: 10px;"></span>
+                      </div>
+                      <div class="card-last-opened-group">
+                        <span class="skeleton-shimmer" style="width: 80px; height: 12px;"></span>
+                      </div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
 
@@ -637,7 +777,35 @@
 
             </div>
             <div class="figma-activity-list" id="activityFeedList">
-              <!-- Dynamically populated -->
+              <!-- Skeleton Activity Items (Shown while fetching) -->
+              <div class="activity-feed-item skeleton-row" aria-hidden="true" style="pointer-events:none;">
+                <div class="feed-icon-wrap" style="background:transparent;">
+                  <span class="skeleton-shimmer" style="width:32px;height:32px;border-radius:50%;"></span>
+                </div>
+                <div class="feed-content" style="flex:1;">
+                  <div class="feed-top-line" style="display:flex;justify-content:space-between;margin-bottom:7px;">
+                    <span class="skeleton-shimmer" style="width:130px;height:13px;"></span>
+                    <span class="skeleton-shimmer" style="width:75px;height:11px;"></span>
+                  </div>
+                  <div class="feed-subject">
+                    <span class="skeleton-shimmer" style="width:65%;height:13px;"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="activity-feed-item skeleton-row" aria-hidden="true" style="pointer-events:none;">
+                <div class="feed-icon-wrap" style="background:transparent;">
+                  <span class="skeleton-shimmer" style="width:32px;height:32px;border-radius:50%;"></span>
+                </div>
+                <div class="feed-content" style="flex:1;">
+                  <div class="feed-top-line" style="display:flex;justify-content:space-between;margin-bottom:7px;">
+                    <span class="skeleton-shimmer" style="width:145px;height:13px;"></span>
+                    <span class="skeleton-shimmer" style="width:80px;height:11px;"></span>
+                  </div>
+                  <div class="feed-subject">
+                    <span class="skeleton-shimmer" style="width:48%;height:13px;"></span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </section>

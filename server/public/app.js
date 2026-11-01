@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeFilter = 'all';
   let searchQuery = '';
   let currentActiveDetailId = null;
+  let hasLoadedEmailsOnce = false;
 
   // -------------------------------------------------------------
   // THEME MANAGEMENT (Dark / Light)
@@ -919,9 +920,96 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------------------------------------------------------------
+  // SKELETON LOADING
+  // -------------------------------------------------------------
+  function renderSkeletonTable(rowCount = 5) {
+    if (!emailsTableBody) return;
+    const skeletonRows = [];
+    const widths = [
+      { subject: 68, rec: 125 },
+      { subject: 52, rec: 95 },
+      { subject: 76, rec: 145 },
+      { subject: 60, rec: 110 },
+      { subject: 72, rec: 135 }
+    ];
+
+    for (let i = 0; i < rowCount; i++) {
+      const w = widths[i % widths.length];
+      skeletonRows.push(`
+        <tr class="email-row-clickable skeleton-row" aria-hidden="true">
+          <td class="cell-sent-at">
+            <span class="skeleton-shimmer" style="width: 80px; height: 13px;"></span>
+          </td>
+          <td class="td-subject-cell">
+            <div class="card-subject-content" style="width: 100%;">
+              <div class="subject-line-row">
+                <span class="skeleton-shimmer" style="width: ${w.subject}%; height: 15px; margin-bottom: 6px;"></span>
+              </div>
+              <div class="recipient-chips-row">
+                <span class="skeleton-shimmer" style="width: ${w.rec}px; height: 20px; border-radius: 6px;"></span>
+              </div>
+            </div>
+            <div class="card-chevron-col">
+              <span class="skeleton-shimmer" style="width: 14px; height: 14px; border-radius: 50%; opacity: 0.35;"></span>
+            </div>
+          </td>
+          <td class="cell-opens">
+            <span class="skeleton-shimmer" style="width: 62px; height: 22px; border-radius: 12px;"></span>
+          </td>
+          <td class="cell-clicks-col">
+            <span class="skeleton-shimmer" style="width: 50px; height: 13px;"></span>
+          </td>
+          <td class="cell-last-opened-col">
+            <span class="skeleton-shimmer" style="width: 85px; height: 13px;"></span>
+          </td>
+          <td class="card-footer-stats-cell">
+            <div class="card-footer-left-badges">
+              <span class="skeleton-shimmer" style="width: 62px; height: 20px; border-radius: 10px;"></span>
+            </div>
+            <div class="card-last-opened-group">
+              <span class="skeleton-shimmer" style="width: 80px; height: 12px;"></span>
+            </div>
+          </td>
+        </tr>
+      `);
+    }
+    emailsTableBody.innerHTML = skeletonRows.join('');
+    if (emptyState) emptyState.style.display = 'none';
+  }
+
+  function renderSkeletonActivityFeed(itemCount = 4) {
+    if (!activityFeedList) return;
+    const skeletonItems = [];
+    const subWidths = [65, 48, 75, 55];
+    for (let i = 0; i < itemCount; i++) {
+      const sw = subWidths[i % subWidths.length];
+      skeletonItems.push(`
+        <div class="activity-feed-item skeleton-row" aria-hidden="true" style="pointer-events: none;">
+          <div class="feed-icon-wrap" style="background: transparent;">
+            <span class="skeleton-shimmer" style="width: 32px; height: 32px; border-radius: 50%;"></span>
+          </div>
+          <div class="feed-content" style="flex: 1;">
+            <div class="feed-top-line" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 7px;">
+              <span class="skeleton-shimmer" style="width: 130px; height: 13px;"></span>
+              <span class="skeleton-shimmer" style="width: 75px; height: 11px;"></span>
+            </div>
+            <div class="feed-subject">
+              <span class="skeleton-shimmer" style="width: ${sw}%; height: 13px;"></span>
+            </div>
+          </div>
+        </div>
+      `);
+    }
+    activityFeedList.innerHTML = skeletonItems.join('');
+  }
+
+  // -------------------------------------------------------------
   // EMAILS FETCH & LIVE WEBSOCKET
   // -------------------------------------------------------------
   async function loadEmails(silent = false) {
+    if (!silent && emails.length === 0) {
+      renderSkeletonTable(5);
+    }
     try {
       const res = await fetch('/api/emails');
       if (res.status === 401) {
@@ -950,6 +1038,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           }
         }
+        hasLoadedEmailsOnce = true;
         emails = data.emails || [];
         renderDashboard();
         if (activeTab === 'activity') renderActivityFeed();
@@ -1536,6 +1625,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // -------------------------------------------------------------
   function renderActivityFeed() {
     if (!activityFeedList) return;
+
+    if (emails.length === 0 && !hasLoadedEmailsOnce) {
+      renderSkeletonActivityFeed(4);
+      return;
+    }
 
     // Aggregate all opens and clicks across emails, separating multiple recipients into individual events
     const events = [];
