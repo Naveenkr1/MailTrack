@@ -356,15 +356,15 @@ function scheduleReconnect() {
 }
 
 function formatDeviceDisplay(client) {
-  if (!client) return 'Read via Gmail (Google Proxy)';
+  if (!client) return 'Read on Desktop';
   const c = String(client).trim();
-  if (/Google Proxy|Gmail|Desktop/i.test(c)) return 'Read via Gmail (Google Proxy)';
+  if (/Google Proxy|Gmail|Desktop/i.test(c)) return 'Read on Desktop';
   if (/iPhone/i.test(c)) return 'Read on iPhone';
   if (/iPad/i.test(c)) return 'Read on iPad';
   if (/Android/i.test(c)) return 'Read on Android';
   if (/Macintosh|Mac OS/i.test(c)) return 'Read on Mac';
   if (/Windows/i.test(c)) return 'Read on Windows';
-  return c;
+  return `Read via ${c}`;
 }
 
 // Handle real-time push events from server
@@ -381,7 +381,7 @@ function handleServerEvent(payload) {
   }
 
   if (type === 'EMAIL_OPENED') {
-    const rawDevice = data.client || (data.open && data.open.client) || 'Gmail (Google Proxy)';
+    const rawDevice = data.client || (data.open && data.open.client) || 'Desktop';
     const displayDevice = formatDeviceDisplay(rawDevice);
 
     const emailSubject = (data.email && data.email.subject) || 'Your email';

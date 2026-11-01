@@ -124,16 +124,16 @@
   }
 
   function formatDeviceDisplay(client) {
-    if (!client) return 'Read via Gmail (Google Proxy)';
+    if (!client) return 'Desktop';
     const c = String(client).trim();
-    if (/Google Proxy|Gmail|Desktop/i.test(c)) return 'Read via Gmail (Google Proxy)';
-    if (/iPhone/i.test(c)) return 'Read on iPhone';
-    if (/iPad/i.test(c)) return 'Read on iPad';
-    if (/Android/i.test(c)) return 'Read on Android';
-    if (/Mac/i.test(c)) return 'Read on Mac';
-    if (/Windows/i.test(c)) return 'Read on Windows PC';
-    if (/Linux/i.test(c)) return 'Read on Linux PC';
-    return `Read via ${c}`;
+    if (/Google Proxy|Gmail|Desktop/i.test(c)) return 'Desktop';
+    if (/iPhone/i.test(c)) return 'iPhone';
+    if (/iPad/i.test(c)) return 'iPad';
+    if (/Android/i.test(c)) return 'Android';
+    if (/Mac/i.test(c)) return 'Mac';
+    if (/Windows/i.test(c)) return 'Windows PC';
+    if (/Linux/i.test(c)) return 'Linux PC';
+    return c;
   }
 
   function formatDeviceName(client) {
@@ -1946,8 +1946,13 @@
         let deviceTagHtml = '';
         if (isOpened) {
           const lastOpenObj = email.opens && email.opens.length > 0 ? email.opens[email.opens.length - 1] : null;
-          const deviceDisplay = lastOpenObj ? formatDeviceDisplay(lastOpenObj.client) : 'Read on Desktop';
-          deviceTagHtml = `<span class="mt-notif-device">• ${escapeHtml(deviceDisplay)}</span>`;
+          // Never display "Read via Gmail (Google Proxy)" or generic desktop in Mail Track Activity
+          if (lastOpenObj && lastOpenObj.client && !/Google Proxy|Gmail|Desktop/i.test(lastOpenObj.client)) {
+            const dev = formatDeviceDisplay(lastOpenObj.client);
+            if (dev && !/Google Proxy|Gmail|Desktop/i.test(dev)) {
+              deviceTagHtml = `<span class="mt-notif-device">• Read on ${escapeHtml(dev)}</span>`;
+            }
+          }
           badgeHtml = `
             <span class="mt-notif-badge ${isUnread ? 'mt-badge-new' : 'mt-badge-gray'}">
               ${openCount} open${openCount > 1 ? 's' : ''}
