@@ -1949,7 +1949,7 @@
           const deviceDisplay = lastOpenObj ? formatDeviceDisplay(lastOpenObj.client) : 'Read on Desktop';
           deviceTagHtml = `<span class="mt-notif-device">• ${escapeHtml(deviceDisplay)}</span>`;
           badgeHtml = `
-            <span class="mt-notif-badge">
+            <span class="mt-notif-badge ${isUnread ? 'mt-badge-new' : 'mt-badge-gray'}">
               ${openCount} open${openCount > 1 ? 's' : ''}
               ${redDotHtml}
             </span>
@@ -2064,7 +2064,7 @@
         localStorage.setItem('mt_last_seen_activity_time', Date.now().toString());
       } catch (e) { }
 
-      // Schedule clearing the red dot after user sees them
+      // Schedule clearing the new state after user sees them
       setTimeout(() => {
         trackedEmails.forEach(e => readNotificationIds.add(e.id));
         newOpenedEmailIds.clear();
@@ -2074,18 +2074,30 @@
             dot.style.opacity = '0';
             setTimeout(() => dot.remove(), 600);
           });
+          topNavDropdownEl.querySelectorAll('.mt-notif-badge.mt-badge-new').forEach(badge => {
+            badge.classList.remove('mt-badge-new');
+            badge.classList.add('mt-badge-gray');
+          });
           topNavDropdownEl.querySelectorAll('.mt-notif-item.is-unread').forEach(item => {
             item.classList.remove('is-unread');
           });
         }
-      }, 3000);
+      }, 4000);
     }
   }
 
   function closeTopNavDropdown() {
     if (topNavDropdownEl) {
       topNavDropdownEl.classList.remove('visible');
+      topNavDropdownEl.querySelectorAll('.mt-notif-badge.mt-badge-new').forEach(badge => {
+        badge.classList.remove('mt-badge-new');
+        badge.classList.add('mt-badge-gray');
+      });
+      topNavDropdownEl.querySelectorAll('.mt-notif-red-dot').forEach(dot => dot.remove());
+      topNavDropdownEl.querySelectorAll('.mt-notif-item.is-unread').forEach(item => item.classList.remove('is-unread'));
     }
+    trackedEmails.forEach(e => readNotificationIds.add(e.id));
+    newOpenedEmailIds.clear();
     const btn = document.getElementById('mt-topnav-btn');
     if (btn) btn.classList.remove('active');
   }

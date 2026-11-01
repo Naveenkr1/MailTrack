@@ -839,17 +839,34 @@
   align-items: center;
   font-size: 10px;
   font-weight: 700;
-  color: #059669;
-  background: rgba(16, 185, 129, 0.12);
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   padding: 1px 6px;
   border-radius: 4px;
   flex-shrink: 0;
   white-space: nowrap;
+  transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+}
+
+/* Gray open count chip for older/seen emails */
+.mt-notif-badge.mt-badge-gray {
+  color: #64748b !important;
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+/* Green open count chip for new emails */
+.mt-notif-badge.mt-badge-new {
+  color: #059669 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
 }
 
 .mt-notif-badge.mt-badge-sent {
   color: #64748b !important;
   background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
 }
 
 .mt-notif-red-dot {
