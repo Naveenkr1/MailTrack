@@ -9,10 +9,10 @@
   <meta name="google-site-verification" content="googlec4ad3d7d85161054" />
   <meta name="google-site-verification" content="c4ad3d7d85161054" />
 
-  <!-- Google Fonts: Geist, Plus Jakarta Sans, Inter -->
+  <!-- Google Fonts: Plus Jakarta Sans, Geist, Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;450;500;600;700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;450;500;600;700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Lottie Player -->
   <script src="/assets/lottie.min.js"></script>
@@ -82,13 +82,6 @@
       align-items: center;
       width: 100%;
       background: #ffffff;
-    }
-
-    .page-container {
-      width: 100%;
-      max-width: 1472px;
-      padding: 0 16px;
-      margin: 0 auto;
     }
 
     /* ---------------------------------------------------- */
@@ -163,7 +156,6 @@
       transform: rotate(3deg);
     }
 
-    .nav-brand-icon svg,
     .nav-brand-icon img {
       width: 22px;
       height: 22px;
@@ -209,7 +201,7 @@
     }
 
     .nav-link:hover {
-      opacity: 0.85;
+      opacity: 0.9;
       color: var(--color-primary);
     }
 
@@ -310,7 +302,7 @@
       font-size: 48px;
       line-height: 52px;
       font-weight: 500;
-      letter-spacing: -0.48px;
+      letter-spacing: -0.025em;
       color: var(--color-dark);
       max-width: 600px;
       margin: 0 auto 24px auto;
@@ -335,7 +327,7 @@
       background: var(--color-dark);
       border-radius: var(--radius-pill);
       height: 40px;
-      padding-left: 16px;
+      padding-left: 18px;
       padding-right: 12px;
       color: #fafafa;
       font-family: var(--font-body);
@@ -358,7 +350,6 @@
     .hero-cta-icon {
       width: 16px;
       height: 16px;
-      margin-left: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -366,7 +357,7 @@
     }
 
     .hero-cta-btn:hover .hero-cta-icon {
-      transform: translateX(2px);
+      transform: translateY(1px);
     }
 
     /* Hero Mockup Preview Banner (Figma Node 116:5127) */
@@ -428,7 +419,7 @@
     .feature-tag-link {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       color: var(--color-blue);
       font-size: 16px;
       font-weight: 500;
@@ -442,17 +433,12 @@
       opacity: 0.85;
     }
 
-    .feature-tag-link img,
-    .feature-tag-link svg {
-      width: 16px;
-      height: 16px;
-    }
-
     .feature-heading-2 {
       font-family: var(--font-display);
       font-size: 44px;
       line-height: 48px;
-      font-weight: 400;
+      font-weight: 500;
+      letter-spacing: -0.025em;
       color: var(--color-dark);
       max-width: 598px;
       margin: 0 auto;
@@ -500,7 +486,7 @@
       width: 393.33px;
     }
 
-    /* Exact Figma dimensions for Lottie containers: 393.33px x 320px */
+    /* Exact Figma dimensions for Bento containers: 393.33px x 320px */
     .lottie-container-box {
       width: 393.33px;
       height: 320px;
@@ -513,20 +499,37 @@
       justify-content: center;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
       border: 1px solid rgba(0, 0, 0, 0.04);
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
       cursor: pointer;
     }
 
     .lottie-container-box:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+      transform: translateY(-6px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.09);
       border-color: rgba(5, 150, 105, 0.2);
     }
 
+    .bento-card-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .lottie-container-box:hover .bento-card-bg-img {
+      transform: scale(1.02);
+    }
+
     .lottie-player-target {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       display: block;
+      z-index: 2;
     }
 
     .lottie-card-info {
@@ -572,6 +575,7 @@
       font-size: 30px;
       line-height: 40px;
       font-weight: 400;
+      letter-spacing: -0.015em;
       margin-bottom: 16px;
     }
 
@@ -621,16 +625,12 @@
       margin-bottom: 16px;
     }
 
-    .quickstart-tag-link svg {
-      width: 16px;
-      height: 16px;
-    }
-
     .quickstart-heading-2 {
       font-family: var(--font-display);
       font-size: 44px;
       line-height: 48px;
-      font-weight: 400;
+      font-weight: 500;
+      letter-spacing: -0.025em;
       color: var(--color-dark);
       margin-bottom: 16px;
     }
@@ -688,6 +688,11 @@
       justify-content: center;
     }
 
+    .quickstart-btn-icon img {
+      width: 18px;
+      height: 18px;
+    }
+
     /* 3 Step Cards Grid */
     .step-cards-grid {
       display: grid;
@@ -716,12 +721,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease;
     }
 
     .step-img-box:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+      transform: translateY(-5px);
+      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
     }
 
     .step-img-box img {
@@ -732,7 +737,7 @@
     }
 
     .step-img-box:hover img {
-      transform: scale(1.03);
+      transform: scale(1.025);
     }
 
     .step-card-info {
@@ -793,6 +798,7 @@
       font-size: 30px;
       line-height: 36px;
       font-weight: 600;
+      letter-spacing: -0.015em;
       color: #090b0c;
       margin-bottom: 6px;
     }
@@ -830,16 +836,17 @@
     }
 
     .inbox-check-badge {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: rgba(5, 150, 105, 0.12);
-      color: #059669;
+      width: 22px;
+      height: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 14px;
       flex-shrink: 0;
+    }
+
+    .inbox-check-badge svg {
+      width: 20px;
+      height: 20px;
     }
 
     .inbox-mobile-right {
@@ -849,7 +856,7 @@
       border-radius: 24px;
       overflow: hidden;
       position: relative;
-      box-shadow: 0 20px 40px rgba(15, 62, 96, 0.2);
+      box-shadow: 0 20px 40px rgba(15, 62, 96, 0.22);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -893,6 +900,7 @@
       font-size: 44px;
       line-height: 48px;
       font-weight: 500;
+      letter-spacing: -0.025em;
       color: var(--color-dark);
       margin-bottom: 14px;
     }
@@ -945,16 +953,20 @@
       color: #0f172a;
     }
 
-    .faq-chevron {
-      color: #94a3b8;
-      font-size: 13px;
+    .faq-indicator {
+      width: 14px;
+      height: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #64748b;
+      font-size: 11px;
       transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
-      display: inline-block;
     }
 
-    .faq-accordion-item.active .faq-chevron {
+    .faq-accordion-item.active .faq-indicator {
+      color: #059669;
       transform: rotate(180deg);
-      color: var(--color-primary);
     }
 
     .faq-answer-panel {
@@ -1022,6 +1034,7 @@
       font-size: 44px;
       line-height: 48px;
       font-weight: 500;
+      letter-spacing: -0.025em;
       color: var(--color-dark);
       max-width: 640px;
       margin-bottom: 32px;
@@ -1062,8 +1075,7 @@
       justify-content: center;
     }
 
-    .cta-chrome-icon img,
-    .cta-chrome-icon svg {
+    .cta-chrome-icon img {
       width: 18px;
       height: 18px;
     }
@@ -1109,11 +1121,11 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0px 4px 8px rgba(5, 150, 105, 0.25);
-      color: #ffffff;
-      font-family: var(--font-inter);
-      font-weight: 800;
-      font-size: 15px;
-      letter-spacing: -1px;
+    }
+
+    .footer-badge-check img {
+      width: 22px;
+      height: 22px;
     }
 
     .footer-brand-title {
@@ -1497,9 +1509,7 @@
           <!-- Logo -->
           <a href="/" class="nav-brand">
             <div class="nav-brand-icon">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" fill="#fafafa"/>
-              </svg>
+              <img src="/landing-assets/656e19691fe2bd18efffb785e9262fe27a886c62.svg" alt="Mail Track Icon">
             </div>
             <span class="nav-brand-text">Mail Track</span>
           </a>
@@ -1517,9 +1527,7 @@
             <span>Download</span>
             <div class="nav-btn-divider"></div>
             <div class="nav-btn-caret">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14M19 12l-7 7-7-7"/>
-              </svg>
+              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Caret Icon">
             </div>
           </button>
         </header>
@@ -1547,9 +1555,7 @@
               <span>Add to Chrome - It’s Free</span>
               <div class="nav-btn-divider"></div>
               <div class="hero-cta-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
-                </svg>
+                <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Arrow" style="transform: rotate(0deg);">
               </div>
             </button>
           </div>
@@ -1571,8 +1577,8 @@
           <div class="feature-header-wrap reveal-on-scroll">
             <a href="#features" class="feature-tag-link">
               <span>Everything you need</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18l6-6-6-6"/>
               </svg>
             </a>
             <h2 class="feature-heading-2">
@@ -1594,6 +1600,7 @@
               <!-- CARD 1: Live open tracking (Node 116:1391) -->
               <div class="lottie-card-col reveal-on-scroll delay-1">
                 <div class="lottie-container-box" id="lottieContainer1" data-name="Lottie 1 (Use here)" data-node-id="132:7871" title="Interactive Open Tracking Preview">
+                  <img src="/landing-assets/card-1-open-tracking.png" alt="Live open tracking preview" class="bento-card-bg-img">
                   <div class="lottie-player-target" id="lottie-1"></div>
                 </div>
                 <div class="lottie-card-info">
@@ -1607,6 +1614,7 @@
               <!-- CARD 2: Unlimited and free (Node 116:1406) -->
               <div class="lottie-card-col reveal-on-scroll delay-2">
                 <div class="lottie-container-box" id="lottieContainer2" data-name="Lottie 2 (Use here)" data-node-id="116:1407" title="Interactive Unlimited Tracking Preview">
+                  <img src="/landing-assets/card-2-unlimited-free.png" alt="Unlimited and free preview" class="bento-card-bg-img">
                   <div class="lottie-player-target" id="lottie-2"></div>
                 </div>
                 <div class="lottie-card-info">
@@ -1620,6 +1628,7 @@
               <!-- CARD 3: Link click tracking (Node 116:1399) -->
               <div class="lottie-card-col reveal-on-scroll delay-3">
                 <div class="lottie-container-box" id="lottieContainer3" data-name="Lottie 3 (Use here)" data-node-id="116:1400" title="Interactive Link Click Tracking Preview">
+                  <img src="/landing-assets/card-3-click-tracking.png" alt="Link click tracking preview" class="bento-card-bg-img">
                   <div class="lottie-player-target" id="lottie-3"></div>
                 </div>
                 <div class="lottie-card-info">
@@ -1662,8 +1671,8 @@
           <div class="quickstart-header-wrap reveal-on-scroll">
             <div class="quickstart-tag-link">
               <span>Quick Start</span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 18l6-6-6-6"/>
               </svg>
             </div>
             <h2 class="quickstart-heading-2">
@@ -1675,12 +1684,9 @@
               </p>
               <button type="button" class="quickstart-btn" onclick="openInstallModal()">
                 <div class="quickstart-btn-icon">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="12" r="10" fill="#059669"/>
-                    <path d="M12 8v8M8 12h8" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
-                  </svg>
+                  <img src="/landing-assets/7923f66be7e33e1ac10934b9b6bf8c5fdd0bda43.svg" alt="Chrome">
                 </div>
-                <span>Add to Chrome</span>
+                <span>Add to chrome</span>
               </button>
             </div>
           </div>
@@ -1690,7 +1696,7 @@
             <!-- Step Card 1 -->
             <div class="step-card-col reveal-on-scroll delay-1">
               <div class="step-img-box">
-                <img src="/landing-assets/popup-install.png" alt="1. Install the Extension">
+                <img src="/landing-assets/step-1-install.png" alt="1. Install the Extension">
               </div>
               <div class="step-card-info">
                 <h4 class="step-title-num">1. Install the Extension</h4>
@@ -1703,7 +1709,7 @@
             <!-- Step Card 2 -->
             <div class="step-card-col reveal-on-scroll delay-2">
               <div class="step-img-box">
-                <img src="/landing-assets/compose-send.png" alt="2. Compose and Send as Usual">
+                <img src="/landing-assets/step-2-compose.png" alt="2. Compose and Send as Usual">
               </div>
               <div class="step-card-info">
                 <h4 class="step-title-num">2. Compose & Send as Usual</h4>
@@ -1716,7 +1722,7 @@
             <!-- Step Card 3 -->
             <div class="step-card-col reveal-on-scroll delay-3">
               <div class="step-img-box">
-                <img src="/landing-assets/sent-checkmarks.png" alt="3. Watch Checkmarks Turn Green">
+                <img src="/landing-assets/step-3-checkmarks.png" alt="3. Watch Checkmarks Turn Green">
               </div>
               <div class="step-card-info">
                 <h4 class="step-title-num">3. Watch Checkmarks Turn Green</h4>
@@ -1738,26 +1744,42 @@
                 </p>
                 <ul class="inbox-mobile-checklist">
                   <li class="inbox-mobile-item">
-                    <span class="inbox-check-badge">✓</span>
+                    <span class="inbox-check-badge">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 13L9 17L19 7" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
                     <span>Check status on the web version of Gmail</span>
                   </li>
                   <li class="inbox-mobile-item">
-                    <span class="inbox-check-badge">✓</span>
+                    <span class="inbox-check-badge">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 13L9 17L19 7" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
                     <span>Check status in the Gmail app for iPhone and iPad</span>
                   </li>
                   <li class="inbox-mobile-item">
-                    <span class="inbox-check-badge">✓</span>
+                    <span class="inbox-check-badge">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 13L9 17L19 7" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
                     <span>Check status in the Gmail app for Android</span>
                   </li>
                   <li class="inbox-mobile-item">
-                    <span class="inbox-check-badge">✓</span>
+                    <span class="inbox-check-badge">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M5 13L9 17L19 7" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </span>
                     <span>Get a clear tick the moment someone reads your message</span>
                   </li>
                 </ul>
               </div>
 
               <div class="inbox-mobile-right" title="Mobile Inbox Checkmarks">
-                <img src="/landing-assets/mobile-inbox.png" alt="Mobile Gmail Checkmarks Mockup">
+                <img src="/landing-assets/inbox-mobile-phones.png" alt="Mobile Gmail Checkmarks Mockup">
               </div>
             </div>
           </div>
@@ -1774,11 +1796,11 @@
       </div>
 
       <div class="faq-list-wrap">
-        <!-- Question 1 (Open by default) -->
+        <!-- Question 1 (Open by default in Figma) -->
         <div class="faq-accordion-item active reveal-on-scroll delay-1">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>Does the recipient know that I am tracking the email?</span>
-            <span class="faq-chevron">▼</span>
+            <span class="faq-indicator">▲</span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -1791,7 +1813,7 @@
         <div class="faq-accordion-item reveal-on-scroll delay-1">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>How does tracking work on mobile Gmail (iPhone & Android)?</span>
-            <span class="faq-chevron">▼</span>
+            <span class="faq-indicator">▼</span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -1804,7 +1826,7 @@
         <div class="faq-accordion-item reveal-on-scroll delay-2">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>Can I turn tracking off for specific emails?</span>
-            <span class="faq-chevron">▼</span>
+            <span class="faq-indicator">▼</span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -1817,7 +1839,7 @@
         <div class="faq-accordion-item reveal-on-scroll delay-2">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>Is my personal email data safe and private?</span>
-            <span class="faq-chevron">▼</span>
+            <span class="faq-indicator">▼</span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -1830,7 +1852,7 @@
         <div class="faq-accordion-item reveal-on-scroll delay-3">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>How do I install the extension right now?</span>
-            <span class="faq-chevron">▼</span>
+            <span class="faq-indicator">▼</span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -1851,17 +1873,12 @@
           </h2>
           <button type="button" class="cta-chrome-btn" onclick="openInstallModal()">
             <div class="cta-chrome-icon">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="12" cy="12" r="10" fill="#fafafa"/>
-                <circle cx="12" cy="12" r="4" fill="#090b0c"/>
-              </svg>
+              <img src="/landing-assets/a1c756bddf8eca99fd5c27c5fadbd0f1081b10ab.svg" alt="Download">
             </div>
             <span>Add to Chrome</span>
             <div class="nav-btn-divider"></div>
             <div class="nav-btn-caret">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 5v14M19 12l-7 7-7-7"/>
-              </svg>
+              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown">
             </div>
           </button>
         </div>
@@ -1873,22 +1890,23 @@
       <div class="footer-inner-container">
         <div class="footer-top-row">
           <a href="/" class="footer-brand">
-            <div class="footer-badge-check">✓✓</div>
+            <div class="footer-badge-check">
+              <img src="/landing-assets/656e19691fe2bd18efffb785e9262fe27a886c62.svg" alt="Mail Track">
+            </div>
             <span class="footer-brand-title">Mail Track</span>
           </a>
 
           <ul class="footer-links-list">
-            <li><a href="/login">Dashboard Sign In</a></li>
+            <li><a href="/login">Login</a></li>
             <li><a href="#features">Features</a></li>
             <li><a href="/terms">Terms of Service</a></li>
             <li><a href="/privacy">Privacy Policy</a></li>
-            <li><a href="/privacy#security">Security</a></li>
           </ul>
         </div>
 
         <div class="footer-bottom-divider">
           <p class="footer-copyright">
-            © 2026 Mailtrack by Mailsuite. All rights reserved. Gmail and Chrome are trademarks of Google LLC.
+            © 2026 Mailtrack. All rights reserved.
           </p>
         </div>
       </div>
@@ -1947,9 +1965,15 @@
     function toggleFaq(btn) {
       const item = btn.closest('.faq-accordion-item');
       const wasActive = item.classList.contains('active');
-      document.querySelectorAll('.faq-accordion-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.faq-accordion-item').forEach(i => {
+        i.classList.remove('active');
+        const indicator = i.querySelector('.faq-indicator');
+        if (indicator) indicator.textContent = '▼';
+      });
       if (!wasActive) {
         item.classList.add('active');
+        const indicator = item.querySelector('.faq-indicator');
+        if (indicator) indicator.textContent = '▲';
       }
     }
 
@@ -2026,7 +2050,7 @@
           autoplay: false,
           path: item.path,
           rendererSettings: {
-            preserveAspectRatio: 'xMidYMid meet',
+            preserveAspectRatio: 'xMidYMid slice',
             progressiveLoad: true,
             hideOnTransparent: true
           }
@@ -2037,7 +2061,7 @@
           item.anim.goToAndStop(0, true);
         });
 
-        // Hover effect: smooth play / scrub interaction
+        // Hover effect: smooth forward play
         const cardBox = document.getElementById(item.containerId);
         if (cardBox) {
           cardBox.addEventListener('mouseenter', () => {
@@ -2077,7 +2101,7 @@
           const totalFrames = item.anim.totalFrames || 240;
           item.targetFrame = progress * (totalFrames - 1);
 
-          // Smooth lerp (linear interpolation) for silky 60fps scrubbing
+          // Smooth lerp for silky 60fps scrubbing
           item.currentFrame += (item.targetFrame - item.currentFrame) * 0.12;
 
           if (Math.abs(item.currentFrame - item.targetFrame) > 0.05) {
@@ -2098,8 +2122,8 @@
           const maxScroll = 400;
           const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
           
-          const tilt = (14 * (1 - progress)).toFixed(2);
-          const scale = (0.97 + 0.03 * progress).toFixed(3);
+          const tilt = (12 * (1 - progress)).toFixed(2);
+          const scale = (0.98 + 0.02 * progress).toFixed(3);
           heroBanner.style.transform = `perspective(1200px) rotateX(${tilt}deg) scale(${scale})`;
         }, { passive: true });
       }
