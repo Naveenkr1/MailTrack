@@ -92,7 +92,7 @@
     }
 
     /* ---------------------------------------------------- */
-    /* HERO CONTAINER (Node 116:910)                         */
+    /* HERO CONTAINER (Figma Node 116:910)                  */
     /* ---------------------------------------------------- */
     .hero-wrapper {
       width: 100%;
@@ -107,7 +107,7 @@
       border-radius: var(--radius-hero);
       overflow: hidden;
       background-color: #f5f5f5;
-      box-shadow: 0px 20px 25px -5px rgba(0,0,0,0.1), 0px 8px 10px -6px rgba(0,0,0,0.1);
+      box-shadow: 0px 20px 25px -5px rgba(0,0,0,0.08), 0px 8px 10px -6px rgba(0,0,0,0.06);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -124,7 +124,7 @@
       z-index: 1;
     }
 
-    /* Navigation Inside Hero (Node 116:1309) */
+    /* Navigation Inside Hero (Figma Node 116:1309) */
     .hero-navbar {
       position: relative;
       z-index: 10;
@@ -138,34 +138,45 @@
     .nav-brand {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
       text-decoration: none;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-brand:hover {
+      transform: scale(1.02);
     }
 
     .nav-brand-icon {
-      width: 25.45px;
-      height: 25.45px;
-      background-color: var(--color-primary);
-      border-radius: 5.78px;
+      width: 38px;
+      height: 38px;
+      background-color: #010d09;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 4px rgba(5, 150, 105, 0.2);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      transition: transform 0.25s ease;
     }
 
+    .nav-brand:hover .nav-brand-icon {
+      transform: rotate(3deg);
+    }
+
+    .nav-brand-icon svg,
     .nav-brand-icon img {
-      width: 17.45px;
-      height: 17.45px;
+      width: 22px;
+      height: 22px;
       display: block;
     }
 
     .nav-brand-text {
       font-family: var(--font-inter);
-      font-weight: 600;
-      font-size: 16.39px;
-      line-height: 26.2px;
-      letter-spacing: -0.33px;
-      color: #081e17;
+      font-weight: 700;
+      font-size: 16.8px;
+      line-height: 25.2px;
+      letter-spacing: -0.336px;
+      color: #0f172a;
       white-space: nowrap;
     }
 
@@ -181,11 +192,29 @@
       font-weight: 500;
       line-height: 20px;
       color: var(--color-dark);
-      transition: opacity 0.15s ease;
+      position: relative;
+      padding: 4px 0;
+      transition: color 0.2s ease, opacity 0.2s ease;
+    }
+
+    .nav-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 0%;
+      height: 2px;
+      background-color: var(--color-primary);
+      transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .nav-link:hover {
-      opacity: 0.7;
+      opacity: 0.85;
+      color: var(--color-primary);
+    }
+
+    .nav-link:hover::after {
+      width: 100%;
     }
 
     .nav-download-btn {
@@ -195,18 +224,24 @@
       border-radius: 16.8px;
       height: 36px;
       padding-left: 14px;
-      padding-right: 8px;
+      padding-right: 10px;
       color: #fafafa;
       font-family: var(--font-body);
       font-size: 14px;
       font-weight: 500;
       overflow: hidden;
-      transition: transform 0.15s ease, background-color 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, box-shadow 0.2s ease;
     }
 
     .nav-download-btn:hover {
       background: #1e293b;
-      transform: translateY(-1px);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-download-btn:active {
+      transform: scale(0.97);
     }
 
     .nav-btn-divider {
@@ -222,9 +257,14 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: transform 0.2s ease;
     }
 
-    /* Hero Center Header (Node 116:913) */
+    .nav-download-btn:hover .nav-btn-caret {
+      transform: translateY(1px);
+    }
+
+    /* Hero Center Header (Figma Node 116:913) */
     .hero-header-content {
       position: relative;
       z-index: 10;
@@ -244,9 +284,17 @@
       padding: 0 12px;
       border: 1px solid var(--color-border-subtle);
       border-radius: var(--radius-pill);
-      background: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.7);
       backdrop-filter: blur(8px);
       margin-bottom: 24px;
+      transition: transform 0.25s ease, background 0.2s ease, border-color 0.2s ease;
+      cursor: default;
+    }
+
+    .hero-badge-pill:hover {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(9, 11, 12, 0.4);
+      transform: translateY(-1px);
     }
 
     .hero-badge-pill span {
@@ -261,11 +309,23 @@
       font-family: var(--font-display);
       font-size: 48px;
       line-height: 52px;
-      font-weight: 400;
+      font-weight: 500;
       letter-spacing: -0.48px;
       color: var(--color-dark);
       max-width: 600px;
-      margin: 0 auto 28px auto;
+      margin: 0 auto 24px auto;
+      text-wrap: balance;
+    }
+
+    .hero-subtitle {
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 28px;
+      font-weight: 400;
+      color: var(--color-dark);
+      opacity: 0.7;
+      max-width: 490px;
+      margin: 0 auto 32px auto;
       text-wrap: balance;
     }
 
@@ -275,77 +335,79 @@
       background: var(--color-dark);
       border-radius: var(--radius-pill);
       height: 40px;
-      padding-left: 12px;
-      padding-right: 8px;
+      padding-left: 16px;
+      padding-right: 12px;
       color: #fafafa;
       font-family: var(--font-body);
       font-size: 16px;
       font-weight: 450;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, box-shadow 0.2s ease;
     }
 
     .hero-cta-btn:hover {
       background: #1e293b;
-      transform: translateY(-1px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
+    }
+
+    .hero-cta-btn:active {
+      transform: scale(0.97);
     }
 
     .hero-cta-icon {
       width: 16px;
       height: 16px;
-      margin-right: 8px;
+      margin-left: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: transform 0.2s ease;
     }
 
-    .hero-cta-icon img {
-      width: 16px;
-      height: 16px;
+    .hero-cta-btn:hover .hero-cta-icon {
+      transform: translateX(2px);
     }
 
-    .hero-cta-text {
-      padding-right: 6px;
-    }
-
-    /* Hero Dashboard Image (Node 116:5127) */
-    .hero-image-wrap {
+    /* Hero Mockup Preview Banner (Figma Node 116:5127) */
+    .hero-preview-wrap {
       position: relative;
       z-index: 5;
       width: 100%;
-      max-width: 1380px;
-      margin: 20px auto 0 auto;
-      padding: 0 24px;
+      max-width: 1438px;
+      margin-top: 16px;
       display: flex;
       justify-content: center;
-      transform-origin: center bottom;
-      transition: transform 0.1s ease-out;
+      perspective: 1200px;
     }
 
-    .hero-dashboard-img {
+    .hero-preview-img {
       width: 100%;
+      max-width: 1438px;
       height: auto;
       display: block;
-      border-top-left-radius: 12px;
-      border-top-right-radius: 12px;
-      box-shadow: 0 -8px 24px -4px rgba(0, 0, 0, 0.05);
+      object-fit: cover;
+      border-bottom-left-radius: var(--radius-hero);
+      border-bottom-right-radius: var(--radius-hero);
+      pointer-events: none;
+      transform-origin: center top;
+      transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* ---------------------------------------------------- */
-    /* SECTION 1: 3 LOTTIE CARDS (Node 116:1363)             */
+    /* FEATURE SECTION 1: EVERYTHING YOU NEED (Node 116:1363)*/
     /* ---------------------------------------------------- */
     .feature-section {
       width: 100%;
       border-bottom: 1px solid var(--color-grid-border);
-      background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
+      background: #ffffff;
     }
 
     .feature-container {
       width: 100%;
-      max-width: 1472px;
-      margin: 0 auto;
+      max-width: 1536px;
       padding: 0 96px;
+      margin: 0 auto;
     }
 
     .feature-inner {
@@ -360,9 +422,10 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
+      background: linear-gradient(180deg, #fafafa 0%, #ffffff 100%);
     }
 
-    .feature-badge-link {
+    .feature-tag-link {
       display: inline-flex;
       align-items: center;
       gap: 4px;
@@ -370,15 +433,17 @@
       font-size: 16px;
       font-weight: 500;
       line-height: 24px;
-      margin-bottom: 20px;
-      transition: opacity 0.15s ease;
+      margin-bottom: 24px;
+      transition: transform 0.2s ease, opacity 0.2s ease;
     }
 
-    .feature-badge-link:hover {
-      opacity: 0.8;
+    .feature-tag-link:hover {
+      transform: translateX(2px);
+      opacity: 0.85;
     }
 
-    .feature-badge-link img {
+    .feature-tag-link img,
+    .feature-tag-link svg {
       width: 16px;
       height: 16px;
     }
@@ -389,14 +454,15 @@
       line-height: 48px;
       font-weight: 400;
       color: var(--color-dark);
-      max-width: 600px;
+      max-width: 598px;
       margin: 0 auto;
       text-wrap: balance;
     }
 
     .feature-lead-text-wrap {
-      padding: 40px 144px 56px 144px;
-      text-align: center;
+      padding: 42px 264px 96px 264px;
+      border-top: 1px dashed var(--color-grid-border);
+      border-bottom: 1px dashed var(--color-grid-border);
     }
 
     .feature-lead-text {
@@ -407,9 +473,10 @@
       color: var(--color-dark);
       max-width: 748px;
       margin: 0 auto;
+      text-align: center;
     }
 
-    /* 3 LOTTIE CARDS GRID (Node 116:1390) */
+    /* 3 LOTTIE BENTO CARDS GRID (Node 116:1390) */
     .lottie-grid-wrap {
       padding: 0 24px 96px 24px;
       width: 100%;
@@ -445,12 +512,15 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+      cursor: pointer;
     }
 
     .lottie-container-box:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.09);
+      border-color: rgba(5, 150, 105, 0.2);
     }
 
     .lottie-player-target {
@@ -472,7 +542,7 @@
     }
 
     .lottie-card-title {
-      font-weight: 500;
+      font-weight: 600;
       color: var(--color-dark);
     }
 
@@ -482,32 +552,38 @@
     }
 
     /* ---------------------------------------------------- */
-    /* SECTION 2: MEMORY SECTION (Node 116:1603)             */
+    /* NARRATIVE SECTION: YOU SEND AN EMAIL (Node 116:1603)  */
     /* ---------------------------------------------------- */
-    .memory-section {
+    .narrative-section {
       width: 100%;
       background: linear-gradient(180deg, #ffffff 18%, #fafafa 100%);
-      border-bottom: 1px dashed var(--color-grid-border);
+      border-top: 1px dashed var(--color-grid-border);
+      border-bottom: 1px solid var(--color-grid-border);
     }
 
-    .memory-header-wrap {
-      padding: 64px 264px 32px 264px;
+    .narrative-header-wrap {
+      padding: 64px 264px 64px 264px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .memory-heading-3 {
+    .narrative-heading-3 {
       font-family: var(--font-display);
       font-size: 30px;
       line-height: 40px;
-      font-weight: 500;
-      color: var(--color-dark);
-      margin-bottom: 12px;
+      font-weight: 400;
+      margin-bottom: 16px;
     }
 
-    .memory-heading-mute {
-      color: #94a3b8;
+    .narrative-lead-mute {
+      color: #9da0a1;
     }
 
-    .memory-desc {
+    .narrative-lead-dark {
+      color: #090b0c;
+    }
+
+    .narrative-desc {
       font-family: var(--font-body);
       font-size: 18px;
       line-height: 28px;
@@ -516,124 +592,41 @@
       max-width: 748px;
     }
 
-    .memory-desc a {
-      color: var(--color-blue);
-      text-decoration: underline;
-      font-weight: 500;
-    }
-
-    .memory-visual-wrap {
-      height: 384px;
-      overflow: hidden;
-      padding: 0 64px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      margin-top: 24px;
-    }
-
-    .memory-visual-grid {
-      display: grid;
-      grid-template-columns: 436px 436px;
-      gap: 24px;
-      width: 896px;
-      height: 384px;
-      overflow: hidden;
-    }
-
-    .memory-prompt-box {
-      background: var(--color-card-bg);
-      padding: 14px 18px;
-      border-radius: 16.8px;
-      max-width: 340px;
-      margin-top: 24px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
-    }
-
-    .memory-prompt-box p {
-      font-family: var(--font-body);
-      font-size: 16px;
-      font-weight: 500;
-      line-height: 24px;
-      color: var(--color-dark);
-    }
-
-    .memory-mockup-stack {
-      position: relative;
-      height: 384px;
-    }
-
-    .memory-mockup-card-back {
-      position: absolute;
-      top: 40px;
-      left: -80px;
-      width: 432px;
-      height: 384px;
-      border-top-left-radius: 16.8px;
-      border-top-right-radius: 16.8px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-bottom: none;
-      box-shadow: 0px 20px 25px -5px rgba(0,0,0,0.1);
-      overflow: hidden;
-      opacity: 0.6;
-    }
-
-    .memory-mockup-card-back img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .memory-mockup-card-front {
-      position: absolute;
-      top: 0;
-      left: 10px;
-      width: 432px;
-      height: 384px;
-      border-top-left-radius: 16.8px;
-      border-top-right-radius: 16.8px;
-      border: 1px solid rgba(0, 0, 0, 0.08);
-      border-bottom: none;
-      box-shadow: 0px 20px 25px -5px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-
-    .memory-mockup-card-front img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+    .narrative-brand-accent {
+      color: #059669;
+      font-weight: 600;
     }
 
     /* ---------------------------------------------------- */
-    /* SECTION 3: PASSWORD MANAGER SECTION (Node 116:1625)   */
+    /* QUICK START SECTION: 30 SECONDS (Node 116:1625)      */
     /* ---------------------------------------------------- */
-    .pm-section {
+    .quickstart-section {
       width: 100%;
       border-bottom: 1px solid var(--color-grid-border);
       background: #ffffff;
     }
 
-    .pm-header-wrap {
-      padding: 96px 144px 32px 144px;
+    .quickstart-header-wrap {
+      padding: 96px 144px 40px 144px;
     }
 
-    .pm-tag-link {
+    .quickstart-tag-link {
       display: inline-flex;
       align-items: center;
-      gap: 4px;
-      color: var(--color-blue);
+      gap: 6px;
+      color: #059669;
       font-size: 16px;
-      font-weight: 500;
+      font-weight: 600;
       line-height: 24px;
       margin-bottom: 16px;
     }
 
-    .pm-tag-link img {
+    .quickstart-tag-link svg {
       width: 16px;
       height: 16px;
     }
 
-    .pm-heading-2 {
+    .quickstart-heading-2 {
       font-family: var(--font-display);
       font-size: 44px;
       line-height: 48px;
@@ -642,48 +635,237 @@
       margin-bottom: 16px;
     }
 
-    .pm-lead-text {
+    .quickstart-lead-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 24px;
+      max-width: 988px;
+    }
+
+    .quickstart-lead-text {
       font-family: var(--font-body);
       font-size: 18px;
       line-height: 28px;
       font-weight: 400;
       color: var(--color-text-muted);
-      max-width: 988px;
+      max-width: 637px;
     }
 
-    .pm-cards-grid {
+    .quickstart-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #f5f5f5;
+      color: #171717;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 12px;
+      height: 46px;
+      padding: 0 18px;
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .quickstart-btn:hover {
+      background: #e5e7eb;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+    }
+
+    .quickstart-btn:active {
+      transform: scale(0.97);
+    }
+
+    .quickstart-btn-icon {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 3 Step Cards Grid */
+    .step-cards-grid {
       display: grid;
       grid-template-columns: repeat(3, 393.33px);
       gap: 24px;
       justify-content: center;
       width: 100%;
-      padding: 32px 24px 96px 24px;
+      padding: 32px 24px 80px 24px;
     }
 
-    .pm-card-col {
+    .step-card-col {
       display: flex;
       flex-direction: column;
       width: 393.33px;
     }
 
-    .pm-img-box {
+    .step-img-box {
       width: 393.33px;
       height: 320px;
       background: var(--color-card-bg);
       border-radius: var(--radius-lottie);
       overflow: hidden;
       position: relative;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
     }
 
-    .pm-img-box img {
+    .step-img-box:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    .step-img-box img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    .pm-card-info {
+    .step-img-box:hover img {
+      transform: scale(1.03);
+    }
+
+    .step-card-info {
       padding: 20px 16px;
       width: 100%;
+    }
+
+    .step-title-num {
+      font-weight: 600;
+      color: var(--color-dark);
+      font-size: 16px;
+      line-height: 24px;
+      margin-bottom: 4px;
+    }
+
+    .step-desc-text {
+      font-size: 16px;
+      line-height: 24px;
+      color: var(--color-text-muted);
+    }
+
+    .step-desc-text a {
+      color: #059669;
+      text-decoration: underline;
+      font-weight: 500;
+    }
+
+    /* ---------------------------------------------------- */
+    /* INBOX AND MOBILE SECTION (Node 286:7326)             */
+    /* ---------------------------------------------------- */
+    .inbox-mobile-wrap {
+      width: 100%;
+      padding: 0 24px 96px 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .inbox-mobile-box {
+      width: 100%;
+      max-width: 1228px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 48px;
+      border-top: 1px dashed var(--color-grid-border);
+      padding-top: 64px;
+    }
+
+    .inbox-mobile-left {
+      flex: 1;
+      max-width: 564px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .inbox-mobile-tag {
+      font-family: var(--font-display);
+      font-size: 30px;
+      line-height: 36px;
+      font-weight: 600;
+      color: #090b0c;
+      margin-bottom: 6px;
+    }
+
+    .inbox-mobile-subtag {
+      font-size: 18px;
+      line-height: 26px;
+      color: rgba(115, 115, 115, 0.8);
+      margin-bottom: 16px;
+    }
+
+    .inbox-mobile-desc {
+      font-family: var(--font-body);
+      font-size: 16px;
+      line-height: 24px;
+      color: #737373;
+      margin-bottom: 32px;
+    }
+
+    .inbox-mobile-checklist {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      list-style: none;
+    }
+
+    .inbox-mobile-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 16px;
+      line-height: 24px;
+      font-weight: 500;
+      color: #090b0c;
+    }
+
+    .inbox-check-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(5, 150, 105, 0.12);
+      color: #059669;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .inbox-mobile-right {
+      width: 560px;
+      height: 468px;
+      background: linear-gradient(180deg, #1fc692 0%, #0f3e60 100%);
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 20px 40px rgba(15, 62, 96, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+    }
+
+    .inbox-mobile-right:hover {
+      transform: translateY(-4px) scale(1.01);
+      box-shadow: 0 25px 50px rgba(15, 62, 96, 0.28);
+    }
+
+    .inbox-mobile-right img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
     }
 
     /* ---------------------------------------------------- */
@@ -696,6 +878,7 @@
       flex-direction: column;
       align-items: center;
       background: #ffffff;
+      border-top: 1px solid var(--color-grid-border);
     }
 
     .faq-header-wrap {
@@ -709,7 +892,7 @@
       font-family: var(--font-display);
       font-size: 44px;
       line-height: 48px;
-      font-weight: 400;
+      font-weight: 500;
       color: var(--color-dark);
       margin-bottom: 14px;
     }
@@ -735,11 +918,18 @@
       border: 1px solid #e2e8f0;
       border-radius: 12px;
       overflow: hidden;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     }
 
     .faq-accordion-item:hover {
       border-color: #cbd5e1;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    }
+
+    .faq-accordion-item.active {
+      border-color: #94a3b8;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
     }
 
     .faq-question-btn {
@@ -757,8 +947,8 @@
 
     .faq-chevron {
       color: #94a3b8;
-      font-size: 12px;
-      transition: transform 0.25s ease, color 0.2s ease;
+      font-size: 13px;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
       display: inline-block;
     }
 
@@ -770,12 +960,12 @@
     .faq-answer-panel {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease, padding 0.3s ease;
+      transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), padding 0.3s ease;
       padding: 0 24px;
     }
 
     .faq-accordion-item.active .faq-answer-panel {
-      max-height: 240px;
+      max-height: 300px;
       padding: 0 24px 20px 24px;
     }
 
@@ -805,7 +995,7 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      box-shadow: 0 16px 36px -8px rgba(0, 132, 209, 0.15);
+      box-shadow: 0 20px 40px -10px rgba(0, 132, 209, 0.18);
     }
 
     .cta-bg-img {
@@ -831,7 +1021,7 @@
       font-family: var(--font-display);
       font-size: 44px;
       line-height: 48px;
-      font-weight: 400;
+      font-weight: 500;
       color: var(--color-dark);
       max-width: 640px;
       margin-bottom: 32px;
@@ -850,12 +1040,17 @@
       font-size: 16px;
       font-weight: 500;
       box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
-      transition: transform 0.15s ease, background 0.2s ease;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, box-shadow 0.2s ease;
     }
 
     .cta-chrome-btn:hover {
       background: #1e293b;
       transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.28);
+    }
+
+    .cta-chrome-btn:active {
+      transform: scale(0.97);
     }
 
     .cta-chrome-icon {
@@ -867,7 +1062,8 @@
       justify-content: center;
     }
 
-    .cta-chrome-icon img {
+    .cta-chrome-icon img,
+    .cta-chrome-icon svg {
       width: 18px;
       height: 18px;
     }
@@ -877,7 +1073,7 @@
     /* ---------------------------------------------------- */
     .landing-footer {
       width: 100%;
-      background: rgba(245, 248, 252, 0.33);
+      background: rgba(245, 248, 252, 0.4);
       border-top: 1px solid #e2e8f0;
       padding: 48px 0 32px 0;
     }
@@ -901,30 +1097,31 @@
       display: flex;
       align-items: center;
       gap: 10px;
+      text-decoration: none;
     }
 
     .footer-badge-check {
-      width: 32px;
-      height: 32px;
-      background-color: var(--color-primary);
+      width: 38px;
+      height: 38px;
+      background-color: #059669;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0px 4px 5px rgba(5, 150, 105, 0.3);
+      box-shadow: 0px 4px 8px rgba(5, 150, 105, 0.25);
       color: #ffffff;
       font-family: var(--font-inter);
       font-weight: 800;
-      font-size: 13px;
+      font-size: 15px;
       letter-spacing: -1px;
     }
 
     .footer-brand-title {
       font-family: var(--font-inter);
-      font-weight: 800;
-      font-size: 17.6px;
-      line-height: 28px;
-      letter-spacing: -0.35px;
+      font-weight: 700;
+      font-size: 16.8px;
+      line-height: 25.2px;
+      letter-spacing: -0.336px;
       color: #0f172a;
     }
 
@@ -967,7 +1164,7 @@
     .modal-backdrop {
       position: fixed;
       inset: 0;
-      background: rgba(15, 23, 42, 0.6);
+      background: rgba(15, 23, 42, 0.65);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       z-index: 999;
@@ -1008,15 +1205,15 @@
       right: 20px;
       width: 32px;
       height: 32px;
-      border-radius: 50%;
+      border-radius: 8px;
       background: #f1f5f9;
       color: #64748b;
+      font-size: 18px;
+      line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 18px;
-      line-height: 1;
-      transition: all 0.15s ease;
+      transition: background 0.15s ease, color 0.15s ease;
     }
 
     .modal-close-btn:hover {
@@ -1025,16 +1222,8 @@
     }
 
     .modal-header-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: #ecfdf5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      color: var(--color-primary);
-      font-size: 24px;
+      font-size: 32px;
+      margin-bottom: 12px;
     }
 
     .modal-title {
@@ -1046,72 +1235,68 @@
     }
 
     .modal-desc {
-      font-size: 14.5px;
+      font-size: 14px;
+      line-height: 22px;
       color: #64748b;
       margin-bottom: 24px;
-      line-height: 1.5;
     }
 
     .modal-step-item {
       display: flex;
+      align-items: flex-start;
       gap: 14px;
       margin-bottom: 16px;
-      align-items: flex-start;
     }
 
     .modal-step-num {
-      width: 26px;
-      height: 26px;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
-      background: #f1f5f9;
-      color: #0f172a;
+      background: rgba(5, 150, 105, 0.1);
+      color: #059669;
       font-weight: 700;
-      font-size: 12px;
+      font-size: 13px;
       display: flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      margin-top: 2px;
     }
 
     .modal-step-content {
       font-size: 14px;
+      line-height: 22px;
       color: #334155;
-      line-height: 1.5;
-    }
-
-    .modal-step-content strong {
-      color: #0f172a;
+      flex: 1;
     }
 
     .code-box-wrap {
-      background: #0f172a;
-      border-radius: 10px;
-      padding: 12px 14px;
-      margin-top: 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-top: 8px;
     }
 
     .code-box-text {
-      font-family: monospace;
-      font-size: 12.5px;
-      color: #38bdf8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      color: #0f172a;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      max-width: 320px;
     }
 
     .btn-copy-code {
-      background: #1e293b;
+      background: #0f172a;
       color: #ffffff;
+      padding: 4px 10px;
       border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      white-space: nowrap;
+      font-size: 12px;
+      font-weight: 500;
       transition: background 0.15s ease;
     }
 
@@ -1121,14 +1306,17 @@
 
     .modal-action-row {
       display: flex;
+      align-items: center;
       gap: 12px;
-      margin-top: 28px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid #f1f5f9;
     }
 
     .modal-btn-primary {
       flex: 1;
       height: 42px;
-      background: var(--color-primary);
+      background: #059669;
       color: #ffffff;
       border-radius: 10px;
       font-weight: 600;
@@ -1141,12 +1329,12 @@
     }
 
     .modal-btn-primary:hover {
-      background: var(--color-primary-hover);
+      background: #047857;
     }
 
     .modal-btn-secondary {
-      flex: 1;
       height: 42px;
+      padding: 0 16px;
       background: #f1f5f9;
       color: #334155;
       border-radius: 10px;
@@ -1164,6 +1352,38 @@
     }
 
     /* ---------------------------------------------------- */
+    /* SCROLL REVEAL ANIMATIONS (IntersectionObserver)       */
+    /* ---------------------------------------------------- */
+    .reveal-on-scroll {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+
+    .reveal-on-scroll.is-revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .delay-1 { transition-delay: 0.1s; }
+    .delay-2 { transition-delay: 0.2s; }
+    .delay-3 { transition-delay: 0.3s; }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal-on-scroll {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      .hero-preview-img {
+        transform: none !important;
+        transition: none !important;
+      }
+    }
+
+    /* ---------------------------------------------------- */
     /* RESPONSIVE BREAKPOINTS                               */
     /* ---------------------------------------------------- */
     @media (max-width: 1280px) {
@@ -1175,53 +1395,52 @@
 
       .feature-header-wrap,
       .feature-lead-text-wrap,
-      .pm-header-wrap,
-      .memory-header-wrap {
+      .quickstart-header-wrap,
+      .narrative-header-wrap {
         padding-left: 24px;
         padding-right: 24px;
       }
 
       .lottie-grid,
-      .pm-cards-grid {
+      .step-cards-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .lottie-card-col,
       .lottie-container-box,
-      .pm-card-col,
-      .pm-img-box {
+      .step-card-col,
+      .step-img-box {
         width: 100%;
+      }
+
+      .inbox-mobile-box {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .inbox-mobile-right {
+        width: 100%;
+        max-width: 560px;
       }
     }
 
     @media (max-width: 992px) {
       .lottie-grid,
-      .pm-cards-grid {
+      .step-cards-grid {
         grid-template-columns: 1fr;
         max-width: 480px;
       }
 
       .lottie-card-col,
-      .pm-card-col {
+      .step-card-col {
         width: 100%;
       }
 
       .lottie-container-box,
-      .pm-img-box {
+      .step-img-box {
         width: 100%;
         max-width: 393.33px;
         margin: 0 auto;
-      }
-
-      .memory-visual-grid {
-        grid-template-columns: 1fr;
-        width: 100%;
-        height: auto;
-      }
-
-      .memory-visual-wrap {
-        height: auto;
-        padding-bottom: 32px;
       }
 
       .nav-links {
@@ -1230,7 +1449,7 @@
 
       .hero-title,
       .feature-heading-2,
-      .pm-heading-2,
+      .quickstart-heading-2,
       .faq-heading-2,
       .cta-heading-2 {
         font-size: 34px;
@@ -1278,7 +1497,9 @@
           <!-- Logo -->
           <a href="/" class="nav-brand">
             <div class="nav-brand-icon">
-              <img src="/landing-assets/656e19691fe2bd18efffb785e9262fe27a886c62.svg" alt="Mail Track Icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22 6C22 4.9 21.1 4 20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6ZM20 6L12 11L4 6H20ZM20 18H4V8L12 13L20 8V18Z" fill="#fafafa"/>
+              </svg>
             </div>
             <span class="nav-brand-text">Mail Track</span>
           </a>
@@ -1286,7 +1507,7 @@
           <!-- Nav Links (Node 116:1319) -->
           <nav class="nav-links">
             <a href="#features" class="nav-link">Features</a>
-            <a href="#features" class="nav-link">Use cases</a>
+            <a href="#quickstart" class="nav-link">Use cases</a>
             <a href="#faq" class="nav-link">Resources</a>
             <a href="/login" class="nav-link">Pricing</a>
           </nav>
@@ -1296,73 +1517,83 @@
             <span>Download</span>
             <div class="nav-btn-divider"></div>
             <div class="nav-btn-caret">
-              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Caret Icon">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M19 12l-7 7-7-7"/>
+              </svg>
             </div>
           </button>
         </header>
 
-        <!-- Hero Header Content (Node 116:913) -->
+        <!-- Hero Center Header (Node 116:913) -->
         <div class="hero-header-content">
-          <!-- Chrome Extension v1.0 Badge (Node 116:914) -->
-          <div class="hero-badge-pill">
-            <span>Chrome Extension v1.0</span>
+          <!-- Badge Pill (Node 116:914) -->
+          <div class="hero-badge-pill reveal-on-scroll">
+            <span>Free forever. No credit card.</span>
           </div>
 
-          <!-- Hero H1 Title (Node 116:921) -->
-          <h1 class="hero-title">
+          <!-- Hero Headline (Node 116:921) -->
+          <h1 class="hero-title reveal-on-scroll delay-1">
             Know the moment your email gets read.
           </h1>
 
-          <!-- Add to Your Chrome CTA (Node 116:925) -->
-          <button type="button" class="hero-cta-btn" onclick="openInstallModal()">
-            <div class="hero-cta-icon">
-              <img src="/landing-assets/7923f66be7e33e1ac10934b9b6bf8c5fdd0bda43.svg" alt="Chrome Logo">
-            </div>
-            <span class="hero-cta-text">Add to Your Chrome</span>
-            <div class="nav-btn-divider"></div>
-            <div class="nav-btn-caret">
-              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown">
-            </div>
-          </button>
+          <!-- Hero Subtitle (Node 235:3) -->
+          <p class="hero-subtitle reveal-on-scroll delay-2">
+            MailTrack shows who opened your email, when they opened it, and how many times and who clicked your links. All of it appears right inside Gmail.
+          </p>
+
+          <!-- CTA Button (Node 116:925 / 235:9) -->
+          <div class="reveal-on-scroll delay-3">
+            <button type="button" class="hero-cta-btn" onclick="openInstallModal()" title="Install Mail Track on Chrome">
+              <span>Add to Chrome - It’s Free</span>
+              <div class="nav-btn-divider"></div>
+              <div class="hero-cta-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l6 4.5-6 4.5z"/>
+                </svg>
+              </div>
+            </button>
+          </div>
         </div>
 
-        <!-- Dashboard Preview Image (Node 116:5127) -->
-        <div class="hero-image-wrap" id="heroBannerImage">
-          <img src="/landing-assets/2c52f713023431b3ecffd59afc26a0686339c0c5.png" alt="Mail Track Live Dashboard" class="hero-dashboard-img">
+        <!-- Hero Preview Mockup Image (Node 116:5127) -->
+        <div class="hero-preview-wrap">
+          <img src="/landing-assets/2c52f713023431b3ecffd59afc26a0686339c0c5.png" alt="Mail Track Gmail Dashboard UI with Real-time Checkmarks" class="hero-preview-img" id="heroBannerImage">
         </div>
       </div>
     </section>
 
-    <!-- SECTION 1: 3 LOTTIE CARDS (Node 116:1363) -->
+    <!-- SECTION 1: EVERYTHING YOU NEED (Node 116:1363) -->
     <section class="feature-section" id="features">
       <div class="feature-container">
         <div class="feature-inner">
 
-          <!-- Header & Tag -->
-          <div class="feature-header-wrap">
-            <a href="#features" class="feature-badge-link">
-              <span>Unlimited capability</span>
-              <img src="/landing-assets/a96d4a9409d73ae000b7b22401d693c2c2783147.svg" alt="Arrow">
+          <!-- Header Wrap (Node 116:1366) -->
+          <div class="feature-header-wrap reveal-on-scroll">
+            <a href="#features" class="feature-tag-link">
+              <span>Everything you need</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
             </a>
             <h2 class="feature-heading-2">
-              Everything you need to close deals and follow up smarter
+              Everything that happens after you press send.
             </h2>
           </div>
 
-          <!-- Subtitle -->
-          <div class="feature-lead-text-wrap">
+          <!-- Lead Paragraph (Node 116:1385) -->
+          <div class="feature-lead-text-wrap reveal-on-scroll delay-1">
             <p class="feature-lead-text">
-              A seamless extension designed for founders, salespeople, recruiters, and consultants.
+              Install it once and every email you send is tracked automatically. There is nothing to set up and no extra step when you write.
             </p>
           </div>
 
-          <!-- 3 LOTTIE CARDS GRID -->
+          <!-- 3 LOTTIE BENTO CARDS GRID (Node 116:1390) -->
           <div class="lottie-grid-wrap">
             <div class="lottie-grid">
 
               <!-- CARD 1: Live open tracking (Node 116:1391) -->
-              <div class="lottie-card-col">
-                <div class="lottie-container-box" id="lottieContainer1" data-name="Lottie 1 (Use here)" data-node-id="132:7871">
+              <div class="lottie-card-col reveal-on-scroll delay-1">
+                <div class="lottie-container-box" id="lottieContainer1" data-name="Lottie 1 (Use here)" data-node-id="132:7871" title="Interactive Open Tracking Preview">
                   <div class="lottie-player-target" id="lottie-1"></div>
                 </div>
                 <div class="lottie-card-info">
@@ -1374,8 +1605,8 @@
               </div>
 
               <!-- CARD 2: Unlimited and free (Node 116:1406) -->
-              <div class="lottie-card-col">
-                <div class="lottie-container-box" id="lottieContainer2" data-name="Lottie 2 (Use here)" data-node-id="116:1407">
+              <div class="lottie-card-col reveal-on-scroll delay-2">
+                <div class="lottie-container-box" id="lottieContainer2" data-name="Lottie 2 (Use here)" data-node-id="116:1407" title="Interactive Unlimited Tracking Preview">
                   <div class="lottie-player-target" id="lottie-2"></div>
                 </div>
                 <div class="lottie-card-info">
@@ -1387,8 +1618,8 @@
               </div>
 
               <!-- CARD 3: Link click tracking (Node 116:1399) -->
-              <div class="lottie-card-col">
-                <div class="lottie-container-box" id="lottieContainer3" data-name="Lottie 3 (Use here)" data-node-id="116:1400">
+              <div class="lottie-card-col reveal-on-scroll delay-3">
+                <div class="lottie-container-box" id="lottieContainer3" data-name="Lottie 3 (Use here)" data-node-id="116:1400" title="Interactive Link Click Tracking Preview">
                   <div class="lottie-player-target" id="lottie-3"></div>
                 </div>
                 <div class="lottie-card-info">
@@ -1406,97 +1637,127 @@
       </div>
     </section>
 
-    <!-- SECTION 2: MEMORY SECTION (Node 116:1603) -->
-    <section class="memory-section">
+    <!-- SECTION 2: NARRATIVE EDITORIAL TRANSITION (Node 116:1603) -->
+    <section class="narrative-section">
       <div class="feature-container">
         <div class="feature-inner">
-
-          <div class="memory-header-wrap">
-            <h3 class="memory-heading-3">
-              <span class="memory-heading-mute">Memory</span> that knows what you’re working on.
+          <div class="narrative-header-wrap reveal-on-scroll">
+            <h3 class="narrative-heading-3">
+              <span class="narrative-lead-mute">You send an email</span>
+              <span class="narrative-lead-dark"> and then wait, with no idea whether anyone read it. You follow up too early, too late, or not at all.</span>
             </h3>
-            <p class="memory-desc">
-              Aside knows which sites to use for which work. It turns your browsing history into memory, so you don’t have to repeat context every time. All memory stays local on your device and is never shared with anyone.
-              <a href="#">Learn more</a>
+            <p class="narrative-desc">
+              <span class="narrative-brand-accent">MailTrack</span> adds live tracking to every email you send from Gmail, so you follow up at exactly the right moment.
             </p>
           </div>
-
-          <div class="memory-visual-wrap">
-            <div class="memory-visual-grid">
-              <div class="memory-prompt-box">
-                <p>Find the candidate I opened yesterday and prep interview notes</p>
-              </div>
-
-              <div class="memory-mockup-stack">
-                <div class="memory-mockup-card-back">
-                  <img src="/landing-assets/d16a3f665ef290f40b18618051fa493d4347fb08.png" alt="Candidate notes preview">
-                </div>
-                <div class="memory-mockup-card-front">
-                  <img src="/landing-assets/beb4da6ebcb80ec5cb3ab4b0a556e62f10be91e1.png" alt="Candidate notes active card">
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
     </section>
 
-    <!-- SECTION 3: PASSWORD MANAGER SECTION (Node 116:1625) -->
-    <section class="pm-section">
+    <!-- SECTION 3: QUICK START 30 SECONDS (Node 116:1625) -->
+    <section class="quickstart-section" id="quickstart">
       <div class="feature-container">
         <div class="feature-inner">
 
-          <div class="pm-header-wrap">
-            <div class="pm-tag-link">
-              <span>Password Manager</span>
-              <img src="/landing-assets/a96d4a9409d73ae000b7b22401d693c2c2783147.svg" alt="Arrow">
+          <div class="quickstart-header-wrap reveal-on-scroll">
+            <div class="quickstart-tag-link">
+              <span>Quick Start</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
             </div>
-            <h2 class="pm-heading-2">
-              Password that works with AI.
+            <h2 class="quickstart-heading-2">
+              Up and running in 30 seconds
             </h2>
-            <p class="pm-lead-text">
-              AI agents stop at login screen and ask you to log in every time. Aside lets agents sign in through autofill, without ever exposing your credentials to the AI.
-            </p>
+            <div class="quickstart-lead-row">
+              <p class="quickstart-lead-text">
+                No complicated setup or onboarding. It works directly inside your existing Gmail account.
+              </p>
+              <button type="button" class="quickstart-btn" onclick="openInstallModal()">
+                <div class="quickstart-btn-icon">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10" fill="#059669"/>
+                    <path d="M12 8v8M8 12h8" stroke="#ffffff" stroke-width="2" stroke-linecap="round"/>
+                  </svg>
+                </div>
+                <span>Add to Chrome</span>
+              </button>
+            </div>
           </div>
 
-          <div class="pm-cards-grid">
-            <!-- PM Card 1 -->
-            <div class="pm-card-col">
-              <div class="pm-img-box">
-                <img src="/landing-assets/e60966a84cad8457ebf2f4970758caca6d473b82.png" alt="Secrets stay invisible to AI">
+          <!-- 3 Step Cards Grid (Node 116:1641) -->
+          <div class="step-cards-grid">
+            <!-- Step Card 1 -->
+            <div class="step-card-col reveal-on-scroll delay-1">
+              <div class="step-img-box">
+                <img src="/landing-assets/popup-install.png" alt="1. Install the Extension">
               </div>
-              <div class="pm-card-info">
-                <p class="lottie-card-text">
-                  <span class="lottie-card-title">Secrets stay invisible to AI</span>
-                  <span class="lottie-card-desc"> Credentials are autofilled into websites, not exposed to the agent.</span>
+              <div class="step-card-info">
+                <h4 class="step-title-num">1. Install the Extension</h4>
+                <p class="step-desc-text">
+                  Add <a href="javascript:void(0)" onclick="openInstallModal()">Mail Track</a> to Chrome with one click. Connect your Google account securely using official OAuth 2.0 without sharing passwords.
                 </p>
               </div>
             </div>
 
-            <!-- PM Card 2 -->
-            <div class="pm-card-col">
-              <div class="pm-img-box">
-                <img src="/landing-assets/fceaf1c40f58d58b5ce28a18f6495123948ed67b.png" alt="Human approval at the edge">
+            <!-- Step Card 2 -->
+            <div class="step-card-col reveal-on-scroll delay-2">
+              <div class="step-img-box">
+                <img src="/landing-assets/compose-send.png" alt="2. Compose and Send as Usual">
               </div>
-              <div class="pm-card-info">
-                <p class="lottie-card-text">
-                  <span class="lottie-card-title">Human approval at the edge</span>
-                  <span class="lottie-card-desc"> Sensitive actions like payments, posts, and messages always wait for your confirmation.</span>
+              <div class="step-card-info">
+                <h4 class="step-title-num">2. Compose & Send as Usual</h4>
+                <p class="step-desc-text">
+                  Open Gmail and click Compose. You'll see the Mail Track toggle active automatically. Write your email and send.
                 </p>
               </div>
             </div>
 
-            <!-- PM Card 3 -->
-            <div class="pm-card-col">
-              <div class="pm-img-box">
-                <img src="/landing-assets/211775414bdcb4d887aa582ff6a8372d7b253be3.png" alt="A record of every access">
+            <!-- Step Card 3 -->
+            <div class="step-card-col reveal-on-scroll delay-3">
+              <div class="step-img-box">
+                <img src="/landing-assets/sent-checkmarks.png" alt="3. Watch Checkmarks Turn Green">
               </div>
-              <div class="pm-card-info">
-                <p class="lottie-card-text">
-                  <span class="lottie-card-title">A record of every access</span>
-                  <span class="lottie-card-desc"> Every credential use is logged, so you know exactly what the agent touched.</span>
+              <div class="step-card-info">
+                <h4 class="step-title-num">3. Watch Checkmarks Turn Green</h4>
+                <p class="step-desc-text">
+                  The moment your recipient opens your email, your desktop chimes with an alert and the checkmarks in your Sent folder light up green.
                 </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- INBOX AND MOBILE SPLIT SECTION (Node 286:7326) -->
+          <div class="inbox-mobile-wrap">
+            <div class="inbox-mobile-box reveal-on-scroll">
+              <div class="inbox-mobile-left">
+                <h3 class="inbox-mobile-tag">Inbox and mobile</h3>
+                <h4 class="inbox-mobile-subtag">Status in your Gmail inbox and mobile app</h4>
+                <p class="inbox-mobile-desc">
+                  Open and click status appears next to every email you send. It also shows in the Gmail app on iOS and Android.
+                </p>
+                <ul class="inbox-mobile-checklist">
+                  <li class="inbox-mobile-item">
+                    <span class="inbox-check-badge">✓</span>
+                    <span>Check status on the web version of Gmail</span>
+                  </li>
+                  <li class="inbox-mobile-item">
+                    <span class="inbox-check-badge">✓</span>
+                    <span>Check status in the Gmail app for iPhone and iPad</span>
+                  </li>
+                  <li class="inbox-mobile-item">
+                    <span class="inbox-check-badge">✓</span>
+                    <span>Check status in the Gmail app for Android</span>
+                  </li>
+                  <li class="inbox-mobile-item">
+                    <span class="inbox-check-badge">✓</span>
+                    <span>Get a clear tick the moment someone reads your message</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div class="inbox-mobile-right" title="Mobile Inbox Checkmarks">
+                <img src="/landing-assets/mobile-inbox.png" alt="Mobile Gmail Checkmarks Mockup">
               </div>
             </div>
           </div>
@@ -1507,14 +1768,14 @@
 
     <!-- SECTION 4: FAQ ACCORDION SECTION (Node 132:7879) -->
     <section class="faq-section" id="faq">
-      <div class="faq-header-wrap">
+      <div class="faq-header-wrap reveal-on-scroll">
         <h2 class="faq-heading-2">Frequently Asked Questions</h2>
         <p class="faq-subheading">Everything you need to know about Mail Track and how it operates.</p>
       </div>
 
       <div class="faq-list-wrap">
         <!-- Question 1 (Open by default) -->
-        <div class="faq-accordion-item active">
+        <div class="faq-accordion-item active reveal-on-scroll delay-1">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>Does the recipient know that I am tracking the email?</span>
             <span class="faq-chevron">▼</span>
@@ -1527,20 +1788,20 @@
         </div>
 
         <!-- Question 2 -->
-        <div class="faq-accordion-item">
+        <div class="faq-accordion-item reveal-on-scroll delay-1">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>How does tracking work on mobile Gmail (iPhone & Android)?</span>
             <span class="faq-chevron">▼</span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
-              Tracking pixels and links are standard email components embedded at send time. When your recipient opens the email on mobile Gmail, Apple Mail, or any smartphone client, the open signal is sent instantly to your Mail Track dashboard and push alerts.
+              Mail Track syncs status checkmarks directly using Gmail labels. When an email is read, the label updates in your Gmail account, displaying real-time ticks right inside the official Gmail iOS and Android apps without needing any third-party app.
             </p>
           </div>
         </div>
 
         <!-- Question 3 -->
-        <div class="faq-accordion-item">
+        <div class="faq-accordion-item reveal-on-scroll delay-2">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>Can I turn tracking off for specific emails?</span>
             <span class="faq-chevron">▼</span>
@@ -1553,7 +1814,7 @@
         </div>
 
         <!-- Question 4 -->
-        <div class="faq-accordion-item">
+        <div class="faq-accordion-item reveal-on-scroll delay-2">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>Is my personal email data safe and private?</span>
             <span class="faq-chevron">▼</span>
@@ -1566,14 +1827,14 @@
         </div>
 
         <!-- Question 5 -->
-        <div class="faq-accordion-item">
+        <div class="faq-accordion-item reveal-on-scroll delay-3">
           <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
             <span>How do I install the extension right now?</span>
             <span class="faq-chevron">▼</span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
-              Click "Add to Your Chrome" at the top or bottom of this page. You will be guided to load the unpacked extension into Chrome in developer mode in under 30 seconds.
+              Click "Add to Chrome" at the top or bottom of this page. You will be guided to load the extension into Chrome in under 30 seconds.
             </p>
           </div>
         </div>
@@ -1581,7 +1842,7 @@
     </section>
 
     <!-- SECTION 5: CTA BANNER (Node 116:1771) -->
-    <section class="cta-banner-section">
+    <section class="cta-banner-section reveal-on-scroll">
       <div class="cta-banner-card">
         <img src="/landing-assets/51ace833ac9ed381049171f0f14f8a589c128e09.png" alt="Cyan Gradient Mesh" class="cta-bg-img">
         <div class="cta-content-wrap">
@@ -1590,12 +1851,17 @@
           </h2>
           <button type="button" class="cta-chrome-btn" onclick="openInstallModal()">
             <div class="cta-chrome-icon">
-              <img src="/landing-assets/a1c756bddf8eca99fd5c27c5fadbd0f1081b10ab.svg" alt="Chrome Logo">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="12" cy="12" r="10" fill="#fafafa"/>
+                <circle cx="12" cy="12" r="4" fill="#090b0c"/>
+              </svg>
             </div>
             <span>Add to Chrome</span>
             <div class="nav-btn-divider"></div>
             <div class="nav-btn-caret">
-              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M19 12l-7 7-7-7"/>
+              </svg>
             </div>
           </button>
         </div>
@@ -1613,7 +1879,7 @@
 
           <ul class="footer-links-list">
             <li><a href="/login">Dashboard Sign In</a></li>
-            <li><a href="/#features">Features</a></li>
+            <li><a href="#features">Features</a></li>
             <li><a href="/terms">Terms of Service</a></li>
             <li><a href="/privacy">Privacy Policy</a></li>
             <li><a href="/privacy#security">Security</a></li>
@@ -1675,7 +1941,7 @@
     </div>
   </div>
 
-  <!-- JAVASCRIPT: LOTTIE INITIALIZATION & SCROLL-DRIVEN SCRUBBING -->
+  <!-- JAVASCRIPT: LOTTIE INITIALIZATION, SCROLL-DRIVEN SCRUBBING & REVEAL ANIMATIONS -->
   <script>
     // FAQ Accordion Toggle
     function toggleFaq(btn) {
@@ -1768,7 +2034,6 @@
 
         item.anim.addEventListener('DOMLoaded', () => {
           item.loaded = true;
-          // Set initial frame
           item.anim.goToAndStop(0, true);
         });
 
@@ -1792,8 +2057,6 @@
       });
 
       // 2. Smooth Scroll Scrubbing Loop
-      let isScrolling = false;
-
       function updateLottieFrames() {
         const windowHeight = window.innerHeight;
 
@@ -1804,14 +2067,10 @@
           if (!container) return;
 
           const rect = container.getBoundingClientRect();
-
-          // Calculate visible progress when card enters bottom and exits top
-          // Range: enter bottom (vh) to center/exit (0.2 * vh)
           const enterPoint = windowHeight * 0.95;
           const exitPoint = windowHeight * 0.05;
           const currentY = rect.top;
 
-          // Normalized progress 0 to 1
           const rawProgress = (enterPoint - currentY) / (enterPoint - exitPoint);
           const progress = Math.max(0, Math.min(1, rawProgress));
 
@@ -1826,7 +2085,6 @@
           }
         });
 
-        // Keep loop running
         requestAnimationFrame(updateLottieFrames);
       }
 
@@ -1840,12 +2098,31 @@
           const maxScroll = 400;
           const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
           
-          // Starts with subtle 14deg tilt at top of page, flattens cleanly on scroll
           const tilt = (14 * (1 - progress)).toFixed(2);
           const scale = (0.97 + 0.03 * progress).toFixed(3);
           heroBanner.style.transform = `perspective(1200px) rotateX(${tilt}deg) scale(${scale})`;
         }, { passive: true });
       }
+
+      // 4. Scroll Reveal Observer
+      const observerOptions = {
+        root: null,
+        rootMargin: '0px 0px -50px 0px',
+        threshold: 0.1
+      };
+
+      const revealObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal-on-scroll').forEach(el => {
+        revealObserver.observe(el);
+      });
     });
   </script>
 
