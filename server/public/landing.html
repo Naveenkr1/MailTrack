@@ -1492,6 +1492,357 @@
         align-items: flex-start;
       }
     }
+
+    /* ---------------------------------------------------- */
+    /* PLATFORM DROPDOWN & SPLIT BUTTON STYLES              */
+    /* ---------------------------------------------------- */
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .nav-login-btn {
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--color-dark);
+      padding: 7px 16px;
+      border-radius: var(--radius-pill);
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .nav-login-btn:hover {
+      background: rgba(9, 11, 12, 0.06);
+      color: #000;
+    }
+
+    .nav-login-btn.is-logged-in {
+      background: rgba(5, 150, 105, 0.1);
+      border-color: rgba(5, 150, 105, 0.25);
+      color: #059669;
+      font-weight: 600;
+    }
+
+    .nav-login-btn.is-logged-in:hover {
+      background: rgba(5, 150, 105, 0.18);
+      color: #047857;
+    }
+
+    .platform-cta-wrapper {
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .hero-cta-btn-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-dark);
+      border-radius: var(--radius-pill);
+      height: 42px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .hero-cta-btn-group:hover {
+      background: #1e293b;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
+    }
+
+    .hero-cta-btn-main {
+      display: inline-flex;
+      align-items: center;
+      padding-left: 20px;
+      padding-right: 6px;
+      height: 100%;
+      color: #fafafa;
+      font-family: var(--font-body);
+      font-size: 15.5px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .hero-cta-btn-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 14px;
+      padding-left: 8px;
+      height: 100%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-top-right-radius: var(--radius-pill);
+      border-bottom-right-radius: var(--radius-pill);
+      transition: background 0.15s ease;
+    }
+
+    .hero-cta-btn-arrow:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .cta-arrow-icon {
+      width: 14px;
+      height: 14px;
+      display: block;
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .platform-cta-wrapper.open .cta-arrow-icon {
+      transform: rotate(180deg);
+    }
+
+    .nav-download-btn-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-dark);
+      border-radius: 16.8px;
+      height: 36px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .nav-download-btn-group:hover {
+      background: #1e293b;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .nav-download-btn-main {
+      display: inline-flex;
+      align-items: center;
+      padding-left: 14px;
+      padding-right: 6px;
+      height: 100%;
+      color: #fafafa;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .nav-download-btn-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 10px;
+      padding-left: 6px;
+      height: 100%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-top-right-radius: 16.8px;
+      border-bottom-right-radius: 16.8px;
+      transition: background 0.15s ease;
+    }
+
+    .nav-download-btn-arrow:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .cta-chrome-btn-group {
+      display: inline-flex;
+      align-items: center;
+      background: var(--color-dark);
+      border-radius: 16.8px;
+      height: 44px;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cta-chrome-btn-group:hover {
+      background: #1e293b;
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.28);
+    }
+
+    .cta-chrome-btn-main {
+      display: inline-flex;
+      align-items: center;
+      padding-left: 16px;
+      padding-right: 8px;
+      height: 100%;
+      color: #fafafa;
+      font-family: var(--font-body);
+      font-size: 16px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .cta-chrome-btn-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding-right: 14px;
+      padding-left: 8px;
+      height: 100%;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      border-top-right-radius: 16.8px;
+      border-bottom-right-radius: 16.8px;
+    }
+
+    .cta-chrome-btn-arrow:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* Platform Dropdown */
+    .platform-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%) translateY(4px) scale(0.96);
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      width: 290px;
+      background: #ffffff;
+      border: 1px solid rgba(9, 11, 12, 0.1);
+      border-radius: 16px;
+      padding: 8px;
+      box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.2), 0 4px 12px rgba(0, 0, 0, 0.06);
+      z-index: 100;
+      transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                  visibility 0.2s;
+    }
+
+    .platform-cta-wrapper.open .platform-dropdown {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .platform-dropdown.nav-dropdown {
+      left: auto;
+      right: 0;
+      transform: translateY(4px) scale(0.96);
+    }
+
+    .platform-cta-wrapper.open .platform-dropdown.nav-dropdown {
+      transform: translateY(0) scale(1);
+    }
+
+    .platform-dropdown.open-up {
+      top: auto;
+      bottom: calc(100% + 10px);
+      transform: translateX(-50%) translateY(-4px) scale(0.96);
+    }
+
+    .platform-cta-wrapper.open .platform-dropdown.open-up {
+      transform: translateX(-50%) translateY(0) scale(1);
+    }
+
+    .platform-dropdown-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 12px;
+      transition: background 0.15s ease;
+      user-select: none;
+    }
+
+    .platform-dropdown-item.active {
+      cursor: pointer;
+    }
+
+    .platform-dropdown-item.active:hover {
+      background: #f8fafc;
+    }
+
+    .platform-dropdown-item.disabled {
+      opacity: 0.62;
+      cursor: not-allowed;
+      background: transparent;
+    }
+
+    .platform-item-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .platform-item-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      flex-shrink: 0;
+    }
+
+    .platform-item-text {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .platform-name {
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #0f172a;
+      line-height: 1.25;
+    }
+
+    .platform-sub {
+      font-family: var(--font-body);
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 2px;
+    }
+
+    .platform-item-badge {
+      font-family: var(--font-body);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+
+    .platform-item-badge.available {
+      background: #ecfdf5;
+      color: #059669;
+      border: 1px solid rgba(5, 150, 105, 0.25);
+    }
+
+    .platform-item-badge.coming-soon {
+      background: #f1f5f9;
+      color: #64748b;
+      border: 1px solid #e2e8f0;
+    }
+
+    @media (max-width: 768px) {
+      .nav-links {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -1522,14 +1873,79 @@
             <a href="/login" class="nav-link">Pricing</a>
           </nav>
 
-          <!-- Download Button (Node 116:1333) -->
-          <button type="button" class="nav-download-btn" onclick="openInstallModal()" title="Download Chrome Extension">
-            <span>Download</span>
-            <div class="nav-btn-divider"></div>
-            <div class="nav-btn-caret">
-              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Caret Icon">
+          <!-- Right Nav Actions: Log in + Download with Platform Dropdown -->
+          <div class="nav-actions">
+            <a href="/login" class="nav-login-btn" id="navLoginBtn" title="Log in to Mail Track">Log in</a>
+
+            <div class="platform-cta-wrapper nav-split-cta" id="navPlatformCtaWrap">
+              <div class="nav-download-btn-group">
+                <button type="button" class="nav-download-btn-main" onclick="openInstallModal()" title="Download Extension for Gmail">
+                  <span>Download</span>
+                </button>
+                <div class="nav-btn-divider"></div>
+                <button type="button" class="nav-download-btn-arrow" id="navDropdownArrowBtn" aria-label="Select email platform" title="Select email platform" aria-expanded="false">
+                  <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown" class="cta-arrow-icon">
+                </button>
+              </div>
+
+              <!-- Navbar Platform Dropdown -->
+              <div class="platform-dropdown nav-dropdown" id="navPlatformDropdown" role="menu">
+                <div class="platform-dropdown-item active" role="menuitem" tabindex="0" onclick="selectPlatform('gmail')">
+                  <div class="platform-item-left">
+                    <div class="platform-item-icon">
+                      <svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"></path>
+                        <path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"></path>
+                        <polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"></polygon>
+                        <path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C8.132,7.551,5.638,8.125,4.6,10.052L3,12.298z"></path>
+                        <path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341c1.744-1.308,4.238-0.734,5.276,1.193L45,12.298z"></path>
+                      </svg>
+                    </div>
+                    <div class="platform-item-text">
+                      <span class="platform-name">Add to Gmail</span>
+                      <span class="platform-sub">Chrome Extension</span>
+                    </div>
+                  </div>
+                  <div class="platform-item-badge available">Active</div>
+                </div>
+
+                <div class="platform-dropdown-item disabled" role="menuitem" aria-disabled="true">
+                  <div class="platform-item-left">
+                    <div class="platform-item-icon">
+                      <svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#039be5" d="M6,10v28c0,2.2,1.8,4,4,4h16V6H10C7.8,6,6,7.8,6,10z"/>
+                        <path fill="#0288d1" d="M26,6v36h12c2.2,0,4-1.8,4-4V18L26,6z"/>
+                        <path fill="#01579b" d="M42,18l-16-7v13l16,6V18z"/>
+                        <path fill="#0288d1" d="M10,13h16v22H10z"/>
+                        <circle cx="18" cy="24" r="5" fill="#ffffff"/>
+                      </svg>
+                    </div>
+                    <div class="platform-item-text">
+                      <span class="platform-name">Add to Outlook</span>
+                      <span class="platform-sub">Microsoft Add-in</span>
+                    </div>
+                  </div>
+                  <div class="platform-item-badge coming-soon">Coming soon</div>
+                </div>
+
+                <div class="platform-dropdown-item disabled" role="menuitem" aria-disabled="true">
+                  <div class="platform-item-left">
+                    <div class="platform-item-icon">
+                      <svg width="20" height="20" viewBox="0 0 48 48">
+                        <rect width="48" height="48" rx="8" fill="#6001d2"/>
+                        <path fill="#ffffff" d="M14 14l6.5 12.5V34h4V26.5L31 14h-4.5L22.5 22.8 18.5 14H14zm19.5 13a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/>
+                      </svg>
+                    </div>
+                    <div class="platform-item-text">
+                      <span class="platform-name">Add to Yahoo</span>
+                      <span class="platform-sub">Yahoo Mail Add-on</span>
+                    </div>
+                  </div>
+                  <div class="platform-item-badge coming-soon">Coming soon</div>
+                </div>
+              </div>
             </div>
-          </button>
+          </div>
         </header>
 
         <!-- Hero Center Header (Node 116:913) -->
@@ -1551,13 +1967,74 @@
 
           <!-- CTA Button (Node 116:925 / 235:9) -->
           <div class="reveal-on-scroll delay-3">
-            <button type="button" class="hero-cta-btn" onclick="openInstallModal()" title="Install Mail Track on Chrome">
-              <span>Add to Chrome - It’s Free</span>
-              <div class="nav-btn-divider"></div>
-              <div class="hero-cta-icon">
-                <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Arrow" style="transform: rotate(0deg);">
+            <div class="platform-cta-wrapper" id="heroPlatformCtaWrap">
+              <div class="hero-cta-btn-group">
+                <button type="button" class="hero-cta-btn-main" onclick="openInstallModal()" title="Add Mail Track to Gmail">
+                  <span>Add to Gmail - It’s Free</span>
+                </button>
+                <div class="nav-btn-divider"></div>
+                <button type="button" class="hero-cta-btn-arrow" id="heroDropdownArrowBtn" aria-label="Select email platform" title="Select email platform" aria-expanded="false">
+                  <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown" class="cta-arrow-icon">
+                </button>
               </div>
-            </button>
+
+              <!-- Hero Platform Dropdown -->
+              <div class="platform-dropdown" id="heroPlatformDropdown" role="menu">
+                <div class="platform-dropdown-item active" role="menuitem" tabindex="0" onclick="selectPlatform('gmail')">
+                  <div class="platform-item-left">
+                    <div class="platform-item-icon">
+                      <svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"></path>
+                        <path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"></path>
+                        <polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"></polygon>
+                        <path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C8.132,7.551,5.638,8.125,4.6,10.052L3,12.298z"></path>
+                        <path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341c1.744-1.308,4.238-0.734,5.276,1.193L45,12.298z"></path>
+                      </svg>
+                    </div>
+                    <div class="platform-item-text">
+                      <span class="platform-name">Add to Gmail</span>
+                      <span class="platform-sub">Live tracking & double ticks</span>
+                    </div>
+                  </div>
+                  <div class="platform-item-badge available">Active</div>
+                </div>
+
+                <div class="platform-dropdown-item disabled" role="menuitem" aria-disabled="true">
+                  <div class="platform-item-left">
+                    <div class="platform-item-icon">
+                      <svg width="20" height="20" viewBox="0 0 48 48">
+                        <path fill="#039be5" d="M6,10v28c0,2.2,1.8,4,4,4h16V6H10C7.8,6,6,7.8,6,10z"/>
+                        <path fill="#0288d1" d="M26,6v36h12c2.2,0,4-1.8,4-4V18L26,6z"/>
+                        <path fill="#01579b" d="M42,18l-16-7v13l16,6V18z"/>
+                        <path fill="#0288d1" d="M10,13h16v22H10z"/>
+                        <circle cx="18" cy="24" r="5" fill="#ffffff"/>
+                      </svg>
+                    </div>
+                    <div class="platform-item-text">
+                      <span class="platform-name">Add to Outlook</span>
+                      <span class="platform-sub">Microsoft Add-in</span>
+                    </div>
+                  </div>
+                  <div class="platform-item-badge coming-soon">Coming soon</div>
+                </div>
+
+                <div class="platform-dropdown-item disabled" role="menuitem" aria-disabled="true">
+                  <div class="platform-item-left">
+                    <div class="platform-item-icon">
+                      <svg width="20" height="20" viewBox="0 0 48 48">
+                        <rect width="48" height="48" rx="8" fill="#6001d2"/>
+                        <path fill="#ffffff" d="M14 14l6.5 12.5V34h4V26.5L31 14h-4.5L22.5 22.8 18.5 14H14zm19.5 13a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/>
+                      </svg>
+                    </div>
+                    <div class="platform-item-text">
+                      <span class="platform-name">Add to Yahoo</span>
+                      <span class="platform-sub">Yahoo Mail Add-on</span>
+                    </div>
+                  </div>
+                  <div class="platform-item-badge coming-soon">Coming soon</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1682,11 +2159,17 @@
               <p class="quickstart-lead-text">
                 No complicated setup or onboarding. It works directly inside your existing Gmail account.
               </p>
-              <button type="button" class="quickstart-btn" onclick="openInstallModal()">
+              <button type="button" class="quickstart-btn" onclick="openInstallModal()" title="Add Mail Track to Gmail">
                 <div class="quickstart-btn-icon">
-                  <img src="/landing-assets/7923f66be7e33e1ac10934b9b6bf8c5fdd0bda43.svg" alt="Chrome">
+                  <svg width="18" height="18" viewBox="0 0 48 48">
+                    <path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"></path>
+                    <path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"></path>
+                    <polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"></polygon>
+                    <path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C8.132,7.551,5.638,8.125,4.6,10.052L3,12.298z"></path>
+                    <path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341c1.744-1.308,4.238-0.734,5.276,1.193L45,12.298z"></path>
+                  </svg>
                 </div>
-                <span>Add to chrome</span>
+                <span>Add to Gmail</span>
               </button>
             </div>
           </div>
@@ -1856,7 +2339,7 @@
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
-              Click "Add to Chrome" at the top or bottom of this page. You will be guided to load the extension into Chrome in under 30 seconds.
+              Click "Add to Gmail" at the top or bottom of this page. You will be guided to load the extension into Chrome in under 30 seconds.
             </p>
           </div>
         </div>
@@ -1871,16 +2354,83 @@
           <h2 class="cta-heading-2">
             Start tracking your emails in under 30 seconds
           </h2>
-          <button type="button" class="cta-chrome-btn" onclick="openInstallModal()">
-            <div class="cta-chrome-icon">
-              <img src="/landing-assets/a1c756bddf8eca99fd5c27c5fadbd0f1081b10ab.svg" alt="Download">
+          <div class="platform-cta-wrapper" id="bottomPlatformCtaWrap">
+            <div class="cta-chrome-btn-group">
+              <button type="button" class="cta-chrome-btn-main" onclick="openInstallModal()" title="Add Mail Track to Gmail">
+                <div class="cta-chrome-icon">
+                  <svg width="18" height="18" viewBox="0 0 48 48">
+                    <path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"></path>
+                    <path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"></path>
+                    <polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"></polygon>
+                    <path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C8.132,7.551,5.638,8.125,4.6,10.052L3,12.298z"></path>
+                    <path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341c1.744-1.308,4.238-0.734,5.276,1.193L45,12.298z"></path>
+                  </svg>
+                </div>
+                <span>Add to Gmail</span>
+              </button>
+              <div class="nav-btn-divider"></div>
+              <button type="button" class="cta-chrome-btn-arrow" id="bottomDropdownArrowBtn" aria-label="Select email platform" title="Select email platform" aria-expanded="false">
+                <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown" class="cta-arrow-icon">
+              </button>
             </div>
-            <span>Add to Chrome</span>
-            <div class="nav-btn-divider"></div>
-            <div class="nav-btn-caret">
-              <img src="/landing-assets/70961fb415f7109222ab93fabf2b829ce13290bf.svg" alt="Dropdown">
+
+            <!-- Bottom Platform Dropdown (opens upward) -->
+            <div class="platform-dropdown open-up" id="bottomPlatformDropdown" role="menu">
+              <div class="platform-dropdown-item active" role="menuitem" tabindex="0" onclick="selectPlatform('gmail')">
+                <div class="platform-item-left">
+                  <div class="platform-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 48 48">
+                      <path fill="#4caf50" d="M45,16.2l-5,2.75l-5,4.75L35,40h7c1.657,0,3-1.343,3-3V16.2z"></path>
+                      <path fill="#1e88e5" d="M3,16.2l3.614,1.71L13,23.7V40H6c-1.657,0-3-1.343-3-3V16.2z"></path>
+                      <polygon fill="#e53935" points="35,11.2 24,19.45 13,11.2 12,17 13,23.7 24,31.95 35,23.7 36,17"></polygon>
+                      <path fill="#c62828" d="M3,12.298V16.2l10,7.5V11.2L9.876,8.859C8.132,7.551,5.638,8.125,4.6,10.052L3,12.298z"></path>
+                      <path fill="#fbc02d" d="M45,12.298V16.2l-10,7.5V11.2l3.124-2.341c1.744-1.308,4.238-0.734,5.276,1.193L45,12.298z"></path>
+                    </svg>
+                  </div>
+                  <div class="platform-item-text">
+                    <span class="platform-name">Add to Gmail</span>
+                    <span class="platform-sub">Live tracking & double ticks</span>
+                  </div>
+                </div>
+                <div class="platform-item-badge available">Active</div>
+              </div>
+
+              <div class="platform-dropdown-item disabled" role="menuitem" aria-disabled="true">
+                <div class="platform-item-left">
+                  <div class="platform-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 48 48">
+                      <path fill="#039be5" d="M6,10v28c0,2.2,1.8,4,4,4h16V6H10C7.8,6,6,7.8,6,10z"/>
+                      <path fill="#0288d1" d="M26,6v36h12c2.2,0,4-1.8,4-4V18L26,6z"/>
+                      <path fill="#01579b" d="M42,18l-16-7v13l16,6V18z"/>
+                      <path fill="#0288d1" d="M10,13h16v22H10z"/>
+                      <circle cx="18" cy="24" r="5" fill="#ffffff"/>
+                    </svg>
+                  </div>
+                  <div class="platform-item-text">
+                    <span class="platform-name">Add to Outlook</span>
+                    <span class="platform-sub">Microsoft Add-in</span>
+                  </div>
+                </div>
+                <div class="platform-item-badge coming-soon">Coming soon</div>
+              </div>
+
+              <div class="platform-dropdown-item disabled" role="menuitem" aria-disabled="true">
+                <div class="platform-item-left">
+                  <div class="platform-item-icon">
+                    <svg width="20" height="20" viewBox="0 0 48 48">
+                      <rect width="48" height="48" rx="8" fill="#6001d2"/>
+                      <path fill="#ffffff" d="M14 14l6.5 12.5V34h4V26.5L31 14h-4.5L22.5 22.8 18.5 14H14zm19.5 13a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z"/>
+                    </svg>
+                  </div>
+                  <div class="platform-item-text">
+                    <span class="platform-name">Add to Yahoo</span>
+                    <span class="platform-sub">Yahoo Mail Add-on</span>
+                  </div>
+                </div>
+                <div class="platform-item-badge coming-soon">Coming soon</div>
+              </div>
             </div>
-          </button>
+          </div>
         </div>
       </div>
     </section>
@@ -2003,6 +2553,101 @@
     window.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') closeInstallModal();
     });
+
+    // -------------------------------------------------------------------------
+    // PLATFORM DROPDOWNS & NAVIGATION AUTH STATE
+    // -------------------------------------------------------------------------
+    function togglePlatformDropdown(wrapperId, arrowBtn) {
+      const wrapper = document.getElementById(wrapperId);
+      if (!wrapper) return;
+      const isOpen = wrapper.classList.contains('open');
+
+      // Close all other platform dropdowns
+      document.querySelectorAll('.platform-cta-wrapper').forEach(w => {
+        if (w !== wrapper) {
+          w.classList.remove('open');
+          const btn = w.querySelector('[aria-expanded="true"]');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        }
+      });
+
+      if (isOpen) {
+        wrapper.classList.remove('open');
+        if (arrowBtn) arrowBtn.setAttribute('aria-expanded', 'false');
+      } else {
+        wrapper.classList.add('open');
+        if (arrowBtn) arrowBtn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+    function selectPlatform(platform) {
+      // Close all dropdowns
+      document.querySelectorAll('.platform-cta-wrapper').forEach(w => {
+        w.classList.remove('open');
+        const btn = w.querySelector('[aria-expanded="true"]');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+      });
+
+      if (platform === 'gmail') {
+        openInstallModal();
+      }
+    }
+
+    // Arrow button triggers
+    document.getElementById('navDropdownArrowBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlatformDropdown('navPlatformCtaWrap', e.currentTarget);
+    });
+
+    document.getElementById('heroDropdownArrowBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlatformDropdown('heroPlatformCtaWrap', e.currentTarget);
+    });
+
+    document.getElementById('bottomDropdownArrowBtn')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      togglePlatformDropdown('bottomPlatformCtaWrap', e.currentTarget);
+    });
+
+    // Close on click outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.platform-cta-wrapper')) {
+        document.querySelectorAll('.platform-cta-wrapper').forEach(w => {
+          w.classList.remove('open');
+          const btn = w.querySelector('[aria-expanded="true"]');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+
+    // Close on Escape
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.platform-cta-wrapper').forEach(w => {
+          w.classList.remove('open');
+          const btn = w.querySelector('[aria-expanded="true"]');
+          if (btn) btn.setAttribute('aria-expanded', 'false');
+        });
+      }
+    });
+
+    // Dynamic Auth State Check for Top Nav Button
+    try {
+      fetch('/auth/me')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.success && data.user) {
+            const loginBtn = document.getElementById('navLoginBtn');
+            if (loginBtn) {
+              loginBtn.textContent = 'Dashboard';
+              loginBtn.href = '/dashboard';
+              loginBtn.classList.add('is-logged-in');
+              loginBtn.title = `Logged in as ${data.user.email} — Open Dashboard`;
+            }
+          }
+        })
+        .catch(() => {});
+    } catch (e) {}
 
     // -------------------------------------------------------------------------
     // LOTTIE ANIMATIONS SETUP & SCROLL INTERACTIONS

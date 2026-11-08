@@ -631,6 +631,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (deleteConfirmModal) deleteConfirmModal.classList.remove('open');
       if (detailsModal) detailsModal.classList.remove('open');
       if (mobileSyncPromptModal) mobileSyncPromptModal.classList.remove('open');
+      if (extensionPromptModal) closeExtensionModal();
     }
   });
 
@@ -2380,6 +2381,131 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // -------------------------------------------------------------
+  // DESKTOP CHROME EXTENSION DETECTION & PROMPTS
+  // -------------------------------------------------------------
+  const extensionInstallCard = document.getElementById('extensionInstallCard');
+  const addExtensionFromCardBtn = document.getElementById('addExtensionFromCardBtn');
+  const closeExtCardBtn = document.getElementById('closeExtCardBtn');
+  const extensionPromptModal = document.getElementById('extensionPromptModal');
+  const closeExtModalBtn = document.getElementById('closeExtModalBtn');
+  const dismissExtModalBtn = document.getElementById('dismissExtModalBtn');
+  const dashboardCopyExtPathBtn = document.getElementById('dashboardCopyExtPathBtn');
+  const extPathCopyTarget = document.getElementById('extPathCopyTarget');
+
+  let extensionInstalledDetected = false;
+
+  function isDesktopChromeBrowser() {
+    const ua = navigator.userAgent;
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    if (isMobile) return false;
+    const isChromium = (window.chrome !== undefined) || /Chrome/.test(ua) || /Chromium/.test(ua) || /Edg\//.test(ua);
+    return isChromium;
+  }
+
+  function markExtensionInstalled() {
+    extensionInstalledDetected = true;
+    if (extensionInstallCard) extensionInstallCard.style.display = 'none';
+    if (extensionPromptModal) {
+      extensionPromptModal.classList.remove('open');
+      extensionPromptModal.style.display = 'none';
+    }
+  }
+
+  // Listen for announcement from extension auth-bridge.js
+  window.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'MAILTRACK_EXTENSION_PONG') {
+      markExtensionInstalled();
+    }
+  });
+
+  function checkDesktopChromeExtension() {
+    // Only target Desktop Chrome
+    if (!isDesktopChromeBrowser()) return;
+
+    // Check DOM attribute set by content script
+    if (document.documentElement.getAttribute('data-mailtrack-extension-installed') === 'true') {
+      markExtensionInstalled();
+      return;
+    }
+
+    // Ping extension in case it loaded slightly after page
+    window.postMessage({ type: 'MAILTRACK_PING_EXTENSION' }, '*');
+
+    // Small grace period (600ms) to allow extension content script to reply
+    setTimeout(() => {
+      if (document.documentElement.getAttribute('data-mailtrack-extension-installed') === 'true' || extensionInstalledDetected) {
+        markExtensionInstalled();
+        return;
+      }
+
+      // Extension is NOT installed on Desktop Chrome
+      const dismissedCard = sessionStorage.getItem('mt_dismissed_ext_card') === 'true';
+      const dismissedModal = sessionStorage.getItem('mt_dismissed_ext_modal') === 'true';
+
+      if (extensionInstallCard && !dismissedCard) {
+        extensionInstallCard.style.display = 'flex';
+      }
+
+      if (extensionPromptModal && !dismissedModal) {
+        extensionPromptModal.style.display = 'flex';
+        requestAnimationFrame(() => {
+          extensionPromptModal.classList.add('open');
+        });
+      }
+    }, 600);
+  }
+
+  if (addExtensionFromCardBtn && extensionPromptModal) {
+    addExtensionFromCardBtn.addEventListener('click', () => {
+      extensionPromptModal.style.display = 'flex';
+      requestAnimationFrame(() => {
+        extensionPromptModal.classList.add('open');
+      });
+    });
+  }
+
+  if (closeExtCardBtn && extensionInstallCard) {
+    closeExtCardBtn.addEventListener('click', () => {
+      extensionInstallCard.style.display = 'none';
+      sessionStorage.setItem('mt_dismissed_ext_card', 'true');
+    });
+  }
+
+  function closeExtensionModal() {
+    if (extensionPromptModal) {
+      extensionPromptModal.classList.remove('open');
+      setTimeout(() => {
+        extensionPromptModal.style.display = 'none';
+      }, 200);
+      sessionStorage.setItem('mt_dismissed_ext_modal', 'true');
+    }
+  }
+
+  if (closeExtModalBtn) closeExtModalBtn.addEventListener('click', closeExtensionModal);
+  if (dismissExtModalBtn) dismissExtModalBtn.addEventListener('click', closeExtensionModal);
+  if (extensionPromptModal) {
+    extensionPromptModal.addEventListener('click', (e) => {
+      if (e.target === extensionPromptModal) closeExtensionModal();
+    });
+  }
+
+  if (dashboardCopyExtPathBtn && extPathCopyTarget) {
+    dashboardCopyExtPathBtn.addEventListener('click', () => {
+      const pathText = extPathCopyTarget.textContent.trim();
+      navigator.clipboard.writeText(pathText).then(() => {
+        dashboardCopyExtPathBtn.textContent = 'Copied!';
+        dashboardCopyExtPathBtn.style.background = '#059669';
+        dashboardCopyExtPathBtn.style.color = '#ffffff';
+        setTimeout(() => {
+          dashboardCopyExtPathBtn.textContent = 'Copy';
+          dashboardCopyExtPathBtn.style.background = 'transparent';
+          dashboardCopyExtPathBtn.style.color = '#059669';
+        }, 2000);
+      }).catch(() => {});
+    });
+  }
+
+  // -------------------------------------------------------------
   // INITIALIZATION
   // -------------------------------------------------------------
   const urlParams = new URLSearchParams(window.location.search);
@@ -2394,6 +2520,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   checkAuth().then(ok => {
     if (ok) {
+      checkDesktopChromeExtension();
       loadEmails();
       connectWebSocket();
     }

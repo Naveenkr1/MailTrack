@@ -157,6 +157,26 @@
           <span class="dropdown-item-label">Privacy Notice</span>
         </button>
 
+        <!-- Option: Website Redirection (Visit Website) -->
+        <a href="/home" class="user-dropdown-item" id="dropdownWebsite" title="Open Mail Track Homepage">
+          <span class="dropdown-item-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+          </span>
+          <span class="dropdown-item-label">Website</span>
+          <span class="dropdown-item-badge-link" style="margin-left: auto; color: var(--text-muted); display: inline-flex; align-items: center;">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </span>
+        </a>
+
         <div class="user-dropdown-divider"></div>
 
         <!-- Option 4: Logout -->
@@ -414,6 +434,36 @@
               <input type="checkbox" id="dontShowBannerCheck" class="install-checkbox" />
               <span>Don't show me again</span>
             </label>
+          </div>
+        </div>
+
+        <!-- Chrome Desktop Extension Not Installed Indication Card -->
+        <div id="extensionInstallCard" class="ext-indication-card" style="display: none;">
+          <div class="ext-card-left">
+            <div class="ext-card-icon-box">
+              <img src="/landing-assets/7923f66be7e33e1ac10934b9b6bf8c5fdd0bda43.svg" alt="Chrome Logo" class="ext-card-chrome-icon" />
+              <span class="ext-card-pulse-dot" title="Extension required for tracking"></span>
+            </div>
+            <div class="ext-card-text">
+              <div class="ext-card-title-row">
+                <span class="ext-card-title">Mail Track Chrome Extension Required</span>
+                <span class="ext-card-chip">Not Installed</span>
+              </div>
+              <p class="ext-card-desc">
+                To track email opens, link clicks, and show double green checkmarks (✓✓) inside Gmail, add the Mail Track extension to this Chrome browser.
+              </p>
+            </div>
+          </div>
+          <div class="ext-card-actions">
+            <button class="btn-ext-card-primary" id="addExtensionFromCardBtn" type="button">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+              <span>Add to Chrome</span>
+            </button>
+            <button class="btn-ext-card-close" id="closeExtCardBtn" type="button" aria-label="Dismiss card" title="Dismiss card">&times;</button>
           </div>
         </div>
 
@@ -1360,6 +1410,91 @@
           <a href="/auth/google/mobile-sync" class="btn-figma-primary" id="enableMobilePromptBtn"
             style="text-decoration:none;">Connect Mobile Gmail</a>
           <button class="btn-modal-cancel" id="dismissMobilePromptBtn" type="button">Maybe Later</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Chrome Extension Prompt Modal -->
+  <div class="modal-backdrop" id="extensionPromptModal" style="display: none;">
+    <div class="modal-window ext-prompt-modal-window">
+      <div class="modal-window-header">
+        <div class="modal-headline">
+          <div class="ext-modal-header-brand">
+            <img src="/landing-assets/7923f66be7e33e1ac10934b9b6bf8c5fdd0bda43.svg" alt="Chrome Logo" class="ext-modal-chrome-logo" />
+            <div>
+              <div class="ext-modal-pill">Chrome Desktop Detected</div>
+              <h3 class="modal-title" style="margin-top: 4px;">Add Mail Track to Chrome</h3>
+            </div>
+          </div>
+        </div>
+        <button class="modal-close-button" id="closeExtModalBtn" type="button" aria-label="Close dialog">&times;</button>
+      </div>
+
+      <div class="modal-window-body">
+        <p class="modal-intro-text">
+          Mail Track needs the Chrome extension to inject tracking pixels into your composed emails and display <strong>double green checkmarks (✓✓)</strong> directly inside Gmail.
+        </p>
+
+        <div class="ext-features-grid">
+          <div class="ext-feat-item">
+            <span class="ext-feat-icon">✓✓</span>
+            <div>
+              <div class="ext-feat-title">Double Green Checkmarks</div>
+              <div class="ext-feat-desc">See read receipts right next to your emails in your Gmail inbox.</div>
+            </div>
+          </div>
+          <div class="ext-feat-item">
+            <span class="ext-feat-icon">⚡</span>
+            <div>
+              <div class="ext-feat-title">Real-Time Open Alerts</div>
+              <div class="ext-feat-desc">Get instant notifications the second your recipient opens your email.</div>
+            </div>
+          </div>
+          <div class="ext-feat-item">
+            <span class="ext-feat-icon">🔗</span>
+            <div>
+              <div class="ext-feat-title">Link Click Tracking</div>
+              <div class="ext-feat-desc">Track clicks on links you share in your emails without annoying badges.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ext-install-steps-card">
+          <div class="ext-step-item">
+            <div class="ext-step-badge">1</div>
+            <div class="ext-step-content">
+              <span>Go to <code>chrome://extensions</code> and turn on <strong>Developer mode</strong> (top right).</span>
+            </div>
+          </div>
+          <div class="ext-step-item">
+            <div class="ext-step-badge">2</div>
+            <div class="ext-step-content">
+              <span>Click <strong>Load unpacked</strong> and select the <code>extension</code> folder:</span>
+              <div class="ext-code-box">
+                <code id="extPathCopyTarget">/Users/naveen/Mail Track/extension</code>
+                <button class="btn-copy-ext-path" id="dashboardCopyExtPathBtn" type="button" title="Copy path to clipboard">Copy</button>
+              </div>
+            </div>
+          </div>
+          <div class="ext-step-item">
+            <div class="ext-step-badge">3</div>
+            <div class="ext-step-content">
+              <span>Open <strong>mail.google.com</strong> and click <strong>Compose</strong> — tracking is now active!</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-actions-footer">
+          <a href="https://mail.google.com" target="_blank" rel="noopener noreferrer" class="btn-figma-primary" id="openGmailFromExtModalBtn" style="text-decoration:none;">
+            <span>Open Gmail</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
+          <button class="btn-modal-cancel" id="dismissExtModalBtn" type="button">Remind Me Later</button>
         </div>
       </div>
     </div>

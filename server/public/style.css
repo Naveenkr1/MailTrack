@@ -5088,3 +5088,335 @@ body {
   padding: 14px 16px;
   border-bottom: 1px solid var(--border-table-row);
 }
+
+/* ------------------------------------------------------------- */
+/* DESKTOP CHROME EXTENSION INDICATION CARD & MODAL              */
+/* ------------------------------------------------------------- */
+.ext-indication-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 14px 20px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
+  animation: fadeInDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .ext-indication-card {
+  background: linear-gradient(135deg, rgba(6, 78, 59, 0.35) 0%, rgba(6, 95, 70, 0.25) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.ext-card-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.ext-card-icon-box {
+  position: relative;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+[data-theme="dark"] .ext-card-icon-box {
+  background: #1e293b;
+}
+
+.ext-card-chrome-icon {
+  width: 26px;
+  height: 26px;
+  display: block;
+}
+
+.ext-card-pulse-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 10px;
+  height: 10px;
+  background-color: #f59e0b;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: pulseDot 2s infinite;
+}
+
+[data-theme="dark"] .ext-card-pulse-dot {
+  border-color: #0f172a;
+}
+
+.ext-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ext-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ext-card-title {
+  font-family: 'Inter', -apple-system, sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: #065f46;
+}
+
+[data-theme="dark"] .ext-card-title {
+  color: #6ee7b7;
+}
+
+.ext-card-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #b45309;
+  background: #fef3c7;
+  border-radius: 9999px;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+[data-theme="dark"] .ext-card-chip {
+  background: rgba(180, 83, 9, 0.25);
+  color: #fcd34d;
+}
+
+.ext-card-desc {
+  font-size: 13px;
+  color: #047857;
+  line-height: 1.4;
+  margin: 0;
+}
+
+[data-theme="dark"] .ext-card-desc {
+  color: #a7f3d0;
+}
+
+.ext-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.btn-ext-card-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background: #059669;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-ext-card-primary:hover {
+  background: #047857;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(5, 150, 105, 0.4);
+}
+
+.btn-ext-card-close {
+  background: transparent;
+  border: none;
+  color: #065f46;
+  font-size: 20px;
+  line-height: 1;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.15s ease;
+}
+
+.btn-ext-card-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="dark"] .btn-ext-card-close {
+  color: #6ee7b7;
+}
+
+/* Modal Window Overrides for Extension Prompt */
+.ext-prompt-modal-window {
+  max-width: 540px;
+}
+
+.ext-modal-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ext-modal-chrome-logo {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.ext-modal-pill {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #059669;
+  background: #ecfdf5;
+  border-radius: 9999px;
+  border: 1px solid rgba(5, 150, 105, 0.2);
+}
+
+.ext-features-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 16px 0 20px 0;
+  background: var(--bg-hover-item);
+  border: 1px solid var(--border-table-row);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+
+.ext-feat-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.ext-feat-icon {
+  font-size: 16px;
+  font-weight: 700;
+  color: #059669;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.ext-feat-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-title);
+}
+
+.ext-feat-desc {
+  font-size: 12px;
+  color: var(--text-subtitle);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.ext-install-steps-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px dashed var(--border-table-row);
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+[data-theme="dark"] .ext-install-steps-card {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.ext-step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--text-title);
+  line-height: 1.45;
+}
+
+.ext-step-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #059669;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ext-step-content {
+  flex: 1;
+}
+
+.ext-step-content code {
+  background: rgba(0, 0, 0, 0.06);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-family: monospace;
+}
+
+[data-theme="dark"] .ext-step-content code {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ext-code-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-table-row);
+  border-radius: 6px;
+}
+
+.ext-code-box code {
+  font-size: 11.5px;
+  color: #059669;
+  word-break: break-all;
+  font-family: monospace;
+}
+
+.btn-copy-ext-path {
+  background: transparent;
+  border: 1px solid rgba(5, 150, 105, 0.3);
+  color: #059669;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+
+.btn-copy-ext-path:hover {
+  background: #059669;
+  color: #ffffff;
+}

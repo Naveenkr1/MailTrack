@@ -169,8 +169,8 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Public Landing Page
-app.get('/landing', (req, res) => {
+// Public Landing Page & Home route (always serves landing page, even for logged-in users)
+app.get(['/home', '/landing'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
 
