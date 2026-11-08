@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Mail Track — Know the moment your email gets read</title>
   <meta name="description" content="Know the moment your email gets read. Everything you need to close deals and follow up smarter with live open tracking and link tracking in Gmail.">
   <link rel="icon" type="image/png" href="/icons/icon-48.png">
@@ -472,7 +472,7 @@
 
     .lottie-grid {
       display: grid;
-      grid-template-columns: repeat(3, 393.33px);
+      grid-template-columns: repeat(3, minmax(0, 393.33px));
       gap: 24px;
       justify-content: center;
       width: 100%;
@@ -483,13 +483,16 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      width: 393.33px;
+      width: 100%;
+      max-width: 393.33px;
     }
 
-    /* Exact Figma dimensions for Bento containers: 393.33px x 320px */
+    /* Bento containers: 393.33px x 320px aspect ratio */
     .lottie-container-box {
-      width: 393.33px;
-      height: 320px;
+      width: 100%;
+      max-width: 393.33px;
+      aspect-ratio: 393.33 / 320;
+      height: auto;
       background-color: var(--color-card-bg);
       border-radius: var(--radius-lottie);
       overflow: hidden;
@@ -696,7 +699,7 @@
     /* 3 Step Cards Grid */
     .step-cards-grid {
       display: grid;
-      grid-template-columns: repeat(3, 393.33px);
+      grid-template-columns: repeat(3, minmax(0, 393.33px));
       gap: 24px;
       justify-content: center;
       width: 100%;
@@ -706,12 +709,15 @@
     .step-card-col {
       display: flex;
       flex-direction: column;
-      width: 393.33px;
+      width: 100%;
+      max-width: 393.33px;
     }
 
     .step-img-box {
-      width: 393.33px;
-      height: 320px;
+      width: 100%;
+      max-width: 393.33px;
+      aspect-ratio: 393.33 / 320;
+      height: auto;
       background: var(--color-card-bg);
       border-radius: var(--radius-lottie);
       overflow: hidden;
@@ -850,8 +856,10 @@
     }
 
     .inbox-mobile-right {
-      width: 560px;
-      height: 468px;
+      width: 100%;
+      max-width: 560px;
+      aspect-ratio: 560 / 468;
+      height: auto;
       background: linear-gradient(180deg, #1fc692 0%, #0f3e60 100%);
       border-radius: 24px;
       overflow: hidden;
@@ -1396,8 +1404,10 @@
     }
 
     /* ---------------------------------------------------- */
-    /* RESPONSIVE BREAKPOINTS                               */
+    /* RESPONSIVE DESIGN (DESKTOP -> TABLET -> MOBILE)      */
     /* ---------------------------------------------------- */
+
+    /* 1. Laptops and Small Desktops (<= 1280px) */
     @media (max-width: 1280px) {
       .feature-container,
       .cta-banner-section {
@@ -1416,31 +1426,8 @@
       .lottie-grid,
       .step-cards-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-
-      .lottie-card-col,
-      .lottie-container-box,
-      .step-card-col,
-      .step-img-box {
-        width: 100%;
-      }
-
-      .inbox-mobile-box {
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .inbox-mobile-right {
-        width: 100%;
-        max-width: 560px;
-      }
-    }
-
-    @media (max-width: 992px) {
-      .lottie-grid,
-      .step-cards-grid {
-        grid-template-columns: 1fr;
-        max-width: 480px;
+        gap: 20px;
+        max-width: 100%;
       }
 
       .lottie-card-col,
@@ -1451,45 +1438,553 @@
       .lottie-container-box,
       .step-img-box {
         width: 100%;
-        max-width: 393.33px;
-        margin: 0 auto;
+        height: auto;
+        aspect-ratio: 393 / 320;
+      }
+
+      .inbox-mobile-box {
+        gap: 32px;
+      }
+
+      .inbox-mobile-right {
+        width: 50%;
+        max-width: 500px;
+        height: auto;
+        aspect-ratio: 560 / 468;
+      }
+    }
+
+    /* 2. Tablets Landscape & Medium Screens (<= 1024px) */
+    @media (max-width: 1024px) {
+      .hero-navbar {
+        padding: 20px 24px;
       }
 
       .nav-links {
-        display: none;
+        gap: 24px;
       }
 
-      .hero-title,
+      .hero-title {
+        font-size: clamp(34px, 5.5vw, 44px);
+        line-height: 1.18;
+      }
+
+      .inbox-mobile-box {
+        flex-direction: column-reverse;
+        align-items: center;
+        text-align: center;
+        padding-top: 48px;
+      }
+
+      .inbox-mobile-left {
+        max-width: 600px;
+        align-items: center;
+      }
+
+      .inbox-mobile-checklist {
+        align-items: flex-start;
+        text-align: left;
+      }
+
+      .inbox-mobile-right {
+        width: 100%;
+        max-width: 520px;
+      }
+    }
+
+    /* 3. Tablets Portrait & Large Mobiles (<= 860px) */
+    @media (max-width: 860px) {
+      .nav-links {
+        display: none !important;
+      }
+
+      .lottie-grid,
+      .step-cards-grid {
+        grid-template-columns: 1fr;
+        max-width: 440px;
+        margin: 0 auto;
+        gap: 20px;
+      }
+
+      .lottie-card-col,
+      .step-card-col {
+        width: 100%;
+      }
+
+      .lottie-container-box,
+      .step-img-box {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        aspect-ratio: 393 / 320;
+      }
+
+      .feature-header-wrap,
+      .quickstart-header-wrap {
+        padding: 64px 20px 24px 20px;
+      }
+
+      .feature-lead-text-wrap {
+        padding: 32px 20px 48px 20px;
+      }
+
+      .narrative-header-wrap {
+        padding: 48px 20px;
+      }
+
+      .quickstart-lead-row {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .faq-section {
+        padding: 60px 16px;
+      }
+
+      .cta-banner-section {
+        padding: 32px 16px 64px 16px;
+      }
+
+      .cta-banner-card {
+        padding: 64px 24px;
+      }
+    }
+
+    /* 4. Mobile Phones Standard (<= 640px) */
+    @media (max-width: 640px) {
+      .hero-wrapper {
+        padding: 6px 6px 0 6px;
+      }
+
+      .hero-card {
+        border-radius: 20px;
+      }
+
+      .hero-navbar {
+        padding: 12px 14px;
+      }
+
+      .nav-brand {
+        gap: 8px;
+      }
+
+      .nav-brand-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+      }
+
+      .nav-brand-icon img {
+        width: 18px;
+        height: 18px;
+      }
+
+      .nav-brand-text {
+        font-size: 15px;
+      }
+
+      .nav-actions {
+        gap: 6px;
+      }
+
+      .nav-login-btn {
+        padding: 6px 10px;
+        font-size: 13px;
+        height: 34px;
+      }
+
+      .nav-download-btn-group {
+        height: 34px;
+        border-radius: 17px;
+      }
+
+      .nav-download-btn-main {
+        padding-left: 10px;
+        padding-right: 4px;
+        font-size: 13px;
+      }
+
+      .nav-download-btn-arrow {
+        padding-right: 8px;
+        padding-left: 4px;
+      }
+
+      .hero-header-content {
+        padding: 24px 12px 16px 12px;
+      }
+
+      .hero-badge-pill {
+        height: 24px;
+        padding: 0 10px;
+        margin-bottom: 16px;
+      }
+
+      .hero-badge-pill span {
+        font-size: 11px;
+      }
+
+      .hero-title {
+        font-size: clamp(26px, 7.5vw, 36px);
+        line-height: 1.16;
+        margin-bottom: 14px;
+      }
+
+      .hero-subtitle {
+        font-size: 15px;
+        line-height: 23px;
+        margin-bottom: 22px;
+        padding: 0 4px;
+      }
+
+      .hero-cta-btn-group {
+        height: 42px;
+        max-width: 100%;
+      }
+
+      .hero-cta-btn-main {
+        padding-left: 14px;
+        padding-right: 6px;
+        font-size: 14px;
+      }
+
+      .hero-cta-btn-arrow {
+        padding-right: 12px;
+        padding-left: 6px;
+      }
+
+      .hero-preview-wrap {
+        margin-top: 12px;
+        perspective: none !important;
+      }
+
+      .hero-preview-img {
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        transform: none !important;
+      }
+
+      .feature-container {
+        padding: 0 8px;
+      }
+
+      .feature-inner {
+        border-left: none;
+        border-right: none;
+      }
+
+      .feature-header-wrap {
+        padding: 44px 12px 16px 12px;
+      }
+
       .feature-heading-2,
       .quickstart-heading-2,
       .faq-heading-2,
       .cta-heading-2 {
-        font-size: 34px;
-        line-height: 40px;
-      }
-    }
-
-    @media (max-width: 640px) {
-      .hero-navbar {
-        padding: 16px;
+        font-size: clamp(24px, 6.5vw, 34px);
+        line-height: 1.2;
       }
 
-      .hero-header-content {
-        padding-top: 24px;
+      .feature-lead-text-wrap {
+        padding: 24px 12px 32px 12px;
       }
 
-      .hero-title {
-        font-size: 28px;
-        line-height: 34px;
+      .feature-lead-text,
+      .quickstart-lead-text,
+      .narrative-desc,
+      .faq-subheading {
+        font-size: 15px;
+        line-height: 23px;
+      }
+
+      .lottie-grid-wrap,
+      .step-cards-grid,
+      .inbox-mobile-wrap {
+        padding-left: 8px;
+        padding-right: 8px;
+        padding-bottom: 40px;
+      }
+
+      .lottie-card-info,
+      .step-card-info {
+        padding: 14px 8px;
+      }
+
+      .narrative-header-wrap {
+        padding: 36px 14px;
+      }
+
+      .narrative-heading-3 {
+        font-size: clamp(19px, 5.2vw, 24px);
+        line-height: 1.35;
+      }
+
+      .quickstart-header-wrap {
+        padding: 44px 12px 20px 12px;
+      }
+
+      .quickstart-btn {
+        width: 100%;
+        max-width: 100%;
+        justify-content: center;
+        height: 44px;
+        font-size: 15px;
+      }
+
+      .inbox-mobile-box {
+        padding-top: 32px;
+        gap: 24px;
+      }
+
+      .inbox-mobile-tag {
+        font-size: 24px;
+        line-height: 30px;
+      }
+
+      .inbox-mobile-subtag {
+        font-size: 15px;
+        line-height: 22px;
+      }
+
+      .inbox-mobile-desc {
+        font-size: 14px;
+        line-height: 21px;
+        margin-bottom: 20px;
+      }
+
+      .inbox-mobile-checklist {
+        gap: 12px;
+      }
+
+      .inbox-mobile-item {
+        font-size: 14.5px;
+        line-height: 20px;
+      }
+
+      .faq-section {
+        padding: 44px 12px;
+      }
+
+      .faq-header-wrap {
+        margin-bottom: 24px;
+        padding: 0 4px;
+      }
+
+      .faq-list-wrap {
+        padding: 0 4px;
+        gap: 10px;
+      }
+
+      .faq-question-btn {
+        padding: 14px 16px;
+        font-size: 14.5px;
+      }
+
+      .faq-answer-panel {
+        padding: 0 16px;
+      }
+
+      .faq-accordion-item.active .faq-answer-panel {
+        padding: 0 16px 14px 16px;
+      }
+
+      .faq-answer-text {
+        font-size: 13.5px;
+        line-height: 20px;
+      }
+
+      .cta-banner-section {
+        padding: 24px 8px 44px 8px;
       }
 
       .cta-banner-card {
-        padding: 64px 20px;
+        padding: 44px 16px;
+        border-radius: 20px;
+      }
+
+      .cta-chrome-btn-group {
+        height: 42px;
+      }
+
+      .cta-chrome-btn-main {
+        padding-left: 14px;
+        padding-right: 6px;
+        font-size: 14px;
+      }
+
+      .cta-chrome-btn-arrow {
+        padding-right: 12px;
+        padding-left: 6px;
+      }
+
+      .landing-footer {
+        padding: 32px 0 20px 0;
+      }
+
+      .footer-inner-container {
+        padding: 0 14px;
       }
 
       .footer-top-row {
         flex-direction: column;
         align-items: flex-start;
+        gap: 16px;
+        padding-bottom: 20px;
+      }
+
+      .footer-links-list {
+        gap: 10px 16px;
+      }
+
+      .footer-links-list a {
+        font-size: 13px;
+      }
+
+      /* Modal Mobile Overrides */
+      .modal-backdrop {
+        padding: 12px;
+      }
+
+      .modal-card {
+        padding: 24px 16px;
+        border-radius: 16px;
+        max-height: 92dvh;
+        overflow-y: auto;
+      }
+
+      .modal-title {
+        font-size: 19px;
+      }
+
+      .modal-desc {
+        font-size: 13px;
+        line-height: 19px;
+        margin-bottom: 18px;
+      }
+
+      .modal-step-item {
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .modal-step-num {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+      }
+
+      .modal-step-content {
+        font-size: 13px;
+        line-height: 19px;
+      }
+
+      .code-box-wrap {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 8px 10px;
+      }
+
+      .code-box-text {
+        max-width: 100%;
+        font-size: 11px;
+      }
+
+      .btn-copy-code {
+        width: 100%;
+        text-align: center;
+        padding: 6px;
+      }
+
+      .modal-action-row {
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 18px;
+      }
+
+      .modal-btn-primary,
+      .modal-btn-secondary {
+        width: 100%;
+        justify-content: center;
+        height: 42px;
+        font-size: 14px;
+      }
+
+      /* Dropdown Mobile Overrides */
+      .platform-dropdown {
+        width: min(280px, calc(100vw - 24px));
+      }
+
+      .platform-dropdown.nav-dropdown {
+        right: 0;
+        left: auto;
+      }
+    }
+
+    /* 5. Compact Mobiles (iPhone SE, Galaxy S compact, <= 380px) */
+    @media (max-width: 380px) {
+      .hero-navbar {
+        padding: 10px 10px;
+      }
+
+      .nav-brand-text {
+        font-size: 14px;
+      }
+
+      .nav-brand-icon {
+        width: 28px;
+        height: 28px;
+      }
+
+      .nav-brand-icon img {
+        width: 16px;
+        height: 16px;
+      }
+
+      .nav-login-btn {
+        padding: 5px 8px;
+        font-size: 12px;
+      }
+
+      .nav-download-btn-main {
+        padding-left: 8px;
+        padding-right: 3px;
+        font-size: 12px;
+      }
+
+      .hero-title {
+        font-size: 25px;
+      }
+
+      .hero-cta-btn-main {
+        font-size: 13px;
+        padding-left: 12px;
+        padding-right: 4px;
+      }
+
+      .cta-chrome-btn-main {
+        font-size: 13px;
+        padding-left: 12px;
+        padding-right: 4px;
+      }
+    }
+
+    /* 6. Touch Screen Optimizations (No hover sticking) */
+    @media (hover: none) and (pointer: coarse) {
+      .lottie-container-box:hover,
+      .step-img-box:hover,
+      .inbox-mobile-right:hover,
+      .hero-cta-btn-group:hover,
+      .cta-chrome-btn-group:hover,
+      .nav-download-btn-group:hover,
+      .quickstart-btn:hover {
+        transform: none !important;
+      }
+      
+      .hero-cta-btn-group:active,
+      .cta-chrome-btn-group:active,
+      .nav-download-btn-group:active,
+      .quickstart-btn:active {
+        transform: scale(0.98) !important;
       }
     }
 
@@ -1836,12 +2331,6 @@
       background: #f1f5f9;
       color: #64748b;
       border: 1px solid #e2e8f0;
-    }
-
-    @media (max-width: 768px) {
-      .nav-links {
-        display: none;
-      }
     }
   </style>
 </head>
@@ -2763,6 +3252,10 @@
       const heroBanner = document.getElementById('heroBannerImage');
       if (heroBanner) {
         window.addEventListener('scroll', () => {
+          if (window.innerWidth <= 768) {
+            heroBanner.style.transform = 'none';
+            return;
+          }
           const scrollY = window.scrollY || window.pageYOffset;
           const maxScroll = 400;
           const progress = Math.min(1, Math.max(0, scrollY / maxScroll));
