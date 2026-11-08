@@ -568,55 +568,124 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
 
   const safeTargetUrl = /^https?:\/\//i.test(targetUrl) ? targetUrl : `https://${targetUrl}`;
   const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-  const cleanIp = ip.replace(/^.*:/, '');
+  const cleanIp = ip.replace(/^.*:/, '').split(',')[0].trim();
   const userAgent = req.headers['user-agent'] || 'Unknown';
   const timestamp = new Date().toISOString();
 
   let email = emailId ? await db.getEmailForBeacon(emailId) : null;
 
-  // Filter automated bots/crawlers
+  // Filter automated bots/crawlers & prefetch
   const isBot = isBotOrPrefetch(userAgent, req);
   if (isBot) {
     console.log(`[BOT / PREFETCH FILTERED] Link "${safeTargetUrl}" crawler (${userAgent}) - IGNORED.`);
     return res.redirect(302, safeTargetUrl);
   }
 
-  // Parse recipient parameter if provided
-  let clickRecipient = req.query.r ? decodeURIComponent(req.query.r).trim().toLowerCase() : null;
+  // Comprehensive Sender Self-Click Filtering
+  if (email) {
+    const now = Date.now();
+    const createdTime = email.createdAt ? new Date(email.createdAt).getTime() : now;
+    const elapsedSeconds = (now - createdTime) / 1000;
+    const senderLower = (email.sender || '').toLowerCase();
 
-  // Only filter self-clicks if clicked within 3 seconds of email creation by sender device
-  const now = Date.now();
-  const createdTime = email && email.createdAt ? new Date(email.createdAt).getTime() : now;
-  const elapsedSeconds = (now - createdTime) / 1000;
-  if (elapsedSeconds < 3 && req.headers['x-mailtrack-sender'] === '1') {
-    console.log(`[SELF-CLICK FILTERED] Immediate pre-click on "${safeTargetUrl}" (< 3s) - IGNORED.`);
-    return res.redirect(302, safeTargetUrl);
+    // 1. Explicit Sender Header or Query Param
+    if (req.headers['x-mailtrack-sender'] === '1' || req.query.sender === '1' || req.query.self === '1') {
+      console.log(`[SELF-CLICK FILTERED] Explicit sender parameter on "${safeTargetUrl}" - IGNORED.`);
+      return res.redirect(302, safeTargetUrl);
+    }
+
+    // 2. Authenticated Sender Session Cookie (Sender logged into dashboard in this browser)
+    if (req.cookies && req.cookies.mt_token) {
+      try {
+        const decoded = jwt.verify(req.cookies.mt_token, JWT_SECRET);
+        if (decoded) {
+          const isOwnerUser = decoded.userId && decoded.userId === email.userId;
+          const isOwnerEmail = decoded.email && senderLower.includes(decoded.email.toLowerCase());
+          if (isOwnerUser || isOwnerEmail) {
+            console.log(`[SELF-CLICK FILTERED] Authenticated email owner (${decoded.email || decoded.userId}) clicked link - IGNORED.`);
+            return res.redirect(302, safeTargetUrl);
+          }
+        }
+      } catch {}
+    }
+
+    // 3. Sender IP match (Sender's device, home, office, or known IP)
+    const isSenderIP = cleanIp === senderPublicIp || 
+                       cleanIp === email.senderPublicIp || 
+                       cleanIp === email.senderIp || 
+                       cleanIp === '1' || 
+                       cleanIp === '127.0.0.1' ||
+                       (await isKnownSenderIp(email.userId, cleanIp));
+
+    if (isSenderIP) {
+      console.log(`[SELF-CLICK FILTERED] Link "${safeTargetUrl}" clicked from known sender IP (${cleanIp}) - IGNORED.`);
+      return res.redirect(302, safeTargetUrl);
+    }
+
+    // 4. Recipient query parameter (&r=) matches the sender
+    const passedRecipient = req.query.r ? decodeURIComponent(req.query.r).trim().toLowerCase() : null;
+    if (passedRecipient && senderLower && (senderLower.includes(passedRecipient) || passedRecipient.includes(senderLower.replace(/<[^>]+>/g, '').trim()))) {
+      console.log(`[SELF-CLICK FILTERED] Link recipient parameter (${passedRecipient}) matches sender - IGNORED.`);
+      return res.redirect(302, safeTargetUrl);
+    }
+
+    // 5. Sent Mail / Outbox / Drafts referer check
+    const referer = req.headers.referer || '';
+    if (/#(sent|outbox|drafts|scheduled)/i.test(referer)) {
+      console.log(`[SELF-CLICK FILTERED] Link clicked from Sent/Drafts folder (${referer}) - IGNORED.`);
+      return res.redirect(302, safeTargetUrl);
+    }
+
+    // 6. Pre-click grace period (< 10s of email creation by sender)
+    if (elapsedSeconds < 10) {
+      console.log(`[SELF-CLICK FILTERED] Immediate pre-click on "${safeTargetUrl}" (< 10s) - IGNORED.`);
+      return res.redirect(302, safeTargetUrl);
+    }
   }
 
-  // Prevent immediate duplicate bursts (< 800ms) on double-click
+  // Prevent immediate duplicate bursts (< 1200ms) on double-click
   const recentDuplicate = email && email.clicks && email.clicks.find(c => 
     c.url === safeTargetUrl && 
-    (Date.now() - new Date(c.timestamp).getTime()) < 800
+    (Date.now() - new Date(c.timestamp).getTime()) < 1200
   );
   if (recentDuplicate) {
     return res.redirect(302, safeTargetUrl);
   }
 
+  // Resolve recipient safely (NEVER attribute to sender)
+  let clickRecipient = req.query.r ? decodeURIComponent(req.query.r).trim().toLowerCase() : null;
+  const senderLower = (email && email.sender) ? email.sender.toLowerCase() : '';
+
+  if (clickRecipient && senderLower && senderLower.includes(clickRecipient)) {
+    clickRecipient = null;
+  }
+
   if (!clickRecipient && email) {
-    if (email.recipients && email.recipients.length === 1) {
-      clickRecipient = email.recipients[0];
-    } else if (email.recipients && email.recipients.length > 1) {
+    const rawRecList = (email.recipients && email.recipients.length > 0) 
+      ? email.recipients 
+      : (email.recipient ? email.recipient.split(/[,;]+/).map(s => s.trim()) : []);
+
+    const validRecipients = rawRecList.filter(r => {
+      const rLower = (r || '').trim().toLowerCase();
+      return rLower && !senderLower.includes(rLower);
+    });
+
+    if (validRecipients.length === 1) {
+      clickRecipient = validRecipients[0];
+    } else if (validRecipients.length > 1) {
       // Find matching open by IP or UserAgent to know which recipient clicked
-      const matchingOpen = (email.opens || []).slice().reverse().find(o => o.ip === cleanIp && o.recipient);
+      const matchingOpen = (email.opens || []).slice().reverse().find(o => 
+        o.ip === cleanIp && o.recipient && validRecipients.includes(o.recipient)
+      );
       if (matchingOpen) {
         clickRecipient = matchingOpen.recipient;
       } else {
         const clickedSet = new Set((email.clicks || []).map(c => (c.recipient || '').toLowerCase()));
-        const unclicked = email.recipients.filter(r => !clickedSet.has(r.toLowerCase()));
-        clickRecipient = unclicked.length > 0 ? unclicked[0] : email.recipients[0];
+        const unclicked = validRecipients.filter(r => !clickedSet.has(r.toLowerCase()));
+        clickRecipient = unclicked.length > 0 ? unclicked[0] : validRecipients[0];
       }
     } else {
-      clickRecipient = email.recipient ? email.recipient.split(/[,;]+/)[0].trim() : 'Recipient';
+      clickRecipient = validRecipients.length > 0 ? validRecipients[0] : 'Recipient';
     }
   }
   if (!clickRecipient) clickRecipient = 'Recipient';

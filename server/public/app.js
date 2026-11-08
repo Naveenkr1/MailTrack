@@ -1834,6 +1834,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 3. Click Events: separate entry per recipient with time
     if (Array.isArray(email.clicks)) {
+      const senderEmail = (email.sender || '').toLowerCase();
       email.clicks.forEach((click, idx) => {
         let clickRecs = parseRecipientList(click.recipient);
         if (clickRecs.length === 0) {
@@ -1842,6 +1843,11 @@ document.addEventListener('DOMContentLoaded', () => {
           } else {
             clickRecs = [recList[idx % recList.length] || recList[0]];
           }
+        }
+        // Exclude sender from click recipients so self-clicks are never shown as recipient actions
+        clickRecs = clickRecs.filter(r => !senderEmail || !senderEmail.includes(r.toLowerCase()));
+        if (clickRecs.length === 0 && recList.length > 0) {
+          clickRecs = [recList[0]];
         }
 
         clickRecs.forEach(rec => {
@@ -2014,6 +2020,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (detClicksTableBody) {
       const clickRows = [];
       if (email.clicks && email.clicks.length > 0) {
+        const senderEmail = (email.sender || '').toLowerCase();
         email.clicks.forEach((click, idx) => {
           let clickRecs = parseRecipientList(click.recipient);
           if (clickRecs.length === 0) {
@@ -2022,6 +2029,10 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
               clickRecs = [recList[idx % recList.length] || recList[0]];
             }
+          }
+          clickRecs = clickRecs.filter(r => !senderEmail || !senderEmail.includes(r.toLowerCase()));
+          if (clickRecs.length === 0 && recList.length > 0) {
+            clickRecs = [recList[0]];
           }
 
           clickRecs.forEach(rec => {

@@ -383,6 +383,16 @@
   align-items: center;
   justify-content: center;
   color: #94a3b8;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+}
+
+.mt-cd-row.mt-cd-action-row:hover .mt-cd-arrow {
+  color: #10b981;
+  transform: translateX(2px);
+}
+
+.mt-cd-row.mt-cd-action-row:hover .mt-cd-label {
+  color: #059669;
 }
 
 /* Compose Dropdown - Locked Option (Grayed out & unclickable) */

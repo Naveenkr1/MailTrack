@@ -66,7 +66,7 @@
     });
   }
 
-  // Universal click protector for tracked links inside Gmail (handles old emails & expired tunnels)
+  // Universal click protector & self-click bypass for tracked links inside Gmail
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href*="/trace/link"]');
     if (!a) return;
@@ -78,7 +78,33 @@
       const dest = u.searchParams.get('url');
       const emailId = u.pathname.split('/trace/link/')[1] || u.searchParams.get('id');
 
-      // If the link uses an old/offline domain or expired tunnel:
+      const currentUser = getCurrentGmailUser();
+      const authEmail = (currentAuthUser && currentAuthUser.email) ? currentAuthUser.email.toLowerCase() : null;
+
+      // 1. SELF-CLICK PROTECTION: Check if sender is clicking their own link in Gmail
+      const isMyTrackedEmail = emailId && trackedEmails.some(t => t.id === emailId);
+      const isSentOrDraftView = /#(sent|outbox|drafts|scheduled)/i.test(window.location.hash || '');
+      let isSenderClick = isMyTrackedEmail || isSentOrDraftView;
+
+      if (!isSenderClick && emailId) {
+        const found = trackedEmails.find(t => t.id === emailId);
+        if (found && found.sender) {
+          const s = found.sender.toLowerCase();
+          if (currentUser && s.includes(currentUser)) isSenderClick = true;
+          if (authEmail && s.includes(authEmail)) isSenderClick = true;
+        }
+      }
+
+      // If sender clicked their own link: bypass tracking entirely and open destination directly!
+      if (isSenderClick && dest) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log(`[Mail Track] 🛡️ Self-click prevented for email (${emailId}) -> Opening "${dest}" directly.`);
+        window.open(dest, '_blank', 'noopener');
+        return;
+      }
+
+      // 2. Legacy domain & offline tunnel rescue
       const isDeadDomain = !href.startsWith(publicTrackingUrl) && !href.includes('vercel.app') && !href.startsWith('http://localhost:4000');
       if (isDeadDomain && dest) {
         e.preventDefault();
@@ -794,14 +820,20 @@
       activeTrackingUrl = DEFAULT_PROD_URL;
     }
 
-    // Auto-wrap any existing links in the email body that aren't already tracked
-    const existingLinks = body.querySelectorAll('a[href]');
-    existingLinks.forEach(a => {
-      const href = a.getAttribute('href');
-      if (href && !href.includes('/trace/link/') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
-        a.setAttribute('href', `${activeTrackingUrl}/trace/link/${trackingId}?url=${encodeURIComponent(href)}`);
-      }
-    });
+    // Auto-wrap links ONLY if Track Links option is enabled by user
+    const trackLinksEnabled = dialog.getAttribute('data-mt-track-links') !== 'false';
+    if (trackLinksEnabled) {
+      const existingLinks = body.querySelectorAll('a[href]');
+      existingLinks.forEach(a => {
+        const href = a.getAttribute('href');
+        if (href && !href.includes('/trace/link/') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
+          a.setAttribute('href', `${activeTrackingUrl}/trace/link/${trackingId}?url=${encodeURIComponent(href)}`);
+        }
+      });
+    } else {
+      // If Track Links is OFF, revert any tracked links back to normal clean destination URLs!
+      untrackLinksInBody(dialog);
+    }
 
     const threadId = extractThreadIdFromContext(dialog);
 
@@ -914,11 +946,32 @@
       if (dialog.querySelector('.mt-compose-logo-btn')) return;
 
       let isTracking = true;
+      let isTrackLinks = true;
+
+      dialog.setAttribute('data-mt-track-mail', 'true');
+      dialog.setAttribute('data-mt-track-links', 'true');
+
+      if (isAlive() && chrome.storage?.local) {
+        chrome.storage.local.get(['mailtrack_track_mail', 'mailtrack_track_links'], (res) => {
+          if (res) {
+            if (typeof res.mailtrack_track_mail === 'boolean') {
+              isTracking = res.mailtrack_track_mail;
+            }
+            if (typeof res.mailtrack_track_links === 'boolean') {
+              isTrackLinks = res.mailtrack_track_links;
+            }
+            dialog.setAttribute('data-mt-track-mail', isTracking ? 'true' : 'false');
+            dialog.setAttribute('data-mt-track-links', isTrackLinks ? 'true' : 'false');
+            updateLogoBtnState();
+          }
+        });
+      }
+
       const logoUrl = isAlive() && chrome.runtime?.getURL ? chrome.runtime.getURL('icons/logo-compose.png') : '';
 
       const logoBtn = document.createElement('div');
       logoBtn.className = 'mt-compose-logo-btn active';
-      logoBtn.title = 'Mail Track: Tracking ON (Click for options)';
+      logoBtn.title = 'Mail Track: Tracking ON (Links ON) - Click for options';
       logoBtn.setAttribute('role', 'button');
       logoBtn.setAttribute('tabindex', '0');
       logoBtn.innerHTML = `
@@ -930,19 +983,40 @@
       function updateLogoBtnState() {
         if (isTracking) {
           logoBtn.className = 'mt-compose-logo-btn active';
-          logoBtn.title = 'Mail Track: Tracking ON (Click for options)';
+          const linkNote = isTrackLinks ? 'Links ON' : 'Links OFF';
+          logoBtn.title = `Mail Track: Tracking ON (${linkNote}) - Click for options`;
         } else {
           logoBtn.className = 'mt-compose-logo-btn disabled';
-          logoBtn.title = 'Mail Track: Tracking OFF (Click for options)';
+          logoBtn.title = 'Mail Track: Tracking OFF - Click for options';
         }
       }
 
       logoBtn.onclick = (e) => {
         e.stopPropagation();
-        toggleComposeDropdown(dialog, logoBtn, () => isTracking, (val) => {
-          isTracking = val;
-          updateLogoBtnState();
-        });
+        toggleComposeDropdown(
+          dialog,
+          logoBtn,
+          () => ({ isTracking, isTrackLinks }),
+          (key, val) => {
+            if (key === 'mail') {
+              isTracking = val;
+              dialog.setAttribute('data-mt-track-mail', val ? 'true' : 'false');
+              if (isAlive() && chrome.storage?.local) {
+                chrome.storage.local.set({ mailtrack_track_mail: val });
+              }
+            } else if (key === 'links') {
+              isTrackLinks = val;
+              dialog.setAttribute('data-mt-track-links', val ? 'true' : 'false');
+              if (isAlive() && chrome.storage?.local) {
+                chrome.storage.local.set({ mailtrack_track_links: val });
+              }
+              if (!val) {
+                untrackLinksInBody(dialog);
+              }
+            }
+            updateLogoBtnState();
+          }
+        );
       };
 
       const sendContainer = sendBtn.closest('.dC') || sendBtn.parentElement;
@@ -1024,7 +1098,24 @@
     }
   }
 
-  function toggleComposeDropdown(dialog, logoBtn, getTracking, setTracking) {
+  // Remove tracking wrappers from links in compose body when link tracking is turned OFF
+  function untrackLinksInBody(dialog) {
+    if (!dialog) return;
+    const body = dialog.querySelector('div[role="textbox"][aria-label*="Message Body" i], div[contenteditable="true"]');
+    if (!body) return;
+    const links = body.querySelectorAll('a[href*="/trace/link"]');
+    links.forEach(a => {
+      try {
+        const u = new URL(a.getAttribute('href'), window.location.origin);
+        const originalUrl = u.searchParams.get('url');
+        if (originalUrl) {
+          a.setAttribute('href', originalUrl);
+        }
+      } catch {}
+    });
+  }
+
+  function toggleComposeDropdown(dialog, logoBtn, getState, setState) {
     if (activeComposeDropdown && activeComposeDropdown._sourceBtn === logoBtn) {
       closeComposeDropdown();
       return;
@@ -1041,12 +1132,13 @@
       composeDropdownEl.addEventListener('mousedown', (e) => e.stopPropagation());
     }
 
-    const isTracking = getTracking();
-    const logoUrl = isAlive() && chrome.runtime?.getURL ? chrome.runtime.getURL('icons/logo-compose.png') : '';
+    const state = (typeof getState === 'function') ? getState() : { isTracking: true, isTrackLinks: true };
+    const isTracking = (state && typeof state.isTracking === 'boolean') ? state.isTracking : true;
+    const isTrackLinks = (state && typeof state.isTrackLinks === 'boolean') ? state.isTrackLinks : true;
 
     composeDropdownEl.innerHTML = `
       <div class="mt-cd-header">
-        <span class="mt-cd-title">Mail Track</span>
+        <span class="mt-cd-title">Mail Track Settings</span>
       </div>
 
       <div class="mt-cd-body">
@@ -1056,7 +1148,7 @@
             <div class="mt-cd-label">Track Mail</div>
             <div class="mt-cd-desc">Notify when email is opened</div>
           </div>
-          <label class="mt-switch" title="Toggle Tracking">
+          <label class="mt-switch" title="Toggle Mail Tracking">
             <input type="checkbox" id="mtCdTrackSwitch" ${isTracking ? 'checked' : ''} />
             <span class="mt-switch-slider"></span>
           </label>
@@ -1064,25 +1156,29 @@
 
         <div class="mt-cd-divider"></div>
 
-        <!-- Option 2: Add Trackable Link (Locked / Disabled) -->
-        <div class="mt-cd-row mt-cd-locked-row" id="mtCdAddLinkRow" title="Add Trackable Link is temporarily locked">
+        <!-- Option 2: Track Links Toggle (Active & Enabled) -->
+        <div class="mt-cd-row mt-cd-toggle-row" id="mtCdLinksToggleRow">
           <div class="mt-cd-row-texts">
-            <div class="mt-cd-label mt-cd-locked-label">
-              <span>Add Trackable Link</span>
-            
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-                <span>Locked</span>
-              </span>
-            </div>
-            <div class="mt-cd-desc mt-cd-locked-desc">Track clicks with real-time stats</div>
+            <div class="mt-cd-label">Track Links</div>
+            <div class="mt-cd-desc">Track clicks with real-time stats</div>
           </div>
-          <div class="mt-cd-arrow mt-cd-locked-arrow">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          <label class="mt-switch" title="Toggle Link Tracking">
+            <input type="checkbox" id="mtCdTrackLinksSwitch" ${isTrackLinks ? 'checked' : ''} />
+            <span class="mt-switch-slider"></span>
+          </label>
+        </div>
+
+        <div class="mt-cd-divider"></div>
+
+        <!-- Option 3: Insert Tracked Link (Modal action) -->
+        <div class="mt-cd-row mt-cd-action-row" id="mtCdAddLinkRow" title="Insert a tracked link with custom text">
+          <div class="mt-cd-row-texts">
+            <div class="mt-cd-label">Insert Tracked Link</div>
+            <div class="mt-cd-desc">Add styled link with tracking</div>
+          </div>
+          <div class="mt-cd-arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
             </svg>
           </div>
         </div>
@@ -1091,8 +1187,8 @@
 
     // Position dropdown smoothly above logoBtn
     const rect = logoBtn.getBoundingClientRect();
-    const dropdownWidth = 230;
-    const dropdownHeight = 135;
+    const dropdownWidth = 240;
+    const dropdownHeight = 205;
 
     let left = rect.left;
     if (left + dropdownWidth > window.innerWidth - 12) {
@@ -1113,41 +1209,51 @@
     composeDropdownEl._sourceBtn = logoBtn;
     activeComposeDropdown = composeDropdownEl;
 
-    // Toggle row / switch handling
-    const switchInput = composeDropdownEl.querySelector('#mtCdTrackSwitch');
-    const toggleRow = composeDropdownEl.querySelector('#mtCdToggleRow');
-
-    const toggleTracking = () => {
-      const newState = !getTracking();
-      setTracking(newState);
-      if (switchInput) switchInput.checked = newState;
-    };
-
-    if (toggleRow) {
-      toggleRow.onclick = (e) => {
+    // 1. Mail Track switch handling
+    const mailSwitch = composeDropdownEl.querySelector('#mtCdTrackSwitch');
+    const mailRow = composeDropdownEl.querySelector('#mtCdToggleRow');
+    if (mailRow) {
+      mailRow.onclick = (e) => {
         if (e.target.closest('.mt-switch')) return;
-        toggleTracking();
+        const currentVal = mailSwitch ? mailSwitch.checked : isTracking;
+        const newVal = !currentVal;
+        if (mailSwitch) mailSwitch.checked = newVal;
+        if (typeof setState === 'function') setState('mail', newVal);
       };
     }
-    if (switchInput) {
-      switchInput.onchange = (e) => {
+    if (mailSwitch) {
+      mailSwitch.onchange = (e) => {
         e.stopPropagation();
-        const newState = switchInput.checked;
-        setTracking(newState);
+        if (typeof setState === 'function') setState('mail', mailSwitch.checked);
       };
     }
 
-    // Add Trackable Link action (Locked and disabled for now - unclickable)
+    // 2. Links Track switch handling
+    const linksSwitch = composeDropdownEl.querySelector('#mtCdTrackLinksSwitch');
+    const linksRow = composeDropdownEl.querySelector('#mtCdLinksToggleRow');
+    if (linksRow) {
+      linksRow.onclick = (e) => {
+        if (e.target.closest('.mt-switch')) return;
+        const currentVal = linksSwitch ? linksSwitch.checked : isTrackLinks;
+        const newVal = !currentVal;
+        if (linksSwitch) linksSwitch.checked = newVal;
+        if (typeof setState === 'function') setState('links', newVal);
+      };
+    }
+    if (linksSwitch) {
+      linksSwitch.onchange = (e) => {
+        e.stopPropagation();
+        if (typeof setState === 'function') setState('links', linksSwitch.checked);
+      };
+    }
+
+    // 3. Insert Tracked Link modal trigger
     const addLinkRow = composeDropdownEl.querySelector('#mtCdAddLinkRow');
     if (addLinkRow) {
       addLinkRow.onclick = (e) => {
         e.stopPropagation();
-        e.preventDefault();
-        // Feature locked for now
-      };
-      addLinkRow.onmousedown = (e) => {
-        e.stopPropagation();
-        e.preventDefault();
+        closeComposeDropdown();
+        openTrackLinkModal(dialog, logoBtn);
       };
     }
   }
@@ -1313,10 +1419,18 @@
             <div class="mt-lm-helper-row">
               <a href="#" id="mtLmTestLink" class="mt-lm-test-link" target="_blank" rel="noopener noreferrer" style="visibility:hidden;">Test this link</a>
               <div class="mt-lm-track-badge" id="mtLmTrackBadge">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#1a73e8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
-                <span>Mail Track real-time click tracking enabled</span>
+                ${(dialog.getAttribute('data-mt-track-links') !== 'false') ? `
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  <span style="color:#059669;">Mail Track real-time click tracking enabled</span>
+                ` : `
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+                  </svg>
+                  <span style="color:#64748b;">Link tracking is turned off for this email</span>
+                `}
               </div>
             </div>
           </div>
@@ -1445,13 +1559,23 @@
         if (!/^https?:\/\//i.test(targetVal)) {
           targetVal = 'https://' + targetVal;
         }
-        // Assign or reuse tracking ID for this email compose dialog
-        let trackingId = dialog.getAttribute('data-mt-tracking-id');
-        if (!trackingId) {
-          trackingId = generateId();
-          dialog.setAttribute('data-mt-tracking-id', trackingId);
+        const trackLinksEnabled = dialog.getAttribute('data-mt-track-links') !== 'false';
+        if (trackLinksEnabled) {
+          // Assign or reuse tracking ID for this email compose dialog
+          let trackingId = dialog.getAttribute('data-mt-tracking-id');
+          if (!trackingId) {
+            trackingId = generateId();
+            dialog.setAttribute('data-mt-tracking-id', trackingId);
+          }
+          let activeTrackingUrl = getServerUrl();
+          if (!activeTrackingUrl || activeTrackingUrl.includes('localhost') || !activeTrackingUrl.startsWith('https://')) {
+            activeTrackingUrl = DEFAULT_PROD_URL;
+          }
+          linkHref = `${activeTrackingUrl}/trace/link/${trackingId}?url=${encodeURIComponent(targetVal)}`;
+        } else {
+          // Link tracking is turned OFF by user: insert clean direct link!
+          linkHref = targetVal;
         }
-        linkHref = `${publicTrackingUrl}/trace/link/${trackingId}?url=${encodeURIComponent(targetVal)}`;
       }
 
       const linkHtml = `<a href="${linkHref}" ${isEmail ? '' : 'target="_blank" rel="noopener noreferrer"'} style="color:#1a73e8;text-decoration:underline;">${escapeHtml(displayText)}</a>&nbsp;`;
@@ -1544,7 +1668,16 @@
     if (!link) return;
     const currentUser = getCurrentGmailUser();
     if (currentUser) {
-      let href = link.getAttribute('href');
+      const href = link.getAttribute('href');
+      if (href) {
+        try {
+          const u = new URL(href, window.location.origin);
+          const emailId = u.pathname.split('/trace/link/')[1] || u.searchParams.get('id');
+          const isMyTrackedEmail = emailId && trackedEmails.some(t => t.id === emailId);
+          const isSentView = /#(sent|outbox|drafts|scheduled)/i.test(window.location.hash || '');
+          if (isMyTrackedEmail || isSentView) return; // Never attach sender's email as recipient!
+        } catch {}
+      }
       if (href && !href.includes('&r=')) {
         link.setAttribute('href', href + '&r=' + encodeURIComponent(currentUser));
       }
