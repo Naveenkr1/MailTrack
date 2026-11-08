@@ -156,14 +156,23 @@ const apiLimiter = rateLimit({
 // -------------------------------------------------------------
 app.use('/auth', apiLimiter, authRouter);
 
-app.get('/login', (req, res) => {
-  // If already logged in, redirect to dashboard
+app.get('/login', async (req, res) => {
+  // If already logged in, redirect directly without asking to log in again
   if (req.cookies && req.cookies.mt_token) {
     try {
       const jwt = require('jsonwebtoken');
       const { JWT_SECRET } = require('./middleware/auth');
-      jwt.verify(req.cookies.mt_token, JWT_SECRET);
-      return res.redirect('/');
+      const decoded = jwt.verify(req.cookies.mt_token, JWT_SECRET);
+      if (decoded && decoded.userId) {
+        const user = await db.findUserById(decoded.userId);
+        if (user) {
+          const isExtension = req.query.flow === 'extension' || req.query.ext === '1';
+          if (isExtension) {
+            return res.redirect(`/auth/extension-success?apiKey=${encodeURIComponent(user.api_key)}&email=${encodeURIComponent(user.email)}&name=${encodeURIComponent(user.name || '')}`);
+          }
+          return res.redirect('/');
+        }
+      }
     } catch {}
   }
   res.sendFile(path.join(__dirname, 'public', 'login.html'));

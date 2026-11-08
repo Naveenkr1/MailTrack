@@ -26,10 +26,29 @@ function getEffectiveBaseUrl(req) {
 // -------------------------------------------------------------
 // 1. INITIATE GOOGLE OAUTH (With Gmail Permissions for Mobile Sync)
 // -------------------------------------------------------------
-router.get('/google', (req, res) => {
+router.get('/google', async (req, res) => {
   const clientId = (process.env.GOOGLE_CLIENT_ID || '').trim();
   const isExtension = req.query.flow === 'extension' || req.query.ext === '1' || req.query.flow_src === 'extension';
   const isMobileSync = req.query.flow === 'mobile_sync' || req.query.mobile === '1';
+
+  // 1. Direct login check: If user already has an active authenticated session,
+  // do NOT force them through Google consent flow again! Make login direct.
+  if (!isMobileSync && req.cookies && req.cookies.mt_token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const { JWT_SECRET } = require('./middleware/auth');
+      const decoded = jwt.verify(req.cookies.mt_token, JWT_SECRET);
+      if (decoded && decoded.userId) {
+        const user = await db.findUserById(decoded.userId);
+        if (user) {
+          if (isExtension) {
+            return res.redirect(`/auth/extension-success?apiKey=${encodeURIComponent(user.api_key)}&email=${encodeURIComponent(user.email)}&name=${encodeURIComponent(user.name || '')}`);
+          }
+          return res.redirect('/');
+        }
+      }
+    } catch {}
+  }
 
   // If Google OAuth credentials are not yet set up, provide the Setup / Dev Login view
   if (!clientId || clientId.includes('your_google_client_id')) {
@@ -61,7 +80,17 @@ router.get('/google', (req, res) => {
     : 'openid email profile';
   authUrl.searchParams.append('scope', scope);
   authUrl.searchParams.append('access_type', 'offline');
-  authUrl.searchParams.append('prompt', 'consent select_account');
+  authUrl.searchParams.append('include_granted_scopes', 'true');
+
+  // CRITICAL: If the user already allowed permissions, do NOT force 'consent' prompt!
+  // 'select_account' lets returning users sign in directly with 1 click without
+  // repeating the permissions screen or being treated as a new user.
+  if (isMobileSync) {
+    authUrl.searchParams.append('prompt', 'consent select_account');
+  } else {
+    authUrl.searchParams.append('prompt', 'select_account');
+  }
+
   authUrl.searchParams.append('state', stateNonce);
 
   res.redirect(authUrl.toString());

@@ -664,6 +664,22 @@
     const notice = params.get('notice');
     const flow = params.get('flow');
 
+    // Auto-detect active session for direct login (no new user flow)
+    try {
+      fetch('/auth/me')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.authenticated && data.user) {
+            if (flow === 'extension') {
+              window.location.replace(`/auth/extension-success?apiKey=${encodeURIComponent(data.user.apiKey)}&email=${encodeURIComponent(data.user.email)}&name=${encodeURIComponent(data.user.name || '')}`);
+            } else {
+              window.location.replace('/');
+            }
+          }
+        })
+        .catch(() => {});
+    } catch (e) {}
+
     const googleBtn = document.getElementById('googleLoginBtn');
     const mobileToggle = document.getElementById('mobileSyncToggle');
     const toggleSlider = document.getElementById('toggleSlider');
