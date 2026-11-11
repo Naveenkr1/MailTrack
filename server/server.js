@@ -1,5 +1,6 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
@@ -43,7 +44,7 @@ if (customDomain) {
     ? customDomain.replace(/\/+$/, '') 
     : `https://${customDomain.replace(/\/+$/, '')}`;
   console.log('[DOMAIN] Active Personal Custom Domain:', publicBaseUrl);
-} else {
+} else if (!process.env.BASE_URL || process.env.BASE_URL.includes('localhost')) {
   const tunnelConfigFile = path.join(__dirname, 'data', 'tunnel.json');
   try {
     const fs = require('fs');
@@ -65,8 +66,10 @@ function getRequestBaseUrl(req) {
     return process.env.BASE_URL.replace(/\/+$/, '');
   }
   if (req) {
-    const proto = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
-    const host = req.headers['x-forwarded-host'] || req.headers['host'];
+    const rawProto = req.headers['x-forwarded-proto'];
+    const proto = rawProto ? String(rawProto).split(',')[0].trim() : (req.secure ? 'https' : 'http');
+    const rawHost = req.headers['x-forwarded-host'] || req.headers['host'];
+    const host = rawHost ? String(rawHost).split(',')[0].trim() : '';
     if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
       return `${proto}://${host}`;
     }
@@ -77,14 +80,30 @@ function getRequestBaseUrl(req) {
   return publicBaseUrl;
 }
 
-let senderPublicIp = '103.181.161.19';
+function cleanIpStr(ip) {
+  if (!ip) return '';
+  const first = String(ip).split(',')[0].trim();
+  return first.replace(/^::ffff:/i, '');
+}
+
+function extractClientIp(req) {
+  if (!req) return '127.0.0.1';
+  const raw = req.headers['cf-connecting-ip'] ||
+              req.headers['x-real-ip'] ||
+              req.headers['x-forwarded-for'] ||
+              (req.socket && req.socket.remoteAddress) ||
+              '127.0.0.1';
+  return cleanIpStr(raw) || '127.0.0.1';
+}
+
+let senderPublicIp = process.env.HOST_SENDER_IP || '';
 
 // In-memory + persistent registry of known IPs per user for cross-device self-open suppression
 const userKnownIps = new Map(); // userId -> Set of recent clean IPs
 
 async function registerUserIp(userId, ip) {
   if (!userId || !ip) return;
-  const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
+  const clean = cleanIpStr(ip);
   if (!clean || clean === '127.0.0.1' || clean === '::1' || clean === '1') return;
   if (!userKnownIps.has(userId)) {
     userKnownIps.set(userId, new Set());
@@ -97,7 +116,7 @@ async function registerUserIp(userId, ip) {
 
 async function isKnownSenderIp(userId, ip) {
   if (!userId || !ip) return false;
-  const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
+  const clean = cleanIpStr(ip);
   if (userKnownIps.has(userId) && userKnownIps.get(userId).has(clean)) {
     return true;
   }
@@ -108,15 +127,18 @@ async function isKnownSenderIp(userId, ip) {
   }
 }
 
-// Auto-detect host public IP for self-open filtering
-http.get('http://api.ipify.org', (res) => {
-  let data = '';
-  res.on('data', chunk => data += chunk);
-  res.on('end', () => {
-    senderPublicIp = data.trim();
-    console.log('[SENDER IP] Detected sender host IP for self-open filtering:', senderPublicIp);
-  });
-}).on('error', () => {});
+// Only auto-detect host public IP when running locally (not on cloud VPS / Vercel)
+const isLocalDevHost = !process.env.VERCEL && (!process.env.BASE_URL || process.env.BASE_URL.includes('localhost'));
+if (!senderPublicIp && isLocalDevHost) {
+  http.get('http://api.ipify.org', (res) => {
+    let data = '';
+    res.on('data', chunk => data += chunk);
+    res.on('end', () => {
+      senderPublicIp = data.trim();
+      console.log('[SENDER IP] Detected sender host IP for self-open filtering:', senderPublicIp);
+    });
+  }).on('error', () => {});
+}
 
 // -------------------------------------------------------------
 // SECURITY & MIDDLEWARE
@@ -416,16 +438,16 @@ app.get(['/trace/mail/:id.png', '/trace/mail/:id'], async (req, res) => {
     });
   }
 
-  const cleanIp = ip.replace(/^.*:/, '').split(',')[0].trim();
+  const cleanIp = extractClientIp(req);
   const now = Date.now();
   const createdTime = email.createdAt ? new Date(email.createdAt).getTime() : now;
   const elapsedSeconds = (now - createdTime) / 1000;
 
   // 1. Known Sender IP check across devices:
   // If the request comes directly from any IP associated with the sender's network or devices, ignore as self-open!
-  const isSenderIP = cleanIp === senderPublicIp || 
-                     cleanIp === email.senderPublicIp || 
-                     cleanIp === email.senderIp || 
+  const isSenderIP = (senderPublicIp && cleanIp === senderPublicIp) || 
+                     (email.senderPublicIp && cleanIp === email.senderPublicIp) || 
+                     (email.senderIp && cleanIp === email.senderIp) || 
                      cleanIp === '1' || 
                      cleanIp === '127.0.0.1' ||
                      (await isKnownSenderIp(email.userId, cleanIp));
@@ -567,8 +589,7 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
   if (!targetUrl) return res.status(400).send('Missing target URL');
 
   const safeTargetUrl = /^https?:\/\//i.test(targetUrl) ? targetUrl : `https://${targetUrl}`;
-  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
-  const cleanIp = ip.replace(/^.*:/, '').split(',')[0].trim();
+  const cleanIp = extractClientIp(req);
   const userAgent = req.headers['user-agent'] || 'Unknown';
   const timestamp = new Date().toISOString();
 
@@ -597,6 +618,8 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
     // 2. Authenticated Sender Session Cookie (Sender logged into dashboard in this browser)
     if (req.cookies && req.cookies.mt_token) {
       try {
+        const jwt = require('jsonwebtoken');
+        const { JWT_SECRET } = require('./middleware/auth');
         const decoded = jwt.verify(req.cookies.mt_token, JWT_SECRET);
         if (decoded) {
           const isOwnerUser = decoded.userId && decoded.userId === email.userId;
@@ -610,9 +633,9 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
     }
 
     // 3. Sender IP match (Sender's device, home, office, or known IP)
-    const isSenderIP = cleanIp === senderPublicIp || 
-                       cleanIp === email.senderPublicIp || 
-                       cleanIp === email.senderIp || 
+    const isSenderIP = (senderPublicIp && cleanIp === senderPublicIp) || 
+                       (email.senderPublicIp && cleanIp === email.senderPublicIp) || 
+                       (email.senderIp && cleanIp === email.senderIp) || 
                        cleanIp === '1' || 
                        cleanIp === '127.0.0.1' ||
                        (await isKnownSenderIp(email.userId, cleanIp));
@@ -769,7 +792,7 @@ app.post('/api/emails/:id/open', async (req, res) => {
     timestamp,
     recipient,
     client,
-    ip: (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').replace(/^.*:/, '')
+    ip: extractClientIp(req)
   };
 
   const updatedEmail = await db.recordOpen(emailId, openData);
@@ -796,19 +819,20 @@ app.use('/api', apiLimiter);
 
 app.get('/api/config', (req, res) => {
   const effectiveUrl = getRequestBaseUrl(req);
+  const wsUrl = effectiveUrl.replace(/^https:\/\//i, 'wss://').replace(/^http:\/\//i, 'ws://');
   res.json({
     success: true,
     localUrl: `http://localhost:${PORT}`,
     publicUrl: effectiveUrl,
-    wsUrl: `ws://localhost:${PORT}`,
+    wsUrl,
     customDomain: customDomain || null,
     hasTunnelToken: !!tunnelToken,
     isCustomDomain: !!customDomain
   });
 });
 
-app.get('/api/ping', (req, res) => {
-  res.json({ pong: true, time: Date.now(), publicUrl: getRequestBaseUrl(req) });
+app.get(['/api/ping', '/healthz'], (req, res) => {
+  res.json({ pong: true, status: 'ok', time: Date.now(), publicUrl: getRequestBaseUrl(req) });
 });
 
 // Update or disconnect personal custom domain
@@ -916,7 +940,7 @@ app.post('/api/emails', optionalAuth, async (req, res) => {
     user = await db.createOrUpdateUser({ email: senderEmail || 'user@example.com', name: 'User' });
   }
 
-  const senderIp = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1').replace(/^.*:/, '').split(',')[0].trim();
+  const senderIp = extractClientIp(req);
   registerUserIp(user.id, senderIp);
 
   const newEmail = await db.createEmail(user.id, {
@@ -1015,7 +1039,7 @@ app.get('/api/emails', optionalAuth, async (req, res) => {
     return res.status(401).json({ success: false, error: 'Unauthorized: Please log in to view tracked emails.' });
   }
 
-  registerUserIp(user.id, req.headers['x-forwarded-for'] || req.socket.remoteAddress);
+  registerUserIp(user.id, extractClientIp(req));
 
   // Proactively auto-sync mobile checkmarks in background for connected user
   if (user && user.id) {
@@ -1100,9 +1124,22 @@ function startCloudflareTunnel() {
     cfProcess = null;
   }
 
-  const directBin = '/Users/naveen/.npm/_npx/8a26fc3a61fe4212/node_modules/cloudflared/bin/cloudflared';
+  if (process.env.DISABLE_TUNNEL === 'true') {
+    console.log(`[TUNNEL] Disabled (DISABLE_TUNNEL=true). Serving directly at: ${publicBaseUrl}`);
+    broadcast('CONFIG_UPDATED', { publicUrl: publicBaseUrl });
+    return;
+  }
+
   const fs = require('fs');
-  const binExists = fs.existsSync(directBin);
+  const candidateBins = [
+    process.env.CLOUDFLARED_BIN,
+    '/usr/local/bin/cloudflared',
+    '/usr/bin/cloudflared',
+    '/opt/homebrew/bin/cloudflared',
+    '/Users/naveen/.npm/_npx/8a26fc3a61fe4212/node_modules/cloudflared/bin/cloudflared'
+  ].filter(Boolean);
+  const directBin = candidateBins.find(p => fs.existsSync(p));
+  const binExists = !!directBin;
   const cmd = binExists ? directBin : 'npx';
 
   // 1. CLOUDFLARE NAMED TUNNEL WITH TOKEN (Personal Domain)
@@ -1148,9 +1185,15 @@ function startCloudflareTunnel() {
     return;
   }
 
-  // 2. CUSTOM DOMAIN CONFIGURED WITHOUT TUNNEL TOKEN (e.g. cloud host or external reverse proxy)
-  if (customDomain && !process.env.ENABLE_QUICK_TUNNEL) {
-    console.log('[TUNNEL] Personal domain active without quick tunnel:', publicBaseUrl);
+  // 2. DIRECT PUBLIC DOMAIN OR REVERSE PROXY (e.g. Oracle Cloud + Caddy/Nginx or custom domain)
+  const hasPublicBaseUrl = !!(
+    process.env.BASE_URL &&
+    process.env.BASE_URL.startsWith('http') &&
+    !process.env.BASE_URL.includes('localhost') &&
+    !process.env.BASE_URL.includes('127.0.0.1')
+  );
+  if ((customDomain || hasPublicBaseUrl) && process.env.ENABLE_QUICK_TUNNEL !== 'true') {
+    console.log(`[TUNNEL] Direct public host active (${publicBaseUrl}); skipping quick tunnel.`);
     broadcast('CONFIG_UPDATED', { publicUrl: publicBaseUrl });
     return;
   }
@@ -1241,10 +1284,32 @@ if (!process.env.VERCEL && require.main === module) {
     console.log(`=================================================`);
     console.log(` 🛡️ Mail Track Public Multi-User Server Active`);
     console.log(` 🌐 Dashboard: http://localhost:${PORT}`);
-    console.log(` 🔑 Google OAuth: http://localhost:${PORT}/auth/google`);
+    console.log(` 🚀 Public URL: ${publicBaseUrl}`);
+    console.log(` 🔑 Google OAuth: ${publicBaseUrl}/auth/google`);
+    console.log(` ❤️ Health Check: http://localhost:${PORT}/healthz`);
     console.log(`=================================================`);
     startCloudflareTunnel();
   });
+
+  const gracefulShutdown = (signal) => {
+    console.log(`[SERVER] Received ${signal}, shutting down gracefully...`);
+    if (watchdogInterval) {
+      clearInterval(watchdogInterval);
+      watchdogInterval = null;
+    }
+    if (cfProcess) {
+      try { cfProcess.removeAllListeners('close'); cfProcess.kill('SIGTERM'); } catch {}
+      cfProcess = null;
+    }
+    wss.clients.forEach(client => {
+      try { client.close(); } catch {}
+    });
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(0), 5000).unref();
+  };
+
+  process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.once('SIGINT', () => gracefulShutdown('SIGINT'));
 }
 
 module.exports = app;

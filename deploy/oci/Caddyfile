@@ -1,0 +1,22 @@
+# Caddy reverse proxy config for Mail Track on Oracle Cloud Free Tier
+# Automatically obtains/renews Let's Encrypt HTTPS certificates and proxies WebSockets (wss://).
+#
+# Option A (Zero-downtime test BEFORE switching mailtrack.in DNS):
+#   Replace `mailtrack.in` below with `<YOUR_VM_PUBLIC_IP>.sslip.io`, remove the `www.` block,
+#   then reload Caddy (`sudo systemctl reload caddy`).
+#
+# Option B (Production custom domain once A records point to Oracle VM):
+#   Keep as-is below. Ensure BOTH `@` (mailtrack.in) and `www` A records point to this VM's public IP
+#   (and set Cloudflare DNS to "DNS only" / grey cloud while issuing the initial certificate, or keep Full Strict).
+
+mailtrack.in {
+  encode zstd gzip
+
+  reverse_proxy 127.0.0.1:4000 {
+    header_up X-Real-IP {remote_host}
+  }
+}
+
+www.mailtrack.in {
+  redir https://mailtrack.in{uri} permanent
+}

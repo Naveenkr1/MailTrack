@@ -11,8 +11,10 @@ function getEffectiveBaseUrl(req) {
     return process.env.BASE_URL.replace(/\/+$/, '');
   }
   if (req) {
-    const protocol = req.headers['x-forwarded-proto'] || (req.secure ? 'https' : 'http');
-    const host = req.headers['x-forwarded-host'] || req.headers['host'];
+    const rawProto = req.headers['x-forwarded-proto'];
+    const protocol = rawProto ? String(rawProto).split(',')[0].trim() : (req.secure ? 'https' : 'http');
+    const rawHost = req.headers['x-forwarded-host'] || req.headers['host'];
+    const host = rawHost ? String(rawHost).split(',')[0].trim() : '';
     if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
       return `${protocol}://${host}`;
     }

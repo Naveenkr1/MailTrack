@@ -658,7 +658,7 @@ async function isSelfOrInternalEmail(email, recipientOverride = null) {
 
 async function registerUserIp(userId, ip) {
   if (!userId || !ip) return;
-  const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
+  const clean = String(ip).split(',')[0].trim().replace(/^::ffff:/i, '');
   if (!clean || clean === '127.0.0.1' || clean === '::1' || clean === '1') return;
   
   const parts = clean.split('.');
@@ -684,7 +684,7 @@ async function registerUserIp(userId, ip) {
 
 async function isKnownSenderIp(userId, ip) {
   if (!userId || !ip) return false;
-  const clean = ip.replace(/^.*:/, '').split(',')[0].trim();
+  const clean = String(ip).split(',')[0].trim().replace(/^::ffff:/i, '');
   if (!clean || clean === '127.0.0.1' || clean === '::1' || clean === '1') return true;
   
   const user = await findUserById(userId);
