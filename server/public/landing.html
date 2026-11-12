@@ -962,19 +962,26 @@
     }
 
     .faq-indicator {
-      width: 14px;
-      height: 14px;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+      margin-left: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: #64748b;
-      font-size: 11px;
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+    }
+
+    .faq-indicator svg {
+      width: 18px;
+      height: 18px;
+      display: block;
     }
 
     .faq-accordion-item.active .faq-indicator {
       color: #059669;
-      transform: rotate(180deg);
+      transform: rotate(45deg);
     }
 
     .faq-answer-panel {
@@ -2770,9 +2777,11 @@
       <div class="faq-list-wrap">
         <!-- Question 1 (Open by default in Figma) -->
         <div class="faq-accordion-item active reveal-on-scroll delay-1">
-          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <button type="button" class="faq-question-btn" aria-expanded="true" onclick="toggleFaq(this)">
             <span>Does the recipient know that I am tracking the email?</span>
-            <span class="faq-indicator">▲</span>
+            <span class="faq-indicator" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            </span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -2783,9 +2792,11 @@
 
         <!-- Question 2 -->
         <div class="faq-accordion-item reveal-on-scroll delay-1">
-          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <button type="button" class="faq-question-btn" aria-expanded="false" onclick="toggleFaq(this)">
             <span>How does tracking work on mobile Gmail (iPhone & Android)?</span>
-            <span class="faq-indicator">▼</span>
+            <span class="faq-indicator" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            </span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -2796,9 +2807,11 @@
 
         <!-- Question 3 -->
         <div class="faq-accordion-item reveal-on-scroll delay-2">
-          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <button type="button" class="faq-question-btn" aria-expanded="false" onclick="toggleFaq(this)">
             <span>Can I turn tracking off for specific emails?</span>
-            <span class="faq-indicator">▼</span>
+            <span class="faq-indicator" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            </span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -2809,9 +2822,11 @@
 
         <!-- Question 4 -->
         <div class="faq-accordion-item reveal-on-scroll delay-2">
-          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <button type="button" class="faq-question-btn" aria-expanded="false" onclick="toggleFaq(this)">
             <span>Is my personal email data safe and private?</span>
-            <span class="faq-indicator">▼</span>
+            <span class="faq-indicator" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            </span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -2822,9 +2837,11 @@
 
         <!-- Question 5 -->
         <div class="faq-accordion-item reveal-on-scroll delay-3">
-          <button type="button" class="faq-question-btn" onclick="toggleFaq(this)">
+          <button type="button" class="faq-question-btn" aria-expanded="false" onclick="toggleFaq(this)">
             <span>How do I install the extension right now?</span>
-            <span class="faq-indicator">▼</span>
+            <span class="faq-indicator" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+            </span>
           </button>
           <div class="faq-answer-panel">
             <p class="faq-answer-text">
@@ -3006,13 +3023,12 @@
       const wasActive = item.classList.contains('active');
       document.querySelectorAll('.faq-accordion-item').forEach(i => {
         i.classList.remove('active');
-        const indicator = i.querySelector('.faq-indicator');
-        if (indicator) indicator.textContent = '▼';
+        const qBtn = i.querySelector('.faq-question-btn');
+        if (qBtn) qBtn.setAttribute('aria-expanded', 'false');
       });
       if (!wasActive) {
         item.classList.add('active');
-        const indicator = item.querySelector('.faq-indicator');
-        if (indicator) indicator.textContent = '▲';
+        btn.setAttribute('aria-expanded', 'true');
       }
     }
 
