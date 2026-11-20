@@ -559,21 +559,21 @@
 }
 
 .mt-topnav-btn.active {
-  background-color: rgba(11, 27, 22, 0.12) !important;
+  background-color: rgba(5, 150, 105, 0.12) !important;
 }
 
-/* Inner Container: 28x28 dark teal #0b1b16 with 5.6px rounded corners */
+/* Inner Container: 28x28 emerald green #059669 with 6px rounded corners */
 .mt-nav-container {
   position: relative !important;
   width: 28px !important;
   height: 28px !important;
-  background: #0b1b16 !important;
-  border-radius: 5.6px !important;
+  background: #059669 !important;
+  border-radius: 6px !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
   flex-shrink: 0 !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
   transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s ease !important;
 }
 
@@ -582,14 +582,14 @@
 }
 
 .mt-topnav-btn.active .mt-nav-container {
-  box-shadow: 0 0 0 2px rgba(61, 241, 182, 0.5) !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.5) !important;
 }
 
-/* Double Checkmark SVG: #3DF1B6 fill */
+/* Double Checkmark SVG: white fill */
 .mt-nav-svg {
   display: block !important;
-  width: 19.158px !important;
-  height: 19.158px !important;
+  width: 18px !important;
+  height: 18px !important;
   flex-shrink: 0 !important;
 }
 
@@ -679,6 +679,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.mt-dh-badge-icon {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 20px !important;
+  height: 20px !important;
+  flex-shrink: 0 !important;
+  border-radius: 5px !important;
+  overflow: hidden !important;
+}
+
+.mt-dh-badge-icon svg {
+  display: block !important;
 }
 
 .mt-dh-title {

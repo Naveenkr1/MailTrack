@@ -2106,6 +2106,14 @@
     topNavDropdownEl.innerHTML = `
       <div class="mt-dropdown-header">
         <div class="mt-dh-left">
+          <div class="mt-dh-badge-icon" aria-label="Mail Track Logo">
+            <svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="36" height="36" rx="8" fill="#059669"/>
+              <g transform="translate(5, 5)">
+                <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
+              </g>
+            </svg>
+          </div>
           <span class="mt-dh-title">Mail Track Activity</span>
         </div>
         <button class="mt-dh-close" id="mtDropdownCloseBtn" title="Close">✕</button>
@@ -2116,7 +2124,7 @@
       </div>
       <div class="mt-dropdown-footer">
         <a href="${getServerUrl()}" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta">
-          <span>Open Dashboard</span>
+          <span>Open Full Dashboard</span>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
             <polyline points="15 3 21 3 21 9"></polyline>
@@ -2274,9 +2282,9 @@
     navBtn.setAttribute('data-node-id', '188:9972');
     navBtn.setAttribute('data-name', 'Track Mail Butotn');
     navBtn.innerHTML = `
-      <div class="mt-nav-container" data-node-id="188:9973" data-name="Container">
-        <svg class="mt-nav-svg" width="19.158" height="19.158" viewBox="0 0 19.158 19.158" fill="none" xmlns="http://www.w3.org/2000/svg" data-node-id="188:9974" data-name="Frame">
-          <path d="M9.2602 10.9842L10.3873 12.1113L17.1449 5.35369L18.2738 6.48258L10.3873 14.3691L5.30729 9.28904L6.43618 8.16016L8.13228 9.85628L9.2602 10.9842ZM9.26156 8.727L13.2149 4.77352L14.3407 5.89927L10.3873 9.85268L9.26156 8.727ZM7.00514 13.2412L5.8772 14.3691L0.797201 9.28904L1.92609 8.16016L3.05402 9.28816L3.05307 9.28904L7.00514 13.2412Z" fill="#3DF1B6"/>
+      <div class="mt-nav-container" data-node-id="188:9973" data-name="Container" title="Mail Track Activity">
+        <svg class="mt-nav-svg" width="18" height="18" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" data-node-id="188:9974" data-name="Frame">
+          <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
         </svg>
         <span class="mt-nav-badge" id="mtNavBadge" style="display:none !important;" data-node-id="188:9976" data-name="Count Badge"></span>
       </div>
