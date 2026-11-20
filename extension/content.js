@@ -1664,21 +1664,22 @@
     const href = link.getAttribute('href');
     if (!href) return;
     try {
-      const u = new URL(href, window.location.origin);
-      const emailId = u.pathname.split('/trace/link/')[1] || u.searchParams.get('id');
-      const isMyTrackedEmail = emailId && trackedEmails.some(t => t.id === emailId);
       const isSentView = /#(sent|outbox|drafts|scheduled)/i.test(window.location.hash || '');
-      if (isMyTrackedEmail || isSentView) {
+      const currentUser = getCurrentGmailUser();
+      
+      // If clicked inside Sent or Drafts folder, mark as sender click so it doesn't self-track
+      if (isSentView) {
         if (!href.includes('sender=1')) {
           link.setAttribute('href', href + '&sender=1');
         }
-        return; // Filtered as sender self-click
+        return;
+      }
+      
+      // If clicked inside an Inbox or reading view, attribute to the active recipient!
+      if (currentUser && !href.includes('&r=')) {
+        link.setAttribute('href', href + '&r=' + encodeURIComponent(currentUser));
       }
     } catch {}
-    const currentUser = getCurrentGmailUser();
-    if (currentUser && !href.includes('&r=')) {
-      link.setAttribute('href', href + '&r=' + encodeURIComponent(currentUser));
-    }
   }, true);
 
   // Attach observer to observe folder changes and compose window appearances

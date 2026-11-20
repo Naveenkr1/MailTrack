@@ -636,6 +636,11 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
     const createdTime = email.createdAt ? new Date(email.createdAt).getTime() : now;
     const elapsedSeconds = (now - createdTime) / 1000;
     const senderLower = (email.sender || '').toLowerCase();
+    const referer = req.headers.referer || '';
+    const passedRecipient = req.query.r ? decodeURIComponent(req.query.r).trim().toLowerCase() : null;
+    const isSentToSelf = passedRecipient && senderLower && (senderLower.includes(passedRecipient) || passedRecipient.includes(senderLower.replace(/<[^>]+>/g, '').trim()));
+    const isSentOrDrafts = /#(sent|outbox|drafts|scheduled)/i.test(referer);
+    const isDashboardPreview = /mailtrack\.in\/(app|dashboard|activity)/i.test(referer);
 
     // 1. Explicit Sender Header or Query Param
     if (req.headers['x-mailtrack-sender'] === '1' || req.query.sender === '1' || req.query.self === '1') {
@@ -643,14 +648,21 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
       return res.redirect(302, safeTargetUrl);
     }
 
-    // 2. Sent Mail / Outbox / Drafts referer check
-    const referer = req.headers.referer || '';
-    if (/#(sent|outbox|drafts|scheduled)/i.test(referer)) {
-      console.log(`[SELF-CLICK FILTERED] Link clicked from Sent/Drafts folder (${referer}) - IGNORED.`);
+    // 2. Sent Mail / Outbox / Drafts / Dashboard referer check
+    if (isSentOrDrafts || isDashboardPreview) {
+      console.log(`[SELF-CLICK FILTERED] Link clicked from Sent/Drafts folder or Dashboard preview (${referer}) - IGNORED.`);
       return res.redirect(302, safeTargetUrl);
     }
 
-    // 3. Authenticated Sender Session Cookie (Sender logged into dashboard in this browser)
+    // 3. Email sent to self (Sender sent email to own address and clicked it)
+    if (isSentToSelf) {
+      console.log(`[SELF-CLICK FILTERED] Link recipient parameter (${passedRecipient}) matches sender - IGNORED.`);
+      return res.redirect(302, safeTargetUrl);
+    }
+
+    // 4. Authenticated Sender Session Cookie:
+    // If the browser holds the sender's dashboard cookie, ONLY filter if clicked from Sent/Drafts,
+    // dashboard preview, or email sent to self. If clicked in recipient's inbox (e.g. testing), COUNT IT!
     if (req.cookies && req.cookies.mt_token) {
       try {
         const jwt = require('jsonwebtoken');
@@ -660,21 +672,17 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
           const isOwnerUser = decoded.userId && decoded.userId === email.userId;
           const isOwnerEmail = decoded.email && senderLower.includes(decoded.email.toLowerCase());
           if (isOwnerUser || isOwnerEmail) {
-            console.log(`[SELF-CLICK FILTERED] Authenticated email owner (${decoded.email || decoded.userId}) clicked link - IGNORED.`);
-            return res.redirect(302, safeTargetUrl);
+            if (isSentOrDrafts || isDashboardPreview || isSentToSelf || req.query.sender === '1') {
+              console.log(`[SELF-CLICK FILTERED] Authenticated email owner (${decoded.email || decoded.userId}) clicked link from Sent/self - IGNORED.`);
+              return res.redirect(302, safeTargetUrl);
+            }
+            console.log(`[RECIPIENT / TEST CLICK] Authenticated owner (${decoded.email}) clicked in recipient view. Recording click.`);
           }
         }
       } catch {}
     }
 
-    // 4. Recipient query parameter (&r=) matches the sender
-    const passedRecipient = req.query.r ? decodeURIComponent(req.query.r).trim().toLowerCase() : null;
-    if (passedRecipient && senderLower && (senderLower.includes(passedRecipient) || passedRecipient.includes(senderLower.replace(/<[^>]+>/g, '').trim()))) {
-      console.log(`[SELF-CLICK FILTERED] Link recipient parameter (${passedRecipient}) matches sender - IGNORED.`);
-      return res.redirect(302, safeTargetUrl);
-    }
-
-    // 5. Pre-click grace period (< 6s of email creation from sender's IP)
+    // 5. Pre-click grace period (< 3s of email creation from sender's IP)
     const isSenderIP = (senderPublicIp && cleanIp === senderPublicIp) || 
                        (email.senderPublicIp && cleanIp === email.senderPublicIp) || 
                        (email.senderIp && cleanIp === email.senderIp) || 
@@ -682,7 +690,7 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
                        cleanIp === '127.0.0.1' ||
                        (await isKnownSenderIp(email.userId, cleanIp));
 
-    if (isSenderIP && elapsedSeconds < 6) {
+    if (isSenderIP && elapsedSeconds < 3) {
       console.log(`[SELF-CLICK FILTERED] Immediate pre-click on "${safeTargetUrl}" from sender IP (${cleanIp}) within ${Math.round(elapsedSeconds)}s - IGNORED.`);
       return res.redirect(302, safeTargetUrl);
     }
