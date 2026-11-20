@@ -1377,10 +1377,9 @@
 
     // Gmail Native Edit Link layout:
     // 1. Text to display:
-    // 2. Link to: (•) Web address  ( ) Email address
-    // 3. To what URL should this link go? (URL input)
-    // 4. Test this link & real-time tracking indicator
-    // 5. Actions: OK and Cancel
+    // 2. To what URL should this link go? (URL input)
+    // 3. Test this link & real-time tracking indicator
+    // 4. Actions: OK and Cancel
     activeLinkModal.innerHTML = `
       <div class="mt-lm-container">
         <div class="mt-lm-header">
@@ -1397,20 +1396,6 @@
           <div class="mt-lm-field">
             <label class="mt-lm-label" for="mtLmText">Text to display:</label>
             <input type="text" class="mt-lm-input" id="mtLmText" autocomplete="off" spellcheck="false" value="${escapeHtml(selectedText)}" />
-          </div>
-
-          <div class="mt-lm-field mt-lm-field-radio">
-            <div class="mt-lm-label">Link to:</div>
-            <div class="mt-lm-radios">
-              <label class="mt-lm-radio-item">
-                <input type="radio" name="mtLinkType" id="mtRadioWeb" value="web" checked />
-                <span>Web address</span>
-              </label>
-              <label class="mt-lm-radio-item">
-                <input type="radio" name="mtLinkType" id="mtRadioEmail" value="email" />
-                <span>Email address</span>
-              </label>
-            </div>
           </div>
 
           <div class="mt-lm-field" id="mtLmTargetGroup">
@@ -1445,7 +1430,7 @@
 
     // Position modal at the exact same location where Gmail's native dialog opens
     const modalWidth = Math.min(480, window.innerWidth - 32);
-    const modalHeight = 310;
+    const modalHeight = 240;
     const pos = calculateLinkDialogPosition(dialog, modalWidth, modalHeight);
 
     activeLinkModal.style.position = 'fixed';
@@ -1458,8 +1443,6 @@
     const textInput = activeLinkModal.querySelector('#mtLmText');
     const urlInput = activeLinkModal.querySelector('#mtLmUrl');
     const urlLabel = activeLinkModal.querySelector('#mtLmUrlLabel');
-    const radioWeb = activeLinkModal.querySelector('#mtRadioWeb');
-    const radioEmail = activeLinkModal.querySelector('#mtRadioEmail');
     const testLink = activeLinkModal.querySelector('#mtLmTestLink');
     const trackBadge = activeLinkModal.querySelector('#mtLmTrackBadge');
     const insertBtn = activeLinkModal.querySelector('#mtLmInsertBtn');
@@ -1491,32 +1474,13 @@
       }
 
       // Update test link
-      if (radioWeb.checked && val) {
+      if (val) {
         let testUrl = val;
         if (!/^https?:\/\//i.test(testUrl)) testUrl = 'https://' + testUrl;
         testLink.href = testUrl;
         testLink.style.visibility = 'visible';
       } else {
         testLink.style.visibility = 'hidden';
-      }
-    });
-
-    radioWeb.addEventListener('change', () => {
-      if (radioWeb.checked) {
-        urlLabel.textContent = 'To what URL should this link go?';
-        urlInput.placeholder = 'https://';
-        if (trackBadge) trackBadge.style.display = 'inline-flex';
-        urlInput.focus();
-      }
-    });
-
-    radioEmail.addEventListener('change', () => {
-      if (radioEmail.checked) {
-        urlLabel.textContent = 'To what email address should this link go?';
-        urlInput.placeholder = 'name@example.com';
-        if (trackBadge) trackBadge.style.display = 'none';
-        testLink.style.visibility = 'hidden';
-        urlInput.focus();
       }
     });
 
@@ -1538,7 +1502,6 @@
     cancelBtn.onclick = closeModal;
 
     const doInsert = () => {
-      const isEmail = radioEmail.checked;
       let targetVal = urlInput.value.trim();
       if (!targetVal) {
         urlInput.style.borderColor = '#d93025';
@@ -1548,13 +1511,10 @@
 
       let linkHref = '';
       const displayText = textInput.value.trim() || targetVal;
+      const isEmail = /^mailto:/i.test(targetVal);
 
       if (isEmail) {
-        if (!/^mailto:/i.test(targetVal)) {
-          linkHref = 'mailto:' + targetVal;
-        } else {
-          linkHref = targetVal;
-        }
+        linkHref = targetVal;
       } else {
         if (!/^https?:\/\//i.test(targetVal)) {
           targetVal = 'https://' + targetVal;
