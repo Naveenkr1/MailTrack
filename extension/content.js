@@ -430,6 +430,9 @@
             incrementUnreadCount();
             fetchAllTrackedEmails(true);
           } else if (payload.type === 'LINK_CLICKED') {
+            if (payload.data && payload.data.email) {
+              handleInstantOpen(payload.data.email);
+            }
             incrementUnreadCount();
             fetchAllTrackedEmails(true);
           }
@@ -454,14 +457,18 @@
   // Also listen for broadcasts forwarded from background service worker
   try {
     chrome.runtime.onMessage.addListener((message) => {
-      if (message.type === 'EMAIL_OPENED' && message.email) {
+      if (message.type === 'EMAIL_OPENED' && (message.email || message.data?.email)) {
         // If direct WebSocket is connected and already handled this event, skip background duplicate
         if (ws && ws.readyState === WebSocket.OPEN) return;
-        handleInstantOpen(message.email);
+        handleInstantOpen(message.email || message.data?.email);
       } else if (message.type === 'EMAIL_CREATED') {
         incrementUnreadCount();
         fetchAllTrackedEmails(true);
       } else if (message.type === 'LINK_CLICKED') {
+        const email = message.email || message.data?.email;
+        if (email) {
+          handleInstantOpen(email);
+        }
         incrementUnreadCount();
         fetchAllTrackedEmails(true);
       } else if (message.type === 'AUTH_UPDATED') {
@@ -809,11 +816,16 @@
     }
     if (!sender) sender = (currentAuthUser && currentAuthUser.email) || 'Me';
 
-    let trackingId = dialog.getAttribute('data-mt-tracking-id');
+    const rootDialog = dialog.closest('div[role="dialog"]') || dialog;
+    let trackingId = body.getAttribute('data-mt-tracking-id') ||
+                     dialog.getAttribute('data-mt-tracking-id') ||
+                     rootDialog.getAttribute('data-mt-tracking-id');
     if (!trackingId) {
       trackingId = generateId();
-      dialog.setAttribute('data-mt-tracking-id', trackingId);
     }
+    body.setAttribute('data-mt-tracking-id', trackingId);
+    dialog.setAttribute('data-mt-tracking-id', trackingId);
+    rootDialog.setAttribute('data-mt-tracking-id', trackingId);
 
     let activeTrackingUrl = getServerUrl();
     if (!activeTrackingUrl || activeTrackingUrl.includes('localhost') || !activeTrackingUrl.startsWith('https://')) {
@@ -825,10 +837,22 @@
     if (trackLinksEnabled) {
       const existingLinks = body.querySelectorAll('a[href]');
       existingLinks.forEach(a => {
-        const href = a.getAttribute('href');
-        if (href && !href.includes('/trace/link/') && !href.startsWith('mailto:') && !href.startsWith('tel:')) {
-          a.setAttribute('href', `${activeTrackingUrl}/trace/link/${trackingId}?url=${encodeURIComponent(href)}`);
+        let href = a.getAttribute('href');
+        if (!href || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) {
+          return;
         }
+        // Extract raw target URL if already wrapped
+        let rawTargetUrl = href;
+        if (href.includes('/trace/link')) {
+          try {
+            const parsed = new URL(href, window.location.origin);
+            const u = parsed.searchParams.get('url');
+            if (u) rawTargetUrl = u;
+          } catch {}
+        }
+        // Re-wrap with current email's exact trackingId and metadata query parameters
+        const newHref = `${activeTrackingUrl}/trace/link/${trackingId}?url=${encodeURIComponent(rawTargetUrl)}&s=${encodeURIComponent(subject)}&r=${encodeURIComponent(recipient)}&from=${encodeURIComponent(sender)}`;
+        a.setAttribute('href', newHref);
       });
     } else {
       // If Track Links is OFF, revert any tracked links back to normal clean destination URLs!
@@ -1526,12 +1550,18 @@
         }
         const trackLinksEnabled = dialog.getAttribute('data-mt-track-links') !== 'false';
         if (trackLinksEnabled) {
-          // Assign or reuse tracking ID for this email compose dialog
-          let trackingId = dialog.getAttribute('data-mt-tracking-id');
+          // Assign or reuse tracking ID for this email compose dialog across body and dialog
+          const rootDialog = dialog.closest('div[role="dialog"]') || dialog;
+          let trackingId = body.getAttribute('data-mt-tracking-id') ||
+                           dialog.getAttribute('data-mt-tracking-id') ||
+                           rootDialog.getAttribute('data-mt-tracking-id');
           if (!trackingId) {
             trackingId = generateId();
-            dialog.setAttribute('data-mt-tracking-id', trackingId);
           }
+          body.setAttribute('data-mt-tracking-id', trackingId);
+          dialog.setAttribute('data-mt-tracking-id', trackingId);
+          rootDialog.setAttribute('data-mt-tracking-id', trackingId);
+
           let activeTrackingUrl = getServerUrl();
           if (!activeTrackingUrl || activeTrackingUrl.includes('localhost') || !activeTrackingUrl.startsWith('https://')) {
             activeTrackingUrl = DEFAULT_PROD_URL;
@@ -1631,21 +1661,23 @@
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[href*="/trace/link/"]');
     if (!link) return;
+    const href = link.getAttribute('href');
+    if (!href) return;
+    try {
+      const u = new URL(href, window.location.origin);
+      const emailId = u.pathname.split('/trace/link/')[1] || u.searchParams.get('id');
+      const isMyTrackedEmail = emailId && trackedEmails.some(t => t.id === emailId);
+      const isSentView = /#(sent|outbox|drafts|scheduled)/i.test(window.location.hash || '');
+      if (isMyTrackedEmail || isSentView) {
+        if (!href.includes('sender=1')) {
+          link.setAttribute('href', href + '&sender=1');
+        }
+        return; // Filtered as sender self-click
+      }
+    } catch {}
     const currentUser = getCurrentGmailUser();
-    if (currentUser) {
-      const href = link.getAttribute('href');
-      if (href) {
-        try {
-          const u = new URL(href, window.location.origin);
-          const emailId = u.pathname.split('/trace/link/')[1] || u.searchParams.get('id');
-          const isMyTrackedEmail = emailId && trackedEmails.some(t => t.id === emailId);
-          const isSentView = /#(sent|outbox|drafts|scheduled)/i.test(window.location.hash || '');
-          if (isMyTrackedEmail || isSentView) return; // Never attach sender's email as recipient!
-        } catch {}
-      }
-      if (href && !href.includes('&r=')) {
-        link.setAttribute('href', href + '&r=' + encodeURIComponent(currentUser));
-      }
+    if (currentUser && !href.includes('&r=')) {
+      link.setAttribute('href', href + '&r=' + encodeURIComponent(currentUser));
     }
   }, true);
 
@@ -1816,6 +1848,11 @@
           <span class="mt-tt-label">Last Opened:</span>
           <span class="mt-tt-val">${lastOpenStr}</span>
         </div>
+        ${(email?.clickCount > 0 || (email?.clicks && email.clicks.length > 0)) ? `
+        <div class="mt-tt-row">
+          <span class="mt-tt-label">Link Clicks:</span>
+          <span class="mt-tt-val opened-count" style="color:#059669;font-weight:600;">🔗 ${Math.max(email.clickCount || 0, (email.clicks || []).length)}</span>
+        </div>` : ''}
         ${isOpened ? `
         <div class="mt-tt-row">
           <span class="mt-tt-label">Device:</span>
@@ -2040,6 +2077,13 @@
         const isUnread = newOpenedEmailIds.has(email.id);
         const redDotHtml = isUnread ? `<span class="mt-notif-red-dot" title="New activity"></span>` : '';
 
+        const clickCount = Math.max(email.clickCount || 0, (email.clicks || []).length);
+        const clickBadgeHtml = clickCount > 0 ? `
+          <span class="mt-notif-badge mt-badge-clicks" style="background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:10px;">
+            🔗 ${clickCount} click${clickCount > 1 ? 's' : ''}
+          </span>
+        ` : '';
+
         let badgeHtml = '';
         let deviceTagHtml = '';
         if (isOpened) {
@@ -2056,6 +2100,7 @@
               ${openCount} open${openCount > 1 ? 's' : ''}
               ${redDotHtml}
             </span>
+            ${clickBadgeHtml}
           `;
         } else {
           badgeHtml = `
@@ -2063,6 +2108,7 @@
               ✓ Sent
               ${redDotHtml}
             </span>
+            ${clickBadgeHtml}
           `;
         }
 

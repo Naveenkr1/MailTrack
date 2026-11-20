@@ -409,7 +409,9 @@ function handleServerEvent(payload) {
 
   if (type === 'LINK_CLICKED') {
     const emailSubject = (data.email && data.email.subject) || 'Your email';
-    const targetUrl = (data.click && data.click.targetUrl) || 'a link';
+    const targetUrl = (data.click && (data.click.url || data.click.targetUrl)) || 
+                      (data.event && (data.event.url || data.event.targetUrl)) || 
+                      'a link';
 
     if (typeof chrome !== 'undefined' && chrome.notifications) {
       chrome.notifications.create({
@@ -421,7 +423,7 @@ function handleServerEvent(payload) {
       });
     }
 
-    broadcastToGmailTabs({ type: 'LINK_CLICKED', data });
+    broadcastToGmailTabs({ type: 'LINK_CLICKED', data, email: data.email });
   }
 
   if (type === 'EMAIL_CREATED') {

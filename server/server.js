@@ -602,6 +602,34 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
     return res.redirect(302, safeTargetUrl);
   }
 
+  // If email was not yet registered in database, auto-register under real sender user or fallback user
+  if (!email && emailId) {
+    const fromEmail = (req.query.from || '').trim().toLowerCase();
+    let senderUser = fromEmail ? await db.findUserByEmail(fromEmail) : null;
+    if (!senderUser && fromEmail && fromEmail.includes('@')) {
+      senderUser = await db.createOrUpdateUser({ email: fromEmail, name: fromEmail.split('@')[0] });
+    }
+    if (!senderUser) {
+      senderUser = (await db.findUserByEmail('nnaveen.8527@gmail.com')) || 
+                   (await db.findUserById('usr_default')) || 
+                   { id: 'usr_default', email: 'nnaveen.8527@gmail.com' };
+    }
+    const decodedSubject = req.query.s ? decodeURIComponent(req.query.s) : 'Tracked Email';
+    const decodedRecipient = req.query.r ? decodeURIComponent(req.query.r) : 'Recipient';
+    try {
+      email = await db.createEmail(senderUser.id, {
+        id: emailId,
+        subject: decodedSubject,
+        recipient: decodedRecipient,
+        recipients: [decodedRecipient],
+        sender: fromEmail || senderUser.email || 'Me'
+      });
+      console.log(`[LINK TRACKING AUTO-CREATED EMAIL] ID: ${emailId} for ${email.sender}`);
+    } catch (e) {
+      console.warn('[LINK TRACKING AUTO-CREATE FAILED]', e.message);
+    }
+  }
+
   // Comprehensive Sender Self-Click Filtering
   if (email) {
     const now = Date.now();
@@ -615,7 +643,14 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
       return res.redirect(302, safeTargetUrl);
     }
 
-    // 2. Authenticated Sender Session Cookie (Sender logged into dashboard in this browser)
+    // 2. Sent Mail / Outbox / Drafts referer check
+    const referer = req.headers.referer || '';
+    if (/#(sent|outbox|drafts|scheduled)/i.test(referer)) {
+      console.log(`[SELF-CLICK FILTERED] Link clicked from Sent/Drafts folder (${referer}) - IGNORED.`);
+      return res.redirect(302, safeTargetUrl);
+    }
+
+    // 3. Authenticated Sender Session Cookie (Sender logged into dashboard in this browser)
     if (req.cookies && req.cookies.mt_token) {
       try {
         const jwt = require('jsonwebtoken');
@@ -632,19 +667,6 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
       } catch {}
     }
 
-    // 3. Sender IP match (Sender's device, home, office, or known IP)
-    const isSenderIP = (senderPublicIp && cleanIp === senderPublicIp) || 
-                       (email.senderPublicIp && cleanIp === email.senderPublicIp) || 
-                       (email.senderIp && cleanIp === email.senderIp) || 
-                       cleanIp === '1' || 
-                       cleanIp === '127.0.0.1' ||
-                       (await isKnownSenderIp(email.userId, cleanIp));
-
-    if (isSenderIP) {
-      console.log(`[SELF-CLICK FILTERED] Link "${safeTargetUrl}" clicked from known sender IP (${cleanIp}) - IGNORED.`);
-      return res.redirect(302, safeTargetUrl);
-    }
-
     // 4. Recipient query parameter (&r=) matches the sender
     const passedRecipient = req.query.r ? decodeURIComponent(req.query.r).trim().toLowerCase() : null;
     if (passedRecipient && senderLower && (senderLower.includes(passedRecipient) || passedRecipient.includes(senderLower.replace(/<[^>]+>/g, '').trim()))) {
@@ -652,16 +674,16 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
       return res.redirect(302, safeTargetUrl);
     }
 
-    // 5. Sent Mail / Outbox / Drafts referer check
-    const referer = req.headers.referer || '';
-    if (/#(sent|outbox|drafts|scheduled)/i.test(referer)) {
-      console.log(`[SELF-CLICK FILTERED] Link clicked from Sent/Drafts folder (${referer}) - IGNORED.`);
-      return res.redirect(302, safeTargetUrl);
-    }
+    // 5. Pre-click grace period (< 6s of email creation from sender's IP)
+    const isSenderIP = (senderPublicIp && cleanIp === senderPublicIp) || 
+                       (email.senderPublicIp && cleanIp === email.senderPublicIp) || 
+                       (email.senderIp && cleanIp === email.senderIp) || 
+                       cleanIp === '1' || 
+                       cleanIp === '127.0.0.1' ||
+                       (await isKnownSenderIp(email.userId, cleanIp));
 
-    // 6. Pre-click grace period (< 10s of email creation by sender)
-    if (elapsedSeconds < 10) {
-      console.log(`[SELF-CLICK FILTERED] Immediate pre-click on "${safeTargetUrl}" (< 10s) - IGNORED.`);
+    if (isSenderIP && elapsedSeconds < 6) {
+      console.log(`[SELF-CLICK FILTERED] Immediate pre-click on "${safeTargetUrl}" from sender IP (${cleanIp}) within ${Math.round(elapsedSeconds)}s - IGNORED.`);
       return res.redirect(302, safeTargetUrl);
     }
   }
@@ -753,7 +775,7 @@ app.get(['/trace/link/:id', '/trace/link'], async (req, res) => {
   console.log(`======================================================\n`);
 
   if (updatedEmail) {
-    broadcast('LINK_CLICKED', { email: updatedEmail, event: clickData }, email.userId);
+    broadcast('LINK_CLICKED', { email: updatedEmail, click: clickData, event: clickData }, email.userId);
   }
 
   res.redirect(302, safeTargetUrl);
