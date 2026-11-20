@@ -975,8 +975,13 @@
       logoBtn.setAttribute('role', 'button');
       logoBtn.setAttribute('tabindex', '0');
       logoBtn.innerHTML = `
-        <div class="mt-compose-logo-wrap">
-          <img src="${logoUrl}" width="24" height="24" class="mt-compose-logo-img" alt="Mail Track" />
+        <div class="mt-compose-logo-wrap" title="Mail Track">
+          <svg class="mt-compose-logo-svg" width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="36" height="36" rx="8" class="mt-logo-bg" fill="#059669"/>
+            <g transform="translate(5, 5)">
+              <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
+            </g>
+          </svg>
         </div>
       `;
 

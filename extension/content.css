@@ -237,7 +237,7 @@
   min-width: 32px !important;
   margin-left: 8px !important;
   margin-right: 4px !important;
-  border-radius: 4px !important;
+  border-radius: 6px !important;
   cursor: pointer !important;
   user-select: none !important;
   background: transparent !important;
@@ -245,7 +245,7 @@
   border: none !important;
   outline: none !important;
   box-shadow: none !important;
-  transition: background-color 0.15s ease !important;
+  transition: background-color 0.15s ease, transform 0.1s ease !important;
   align-self: center !important;
   position: relative !important;
   box-sizing: border-box !important;
@@ -276,6 +276,7 @@
   background: transparent !important;
 }
 
+.mt-compose-logo-svg,
 .mt-compose-logo-img {
   width: 24px !important;
   height: 24px !important;
@@ -283,13 +284,19 @@
   max-height: 24px !important;
   display: block !important;
   object-fit: contain !important;
-  border-radius: 4px !important;
-  transition: opacity 0.2s ease, filter 0.2s ease;
+  border-radius: 6px !important;
+  transition: opacity 0.2s ease, filter 0.2s ease, transform 0.15s ease;
   background: transparent !important;
 }
 
+.mt-compose-logo-btn:hover .mt-compose-logo-svg,
+.mt-compose-logo-btn:hover .mt-compose-logo-img {
+  transform: scale(1.05);
+}
+
+.mt-compose-logo-btn.disabled .mt-compose-logo-svg,
 .mt-compose-logo-btn.disabled .mt-compose-logo-img {
-  filter: grayscale(1) opacity(0.4);
+  filter: grayscale(1) opacity(0.4) !important;
 }
 
 .mt-compose-logo-btn.success {

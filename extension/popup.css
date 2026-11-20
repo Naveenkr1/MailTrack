@@ -26,11 +26,19 @@ body {
   gap: 8px;
 }
 
-.brand .icon {
-  font-weight: 900;
-  color: #10b981;
-  letter-spacing: -2px;
-  font-size: 17px;
+.brand-badge-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.brand-badge-icon svg {
+  display: block;
 }
 
 .brand .title {
