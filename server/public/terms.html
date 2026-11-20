@@ -4,7 +4,12 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terms of Service — Mail Track</title>
-  <link rel="icon" type="image/png" href="/icons/icon-48.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#059669">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -43,15 +48,12 @@
     .brand-icon {
       width: 34px;
       height: 34px;
-      background: #10b981;
+      background: #059669;
       border-radius: 9px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
-      font-weight: 800;
-      font-size: 17px;
-      letter-spacing: -1px;
+      box-shadow: 0 3px 8px rgba(5, 150, 105, 0.25);
     }
     .brand-title {
       font-size: 18px;
@@ -201,7 +203,12 @@
 
   <header class="header-bar">
     <a href="/" class="brand-wrap">
-      <div class="brand-icon">✓✓</div>
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11 12.6111L15.9231 17.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
       <span class="brand-title">Mail Track</span>
     </a>
     <div class="header-links">

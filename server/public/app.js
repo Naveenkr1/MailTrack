@@ -2243,11 +2243,26 @@ document.addEventListener('DOMContentLoaded', () => {
   const iosInstallGotItBtn = document.getElementById('iosInstallGotItBtn');
   const dontShowIosCheck = document.getElementById('dontShowIosCheck');
 
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  // Multi-platform detection for PWA standalone or already added to home screen
+  function isAddedToHomeScreen() {
+    return (
+      localStorage.getItem('mt_pwa_installed') === 'true' ||
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      window.navigator.standalone === true ||
+      (typeof document !== 'undefined' && document.referrer && document.referrer.includes('android-app://'))
+    );
+  }
+
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
   function isNeverShowInstallAgain() {
-    return localStorage.getItem('mt_dont_show_install_again') === 'true';
+    return (
+      localStorage.getItem('mt_dont_show_install_again') === 'true' ||
+      localStorage.getItem('mt_dismiss_install_banner') === 'permanent' ||
+      isAddedToHomeScreen()
+    );
   }
 
   function markNeverShowInstallAgain() {
@@ -2256,15 +2271,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function shouldShowInstallBanner() {
-    if (isStandalone) return false;
+    // 1. If already added to home screen or running standalone: NEVER SHOW!
+    if (isAddedToHomeScreen()) return false;
+    // 2. Only show on mobile view (<= 768px or touch mobile)
     if (window.innerWidth > 768) return false;
+    // 3. If user checked "Don't show again" or permanently dismissed: NEVER SHOW!
     if (isNeverShowInstallAgain()) return false;
+    // 4. If dismissed previously: do not show again
     const dismissedAt = localStorage.getItem('mt_dismiss_install_banner');
-    if (dismissedAt) {
-      if (dismissedAt === 'permanent') return false;
-      const elapsed = Date.now() - parseInt(dismissedAt, 10);
-      if (elapsed < 7 * 24 * 60 * 60 * 1000) return false;
-    }
+    if (dismissedAt) return false;
     return true;
   }
 
@@ -2291,12 +2306,21 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredInstallPrompt = e;
-    showInstallBanner();
+    if (shouldShowInstallBanner()) {
+      showInstallBanner();
+    }
   });
 
-  // For iOS or browsers without beforeinstallprompt, display prompt on mobile view after brief delay
+  // Track native installation completion on Android / Desktop
+  window.addEventListener('appinstalled', () => {
+    localStorage.setItem('mt_pwa_installed', 'true');
+    markNeverShowInstallAgain();
+    hideInstallBanner(true);
+  });
+
+  // For mobile view, display prompt on 1st visit after brief smooth delay (1.2s)
   if (shouldShowInstallBanner()) {
-    setTimeout(showInstallBanner, 1500);
+    setTimeout(showInstallBanner, 1200);
   }
 
   function triggerInstallFlow() {
@@ -2304,6 +2328,8 @@ document.addEventListener('DOMContentLoaded', () => {
       deferredInstallPrompt.prompt();
       deferredInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
+          localStorage.setItem('mt_pwa_installed', 'true');
+          markNeverShowInstallAgain();
           hideInstallBanner(true);
         }
         deferredInstallPrompt = null;
@@ -2337,6 +2363,11 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       const isChecked = dontShowBannerCheck && dontShowBannerCheck.checked;
+      if (isChecked) {
+        markNeverShowInstallAgain();
+      } else {
+        localStorage.setItem('mt_dismiss_install_banner', Date.now().toString());
+      }
       hideInstallBanner(isChecked);
     });
   }
@@ -2369,8 +2400,10 @@ document.addEventListener('DOMContentLoaded', () => {
       iosInstallModal.style.setProperty('display', 'none', 'important');
     }
     if (isChecked) {
+      markNeverShowInstallAgain();
       hideInstallBanner(true);
     } else {
+      localStorage.setItem('mt_dismiss_install_banner', Date.now().toString());
       hideInstallBanner(false);
     }
   }
