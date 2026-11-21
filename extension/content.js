@@ -66,6 +66,248 @@
     });
   }
 
+  // -------------------------------------------------------------------------
+  // AUTHENTICATION & LOGIN STATE
+  // -------------------------------------------------------------------------
+  function isUserAuthenticated() {
+    return !!(currentAuthUser && (currentAuthUser.apiKey || currentAuthUser.id));
+  }
+
+  // Load cached auth immediately from local extension storage
+  if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+    chrome.storage.local.get(['mt_user', 'mt_api_key'], (items) => {
+      if (items && items.mt_user) {
+        currentAuthUser = items.mt_user;
+        if (items.mt_api_key && !currentAuthUser.apiKey) {
+          currentAuthUser.apiKey = items.mt_api_key;
+        }
+      }
+      updateTopNavBtnAuthState();
+      updateComposeButtonsAuthState();
+    });
+  }
+
+  // Listen for storage changes in real time (e.g. user logged in or out in another tab)
+  if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === 'local' && (changes.mt_user || changes.mt_api_key)) {
+        chrome.storage.local.get(['mt_user', 'mt_api_key'], (items) => {
+          if (items && items.mt_user) {
+            currentAuthUser = items.mt_user;
+            if (items.mt_api_key && !currentAuthUser.apiKey) {
+              currentAuthUser.apiKey = items.mt_api_key;
+            }
+          } else {
+            currentAuthUser = null;
+          }
+          updateTopNavBtnAuthState();
+          updateComposeButtonsAuthState();
+          if (isUserAuthenticated()) {
+            dismissAuthModal();
+          }
+          if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
+            renderNotificationsDropdown();
+          }
+        });
+      }
+    });
+  }
+
+  function fetchAuthStatus() {
+    if (!isAlive()) return;
+    try {
+      chrome.runtime.sendMessage({ action: 'GET_AUTH_STATUS' }, (res) => {
+        if (!isAlive() || chrome.runtime.lastError) return;
+        if (res && res.authenticated && res.user) {
+          currentAuthUser = res.user;
+          if (!currentAuthUser.apiKey && res.apiKey) {
+            currentAuthUser.apiKey = res.apiKey;
+          }
+        } else if (res && res.authenticated === false) {
+          currentAuthUser = null;
+        }
+        updateTopNavBtnAuthState();
+        updateComposeButtonsAuthState();
+        if (isUserAuthenticated()) {
+          dismissAuthModal();
+        } else {
+          checkAndShowAuthPrompt();
+        }
+      });
+    } catch {}
+  }
+
+  function dismissAuthModal() {
+    const existing = document.getElementById('mt-auth-prompt-modal');
+    if (existing) {
+      existing.style.opacity = '0';
+      existing.style.transition = 'opacity 0.18s ease';
+      setTimeout(() => {
+        if (existing.parentElement) existing.remove();
+      }, 180);
+    }
+  }
+
+  function showAuthPromptModal(force = false) {
+    if (!force) {
+      if (isUserAuthenticated()) return;
+      try {
+        if (sessionStorage.getItem('mt_auth_alert_dismissed') === 'true') return;
+      } catch {}
+    }
+
+    if (document.getElementById('mt-auth-prompt-modal')) return;
+
+    const modalBackdrop = document.createElement('div');
+    modalBackdrop.id = 'mt-auth-prompt-modal';
+    modalBackdrop.className = 'mt-auth-prompt-backdrop';
+    modalBackdrop.innerHTML = `
+      <div class="mt-auth-prompt-card" role="dialog" aria-modal="true" aria-labelledby="mtAuthPromptTitle">
+        <button class="mt-auth-prompt-close" id="mtAuthPromptCloseBtn" title="Close" aria-label="Close">✕</button>
+        
+        <div class="mt-auth-prompt-icon-box">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M11 12.6111L15.9231 17.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div style="display:flex; justify-content:center;">
+          <span class="mt-auth-prompt-pill">Setup Required • 1 Step</span>
+        </div>
+
+        <h2 class="mt-auth-prompt-title" id="mtAuthPromptTitle">Connect Your Gmail Account</h2>
+        <p class="mt-auth-prompt-desc">
+          You've installed Mail Track! To activate live email read receipts, link click notifications, and double checkmarks in Gmail, connect your Google account.
+        </p>
+
+        <div class="mt-auth-prompt-btn-group">
+          <a href="${getServerUrl()}/auth/google?flow_src=extension" target="_blank" class="mt-auth-prompt-connect-btn" id="mtAuthPromptConnectBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Connect with Google</span>
+          </a>
+          <button class="mt-auth-prompt-later-btn" id="mtAuthPromptLaterBtn">Remind me later</button>
+        </div>
+
+        <p class="mt-auth-prompt-footer-note">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          <span>Official Google OAuth 2.0 • Secure & Private</span>
+        </p>
+      </div>
+    `;
+
+    function closePrompt(sessionDismiss = true) {
+      if (sessionDismiss) {
+        try { sessionStorage.setItem('mt_auth_alert_dismissed', 'true'); } catch {}
+      }
+      dismissAuthModal();
+    }
+
+    modalBackdrop.querySelector('#mtAuthPromptCloseBtn').onclick = (e) => {
+      e.stopPropagation();
+      closePrompt(true);
+    };
+
+    modalBackdrop.querySelector('#mtAuthPromptLaterBtn').onclick = (e) => {
+      e.stopPropagation();
+      closePrompt(true);
+    };
+
+    modalBackdrop.querySelector('#mtAuthPromptConnectBtn').onclick = () => {
+      setTimeout(() => {
+        closePrompt(false);
+      }, 500);
+    };
+
+    modalBackdrop.onclick = (e) => {
+      if (e.target === modalBackdrop) {
+        closePrompt(true);
+      }
+    };
+
+    const handleKeydown = (e) => {
+      if (e.key === 'Escape') {
+        window.removeEventListener('keydown', handleKeydown);
+        closePrompt(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeydown);
+
+    document.body.appendChild(modalBackdrop);
+  }
+
+  function checkAndShowAuthPrompt() {
+    if (isUserAuthenticated()) return;
+    try {
+      if (sessionStorage.getItem('mt_auth_alert_dismissed') === 'true') return;
+    } catch {}
+    showAuthPromptModal(false);
+  }
+
+  function updateTopNavBtnAuthState() {
+    const navBtn = document.getElementById('mt-topnav-btn');
+    if (!navBtn) return;
+    const isAuth = isUserAuthenticated();
+    const container = navBtn.querySelector('.mt-nav-container');
+    const unlinkedDot = navBtn.querySelector('#mtNavUnlinkedDot');
+
+    if (!isAuth) {
+      navBtn.classList.add('unlinked');
+      navBtn.title = 'Mail Track: Not Connected — Click to connect your Google account';
+      if (container) {
+        container.classList.add('unlinked');
+        container.style.setProperty('background', '#94a3b8', 'important');
+      }
+      if (unlinkedDot) unlinkedDot.style.setProperty('display', 'block', 'important');
+      updateNavBadgeCount(0);
+    } else {
+      navBtn.classList.remove('unlinked');
+      navBtn.title = 'Mail Track Activity & Notifications';
+      if (container) {
+        container.classList.remove('unlinked');
+        container.style.setProperty('background', '#059669', 'important');
+      }
+      if (unlinkedDot) unlinkedDot.style.setProperty('display', 'none', 'important');
+      updateNavBadgeCount(unreadNotificationsCount);
+    }
+  }
+
+  function updateComposeButtonsAuthState() {
+    const isAuth = isUserAuthenticated();
+    const composeButtons = document.querySelectorAll('.mt-compose-logo-btn');
+    composeButtons.forEach((btn) => {
+      const bgRect = btn.querySelector('.mt-logo-bg');
+      if (!isAuth) {
+        btn.classList.add('unlinked');
+        btn.title = 'Mail Track: Not Connected — Click to connect your Google account';
+        if (bgRect) bgRect.setAttribute('fill', '#94a3b8');
+      } else {
+        btn.classList.remove('unlinked');
+        const dialog = btn.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An');
+        const isTracking = dialog ? dialog.getAttribute('data-mt-track-mail') !== 'false' : true;
+        const isTrackLinks = dialog ? dialog.getAttribute('data-mt-track-links') !== 'false' : true;
+        if (isTracking) {
+          btn.className = 'mt-compose-logo-btn active';
+          const linkNote = isTrackLinks ? 'Links ON' : 'Links OFF';
+          btn.title = `Mail Track: Tracking ON (${linkNote}) — Click for options`;
+          if (bgRect) bgRect.setAttribute('fill', '#059669');
+        } else {
+          btn.className = 'mt-compose-logo-btn disabled';
+          btn.title = 'Mail Track: Tracking OFF — Click for options';
+          if (bgRect) bgRect.setAttribute('fill', '#94a3b8');
+        }
+      }
+    });
+  }
+
   // Universal click protector & self-click bypass for tracked links inside Gmail
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href*="/trace/link"]');
@@ -479,6 +721,16 @@
               ws.send(JSON.stringify({ type: 'AUTH', token: currentAuthUser.apiKey }));
             } catch { }
           }
+        } else {
+          currentAuthUser = null;
+        }
+        updateTopNavBtnAuthState();
+        updateComposeButtonsAuthState();
+        if (isUserAuthenticated()) {
+          dismissAuthModal();
+        }
+        if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
+          renderNotificationsDropdown();
         }
         fetchAllTrackedEmails(true);
       } else if (message.type === 'CONFIG_UPDATED') {
@@ -489,18 +741,22 @@
 
   // Listen for login broadcasts from /auth/extension-success
   window.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'MAILTRACK_AUTH_SUCCESS') {
-      console.log('[Mail Track] Authentication event captured from window postMessage:', event.data.user);
-      if (event.data.user) {
-        currentAuthUser = event.data.user;
+    if (event.data && (event.data.type === 'MAILTRACK_AUTH_SUCCESS' || event.data.action === 'AUTH_SUCCESS_BRIDGE')) {
+      console.log('[Mail Track] Authentication event captured from window postMessage:', event.data.user || event.data);
+      const user = event.data.user || (event.data.apiKey ? { apiKey: event.data.apiKey, email: event.data.email, name: event.data.name } : null);
+      if (user) {
+        currentAuthUser = user;
         if (ws && ws.readyState === WebSocket.OPEN && currentAuthUser.apiKey) {
           try {
             ws.send(JSON.stringify({ type: 'AUTH', token: currentAuthUser.apiKey }));
           } catch { }
         }
       }
+      updateTopNavBtnAuthState();
+      updateComposeButtonsAuthState();
+      dismissAuthModal();
       chrome.runtime.sendMessage({ action: 'GET_AUTH_STATUS' }, () => {
-        fetchAllTrackedEmails();
+        fetchAllTrackedEmails(true);
       });
     }
   });
@@ -1010,18 +1266,30 @@
       `;
 
       function updateLogoBtnState() {
-        if (isTracking) {
+        const isAuth = isUserAuthenticated();
+        const bgRect = logoBtn.querySelector('.mt-logo-bg');
+        if (!isAuth) {
+          logoBtn.className = 'mt-compose-logo-btn unlinked';
+          logoBtn.title = 'Mail Track: Not Connected — Click to connect your Google account';
+          if (bgRect) bgRect.setAttribute('fill', '#94a3b8');
+        } else if (isTracking) {
           logoBtn.className = 'mt-compose-logo-btn active';
           const linkNote = isTrackLinks ? 'Links ON' : 'Links OFF';
-          logoBtn.title = `Mail Track: Tracking ON (${linkNote}) - Click for options`;
+          logoBtn.title = `Mail Track: Tracking ON (${linkNote}) — Click for options`;
+          if (bgRect) bgRect.setAttribute('fill', '#059669');
         } else {
           logoBtn.className = 'mt-compose-logo-btn disabled';
-          logoBtn.title = 'Mail Track: Tracking OFF - Click for options';
+          logoBtn.title = 'Mail Track: Tracking OFF — Click for options';
+          if (bgRect) bgRect.setAttribute('fill', '#94a3b8');
         }
       }
 
       logoBtn.onclick = (e) => {
         e.stopPropagation();
+        if (!isUserAuthenticated()) {
+          showAuthPromptModal(true);
+          return;
+        }
         toggleComposeDropdown(
           dialog,
           logoBtn,
@@ -2133,18 +2401,71 @@
       }).join('');
     }
 
-    // Auth Header Strip: Only show if NOT logged in, prompting to link
-    let authHeaderHtml = '';
-    const activeUser = currentAuthUser || (getCurrentGmailUser() ? { email: getCurrentGmailUser() } : null);
-    if (!activeUser) {
-      authHeaderHtml = `
-        <div class="mt-auth-strip unlinked">
-          <div class="mt-auth-user">
-            <span class="mt-auth-dot unlinked"></span>
-            <span>Gmail Not Linked</span>
+    const isAuth = isUserAuthenticated();
+    const dropdownHeaderIconColor = isAuth ? '#059669' : '#94a3b8';
+
+    let contentBodyHtml = '';
+    if (!isAuth) {
+      contentBodyHtml = `
+        <div class="mt-dropdown-unauth-box">
+          <div class="mt-unauth-badge-row">
+            <div class="mt-unauth-avatar-pill">
+              <div class="mt-unauth-avatar-logo">
+                <svg width="20" height="20" viewBox="0 0 36 36" fill="none">
+                  <rect width="36" height="36" rx="8" fill="#94a3b8"/>
+                  <g transform="translate(5, 5)">
+                    <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
+                  </g>
+                </svg>
+              </div>
+              <span class="mt-unauth-status-text">Account Not Connected</span>
+            </div>
           </div>
-          <a href="${getServerUrl()}/auth/google?flow_src=extension" target="_blank" class="mt-auth-link-btn">
-            Link Google Account
+
+          <h3 class="mt-unauth-headline">Connect your Google Account</h3>
+          <p class="mt-unauth-description">
+            Sign in to Mail Track to enable real-time email open tracking, link click alerts, and double checkmarks.
+          </p>
+
+          <a href="${getServerUrl()}/auth/google?flow_src=extension" target="_blank" class="mt-unauth-primary-btn" id="mtDropdownConnectBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24">
+              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+            </svg>
+            <span>Connect Google Account</span>
+          </a>
+
+          <div class="mt-unauth-perks">
+            <div class="mt-unauth-perk-item">
+              <span class="mt-perk-check">✓</span>
+              <span>Know the exact moment your email is opened</span>
+            </div>
+            <div class="mt-unauth-perk-item">
+              <span class="mt-perk-check">✓</span>
+              <span>Track link clicks with live timestamps</span>
+            </div>
+            <div class="mt-unauth-perk-item">
+              <span class="mt-perk-check">✓</span>
+              <span>Double checkmarks (✓✓) right in your Gmail list</span>
+            </div>
+          </div>
+        </div>
+      `;
+    } else {
+      contentBodyHtml = `
+        <div class="mt-dropdown-list">
+          ${itemsHtml}
+        </div>
+        <div class="mt-dropdown-footer">
+          <a href="${getServerUrl()}" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta">
+            <span>Open Full Dashboard</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
           </a>
         </div>
       `;
@@ -2155,7 +2476,7 @@
         <div class="mt-dh-left">
           <div class="mt-dh-badge-icon" aria-label="Mail Track Logo">
             <svg width="20" height="20" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="36" height="36" rx="8" fill="#059669"/>
+              <rect width="36" height="36" rx="8" fill="${dropdownHeaderIconColor}"/>
               <g transform="translate(5, 5)">
                 <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
               </g>
@@ -2165,20 +2486,7 @@
         </div>
         <button class="mt-dh-close" id="mtDropdownCloseBtn" title="Close">✕</button>
       </div>
-      ${authHeaderHtml}
-      <div class="mt-dropdown-list">
-        ${itemsHtml}
-      </div>
-      <div class="mt-dropdown-footer">
-        <a href="${getServerUrl()}" target="_blank" rel="noopener noreferrer" class="mt-dropdown-cta">
-          <span>Open Full Dashboard</span>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-            <polyline points="15 3 21 3 21 9"></polyline>
-            <line x1="10" y1="14" x2="21" y2="3"></line>
-          </svg>
-        </a>
-      </div>
+      ${contentBodyHtml}
     `;
 
     const closeBtn = topNavDropdownEl.querySelector('#mtDropdownCloseBtn');
@@ -2186,6 +2494,13 @@
       closeBtn.onclick = (e) => {
         e.stopPropagation();
         closeTopNavDropdown();
+      };
+    }
+
+    const connectBtn = topNavDropdownEl.querySelector('#mtDropdownConnectBtn');
+    if (connectBtn) {
+      connectBtn.onclick = () => {
+        setTimeout(closeTopNavDropdown, 400);
       };
     }
 
@@ -2314,26 +2629,29 @@
     if (navBtn) {
       if (navBtn.nextElementSibling === targetAnchor) {
         updateNavBadgeCount(unreadNotificationsCount);
+        updateTopNavBtnAuthState();
         return;
       }
       navBtn.remove();
     }
 
+    const isAuth = isUserAuthenticated();
     navBtn = document.createElement('div');
     navBtn.id = 'mt-topnav-btn';
-    navBtn.className = 'mt-topnav-btn';
-    navBtn.title = 'Mail Track Activity & Notifications';
+    navBtn.className = `mt-topnav-btn ${isAuth ? '' : 'unlinked'}`;
+    navBtn.title = isAuth ? 'Mail Track Activity & Notifications' : 'Mail Track: Not Connected — Click to connect your Google account';
     navBtn.setAttribute('role', 'button');
-    navBtn.setAttribute('aria-label', 'Mail Track Activity & Notifications');
+    navBtn.setAttribute('aria-label', isAuth ? 'Mail Track Activity & Notifications' : 'Mail Track: Not Connected — Click to connect your Google account');
     navBtn.setAttribute('tabindex', '0');
     navBtn.setAttribute('data-node-id', '188:9972');
     navBtn.setAttribute('data-name', 'Track Mail Butotn');
     navBtn.innerHTML = `
-      <div class="mt-nav-container" data-node-id="188:9973" data-name="Container" title="Mail Track Activity">
+      <div class="mt-nav-container ${isAuth ? '' : 'unlinked'}" style="background: ${isAuth ? '#059669' : '#94a3b8'} !important;" data-node-id="188:9973" data-name="Container" title="${isAuth ? 'Mail Track Activity' : 'Mail Track: Not Connected'}">
         <svg class="mt-nav-svg" width="18" height="18" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" data-node-id="188:9974" data-name="Frame">
           <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
         </svg>
         <span class="mt-nav-badge" id="mtNavBadge" style="display:none !important;" data-node-id="188:9976" data-name="Count Badge"></span>
+        <span class="mt-nav-unlinked-dot" id="mtNavUnlinkedDot" style="${isAuth ? 'display:none !important;' : 'display:block !important;'}"></span>
       </div>
     `;
 
@@ -2354,13 +2672,25 @@
     };
 
     parentContainer.insertBefore(navBtn, targetAnchor);
+    updateTopNavBtnAuthState();
     updateNavBadgeCount(unreadNotificationsCount);
   }
 
   // Initial runs
+  fetchAuthStatus();
   fetchAllTrackedEmails();
   initDirectWebSocket();
   attachTargetedObserver();
   setupComposeButtons();
   setupTopNavButton();
+
+  // Prompt user after brief delay on opening Gmail if not logged in
+  setTimeout(() => {
+    checkAndShowAuthPrompt();
+  }, 1800);
+
+  // Sync auth when window regains focus (e.g. user finished Google OAuth in another tab)
+  window.addEventListener('focus', () => {
+    fetchAuthStatus();
+  });
 })();
