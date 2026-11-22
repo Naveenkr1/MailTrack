@@ -157,6 +157,10 @@
     }
 
     if (document.getElementById('mt-auth-prompt-modal')) return;
+    if (!document.body) {
+      setTimeout(() => showAuthPromptModal(force), 500);
+      return;
+    }
 
     const modalBackdrop = document.createElement('div');
     modalBackdrop.id = 'mt-auth-prompt-modal';
@@ -173,12 +177,12 @@
         </div>
 
         <div style="display:flex; justify-content:center;">
-          <span class="mt-auth-prompt-pill">Setup Required • 1 Step</span>
+          <span class="mt-auth-prompt-pill">Action Required • Please Log In First</span>
         </div>
 
-        <h2 class="mt-auth-prompt-title" id="mtAuthPromptTitle">Connect Your Gmail Account</h2>
+        <h2 class="mt-auth-prompt-title" id="mtAuthPromptTitle">Please Log In to Enable Email Tracking</h2>
         <p class="mt-auth-prompt-desc">
-          You've installed Mail Track! To activate live email read receipts, link click notifications, and double checkmarks in Gmail, connect your Google account.
+          Email tracking is currently <strong>disabled</strong>. Connect your Google account to enable live email read receipts, link click notifications, and double checkmarks in Gmail.
         </p>
 
         <div class="mt-auth-prompt-btn-group">
@@ -189,7 +193,7 @@
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
             </svg>
-            <span>Connect with Google</span>
+            <span>Log In with Google</span>
           </a>
           <button class="mt-auth-prompt-later-btn" id="mtAuthPromptLaterBtn">Remind me later</button>
         </div>
@@ -286,14 +290,28 @@
     composeButtons.forEach((btn) => {
       const bgRect = btn.querySelector('.mt-logo-bg');
       if (!isAuth) {
-        btn.classList.add('unlinked');
-        btn.title = 'Mail Track: Not Connected — Click to connect your Google account';
+        btn.className = 'mt-compose-logo-btn unlinked disabled';
+        btn.title = 'Mail Track: Tracking Disabled — Please log in to connect your Google account';
         if (bgRect) bgRect.setAttribute('fill', '#94a3b8');
+        const dialog = btn.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An');
+        if (dialog) {
+          dialog.setAttribute('data-mt-track-mail', 'false');
+          dialog.setAttribute('data-mt-track-links', 'false');
+        }
       } else {
         btn.classList.remove('unlinked');
         const dialog = btn.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An');
-        const isTracking = dialog ? dialog.getAttribute('data-mt-track-mail') !== 'false' : true;
-        const isTrackLinks = dialog ? dialog.getAttribute('data-mt-track-links') !== 'false' : true;
+        let isTracking = true;
+        let isTrackLinks = true;
+        if (dialog) {
+          if (dialog.getAttribute('data-mt-user-set') === 'true') {
+            isTracking = dialog.getAttribute('data-mt-track-mail') !== 'false';
+            isTrackLinks = dialog.getAttribute('data-mt-track-links') !== 'false';
+          } else {
+            dialog.setAttribute('data-mt-track-mail', 'true');
+            dialog.setAttribute('data-mt-track-links', 'true');
+          }
+        }
         if (isTracking) {
           btn.className = 'mt-compose-logo-btn active';
           const linkNote = isTrackLinks ? 'Links ON' : 'Links OFF';
@@ -1014,7 +1032,29 @@
   function injectTrackingIntoCompose(dialog) {
     if (!dialog) return;
 
-    // Check if tracking is explicitly disabled via toggle
+    // Hard block: do NOT enable or inject tracking until user logs in
+    if (!isUserAuthenticated()) {
+      untrackLinksInBody(dialog);
+      const body = dialog.querySelector('div[role="textbox"][aria-label*="Message Body" i], div[contenteditable="true"]');
+      if (body) {
+        const img = body.querySelector('img[src*="/trace/mail/"]');
+        if (img) img.remove();
+      }
+      showAuthPromptModal(true);
+      return;
+    }
+
+    // Check if tracking is explicitly disabled via toggle or attribute
+    if (dialog.getAttribute('data-mt-track-mail') === 'false') {
+      untrackLinksInBody(dialog);
+      const body = dialog.querySelector('div[role="textbox"][aria-label*="Message Body" i], div[contenteditable="true"]');
+      if (body) {
+        const img = body.querySelector('img[src*="/trace/mail/"]');
+        if (img) img.remove();
+      }
+      return;
+    }
+
     const logoBtn = dialog.querySelector('.mt-compose-logo-btn');
     if (logoBtn && logoBtn.classList.contains('disabled')) {
       return;
@@ -1217,21 +1257,29 @@
       // Attach send triggers (mousedown, pointerdown, click) to ensure injection runs regardless of speed
       if (!sendBtn.getAttribute('data-mt-bound')) {
         sendBtn.setAttribute('data-mt-bound', 'true');
-        sendBtn.addEventListener('mousedown', () => injectTrackingIntoCompose(dialog), true);
-        sendBtn.addEventListener('pointerdown', () => injectTrackingIntoCompose(dialog), true);
-        sendBtn.addEventListener('click', () => injectTrackingIntoCompose(dialog), true);
+        const handleSendAttempt = () => {
+          if (!isUserAuthenticated()) {
+            showAuthPromptModal(true);
+            return;
+          }
+          injectTrackingIntoCompose(dialog);
+        };
+        sendBtn.addEventListener('mousedown', handleSendAttempt, true);
+        sendBtn.addEventListener('pointerdown', handleSendAttempt, true);
+        sendBtn.addEventListener('click', handleSendAttempt, true);
       }
 
       // Avoid injecting multiple logo buttons
       if (dialog.querySelector('.mt-compose-logo-btn')) return;
 
-      let isTracking = true;
-      let isTrackLinks = true;
+      const isAuth = isUserAuthenticated();
+      let isTracking = isAuth;
+      let isTrackLinks = isAuth;
 
-      dialog.setAttribute('data-mt-track-mail', 'true');
-      dialog.setAttribute('data-mt-track-links', 'true');
+      dialog.setAttribute('data-mt-track-mail', isAuth ? 'true' : 'false');
+      dialog.setAttribute('data-mt-track-links', isAuth ? 'true' : 'false');
 
-      if (isAlive() && chrome.storage?.local) {
+      if (isAuth && isAlive() && chrome.storage?.local) {
         chrome.storage.local.get(['mailtrack_track_mail', 'mailtrack_track_links'], (res) => {
           if (res) {
             if (typeof res.mailtrack_track_mail === 'boolean') {
@@ -1250,14 +1298,14 @@
       const logoUrl = isAlive() && chrome.runtime?.getURL ? chrome.runtime.getURL('icons/logo-compose.png') : '';
 
       const logoBtn = document.createElement('div');
-      logoBtn.className = 'mt-compose-logo-btn active';
-      logoBtn.title = 'Mail Track: Tracking ON (Links ON) - Click for options';
+      logoBtn.className = isAuth ? 'mt-compose-logo-btn active' : 'mt-compose-logo-btn unlinked disabled';
+      logoBtn.title = isAuth ? 'Mail Track: Tracking ON (Links ON) — Click for options' : 'Mail Track: Tracking Disabled — Please log in to connect your Google account';
       logoBtn.setAttribute('role', 'button');
       logoBtn.setAttribute('tabindex', '0');
       logoBtn.innerHTML = `
         <div class="mt-compose-logo-wrap" title="Mail Track">
           <svg class="mt-compose-logo-svg" width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="36" height="36" rx="8" class="mt-logo-bg" fill="#059669"/>
+            <rect width="36" height="36" rx="8" class="mt-logo-bg" fill="${isAuth ? '#059669' : '#94a3b8'}"/>
             <g transform="translate(5, 5)">
               <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
             </g>
@@ -1266,11 +1314,11 @@
       `;
 
       function updateLogoBtnState() {
-        const isAuth = isUserAuthenticated();
+        const currentIsAuth = isUserAuthenticated();
         const bgRect = logoBtn.querySelector('.mt-logo-bg');
-        if (!isAuth) {
-          logoBtn.className = 'mt-compose-logo-btn unlinked';
-          logoBtn.title = 'Mail Track: Not Connected — Click to connect your Google account';
+        if (!currentIsAuth) {
+          logoBtn.className = 'mt-compose-logo-btn unlinked disabled';
+          logoBtn.title = 'Mail Track: Tracking Disabled — Please log in to connect your Google account';
           if (bgRect) bgRect.setAttribute('fill', '#94a3b8');
         } else if (isTracking) {
           logoBtn.className = 'mt-compose-logo-btn active';
@@ -1297,12 +1345,14 @@
           (key, val) => {
             if (key === 'mail') {
               isTracking = val;
+              dialog.setAttribute('data-mt-user-set', 'true');
               dialog.setAttribute('data-mt-track-mail', val ? 'true' : 'false');
               if (isAlive() && chrome.storage?.local) {
                 chrome.storage.local.set({ mailtrack_track_mail: val });
               }
             } else if (key === 'links') {
               isTrackLinks = val;
+              dialog.setAttribute('data-mt-user-set', 'true');
               dialog.setAttribute('data-mt-track-links', val ? 'true' : 'false');
               if (isAlive() && chrome.storage?.local) {
                 chrome.storage.local.set({ mailtrack_track_links: val });
@@ -1328,6 +1378,10 @@
   // Intercept keyboard shortcut sends (Cmd+Enter on Mac, Ctrl+Enter on Windows)
   document.addEventListener('keydown', (e) => {
     if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.keyCode === 13)) {
+      if (!isUserAuthenticated()) {
+        showAuthPromptModal(true);
+        return;
+      }
       const activeEl = document.activeElement;
       const dialog = activeEl ? activeEl.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An') : null;
       if (dialog) {
@@ -1356,6 +1410,10 @@
       '[aria-label*="Send ("]'
     );
     if (sendBtn) {
+      if (!isUserAuthenticated()) {
+        showAuthPromptModal(true);
+        return;
+      }
       const dialog = sendBtn.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An') ||
                      document.querySelector('div[role="dialog"], div.M9, div.AD, table.cf.An');
       if (dialog) {

@@ -96,6 +96,21 @@ if (typeof chrome !== 'undefined' && chrome.declarativeNetRequest && chrome.decl
   }).catch(() => {});
 }
 
+// On extension install, automatically prompt user to connect Google account / log in
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onInstalled) {
+  chrome.runtime.onInstalled.addListener(async (details) => {
+    if (details.reason === 'install') {
+      try {
+        const serverUrl = await getActiveServerUrl();
+        const targetUrl = `${serverUrl || PROD_SERVER_URL}/auth/google?flow_src=extension&installed=true`;
+        chrome.tabs.create({ url: targetUrl });
+      } catch (e) {
+        chrome.tabs.create({ url: `${PROD_SERVER_URL}/auth/google?flow_src=extension&installed=true` });
+      }
+    }
+  });
+}
+
 // Dynamic Extension Action behavior:
 // - If user is logged in: clicking the extension redirects immediately to dashboard.
 // - If user is NOT logged in: clicking the extension shows popup with "Log In".
