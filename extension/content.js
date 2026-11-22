@@ -74,8 +74,12 @@
   }
 
   // Load cached auth immediately from local extension storage
+  let isGlobalTrackingActive = true;
   if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-    chrome.storage.local.get(['mt_user', 'mt_api_key', 'mt_is_logged_out'], (items) => {
+    chrome.storage.local.get(['mt_user', 'mt_api_key', 'mt_is_logged_out', 'mt_tracking_enabled'], (items) => {
+      if (items && items.mt_tracking_enabled !== undefined) {
+        isGlobalTrackingActive = items.mt_tracking_enabled !== false;
+      }
       if (items && items.mt_is_logged_out) {
         currentAuthUser = null;
         updateTopNavBtnAuthState();
@@ -97,32 +101,38 @@
   // Listen for storage changes in real time (e.g. user logged in or out in another tab)
   if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && (changes.mt_user || changes.mt_api_key || changes.mt_is_logged_out)) {
-        chrome.storage.local.get(['mt_user', 'mt_api_key', 'mt_is_logged_out'], (items) => {
-          if (items && (items.mt_is_logged_out || !items.mt_user)) {
-            currentAuthUser = null;
-            try { sessionStorage.removeItem('mt_auth_alert_dismissed'); } catch {}
-          } else if (items && items.mt_user) {
-            currentAuthUser = items.mt_user;
-            if (items.mt_api_key && !currentAuthUser.apiKey) {
-              currentAuthUser.apiKey = items.mt_api_key;
-            }
-          } else {
-            currentAuthUser = null;
-          }
-          updateTopNavBtnAuthState();
+      if (area === 'local') {
+        if (changes.mt_tracking_enabled !== undefined) {
+          isGlobalTrackingActive = changes.mt_tracking_enabled.newValue !== false;
           updateComposeButtonsAuthState();
-          if (isUserAuthenticated()) {
-            dismissAuthModal();
-          } else {
-            showAuthPromptModal(true);
-          }
-          if (!isUserAuthenticated()) {
-            closeTopNavDropdown();
-          } else if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
-            renderNotificationsDropdown();
-          }
-        });
+        }
+        if (changes.mt_user || changes.mt_api_key || changes.mt_is_logged_out) {
+          chrome.storage.local.get(['mt_user', 'mt_api_key', 'mt_is_logged_out'], (items) => {
+            if (items && (items.mt_is_logged_out || !items.mt_user)) {
+              currentAuthUser = null;
+              try { sessionStorage.removeItem('mt_auth_alert_dismissed'); } catch {}
+            } else if (items && items.mt_user) {
+              currentAuthUser = items.mt_user;
+              if (items.mt_api_key && !currentAuthUser.apiKey) {
+                currentAuthUser.apiKey = items.mt_api_key;
+              }
+            } else {
+              currentAuthUser = null;
+            }
+            updateTopNavBtnAuthState();
+            updateComposeButtonsAuthState();
+            if (isUserAuthenticated()) {
+              dismissAuthModal();
+            } else {
+              showAuthPromptModal(true);
+            }
+            if (!isUserAuthenticated()) {
+              closeTopNavDropdown();
+            } else if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
+              renderNotificationsDropdown();
+            }
+          });
+        }
       }
     });
   }
@@ -538,6 +548,15 @@
       if (!isAuth) {
         btn.className = 'mt-compose-logo-btn unlinked disabled';
         btn.title = 'Mail Track: Tracking Disabled — Please log in to connect your Google account';
+        if (bgRect) bgRect.setAttribute('fill', '#94a3b8');
+        const dialog = btn.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An');
+        if (dialog) {
+          dialog.setAttribute('data-mt-track-mail', 'false');
+          dialog.setAttribute('data-mt-track-links', 'false');
+        }
+      } else if (!isGlobalTrackingActive) {
+        btn.className = 'mt-compose-logo-btn disabled';
+        btn.title = 'Mail Track: Tracking Paused — Enable via Mail Track Extension Dropdown';
         if (bgRect) bgRect.setAttribute('fill', '#94a3b8');
         const dialog = btn.closest('div[role="dialog"], div.M9, div.AD, div[role="region"], table.cf.An');
         if (dialog) {
@@ -1311,6 +1330,17 @@
         if (img) img.remove();
       }
       showAuthPromptModal(true);
+      return;
+    }
+
+    // Check if tracking is paused globally from extension dropdown toggle
+    if (!isGlobalTrackingActive) {
+      untrackLinksInBody(dialog);
+      const body = dialog.querySelector('div[role="textbox"][aria-label*="Message Body" i], div[contenteditable="true"]');
+      if (body) {
+        const img = body.querySelector('img[src*="/trace/mail/"]');
+        if (img) img.remove();
+      }
       return;
     }
 
