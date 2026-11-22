@@ -1082,7 +1082,7 @@ app.get('/api/emails', optionalAuth, async (req, res) => {
     emails,
     publicUrl: effectiveBaseUrl,
     // Only return user credentials if the request was authenticated via session cookie or bearer token
-    user: req.user ? { id: user.id, email: user.email, name: user.name, apiKey: user.api_key } : null
+    user: req.user ? { id: user.id, email: user.email, name: user.name, apiKey: user.api_key, avatarUrl: user.avatar_url } : null
   });
 });
 

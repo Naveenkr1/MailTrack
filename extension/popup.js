@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loggedInView = document.getElementById('loggedInView');
   const loadingView = document.getElementById('loadingView');
   const loginBtn = document.getElementById('loginBtn');
-  const openDashboardBtn = document.getElementById('openDashboardBtn');
   const openGmailBtn = document.getElementById('openGmailBtn');
   const openGmailLoggedOutBtn = document.getElementById('openGmailLoggedOutBtn');
   const logoutBtn = document.getElementById('logoutBtn');
@@ -39,6 +38,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (loggedInView) loggedInView.style.display = (view === 'loggedIn') ? 'block' : 'none';
   }
 
+  // Helper: compute First + Last name initials
+  function computeInitials(name, email) {
+    if (name && typeof name === 'string') {
+      const parts = name.trim().split(/\s+/).filter(Boolean);
+      if (parts.length >= 2) {
+        const first = parts[0][0] || '';
+        const last = parts[parts.length - 1][0] || '';
+        return (first + last).toUpperCase();
+      } else if (parts.length === 1 && parts[0].length > 0) {
+        return parts[0][0].toUpperCase();
+      }
+    }
+    if (email && typeof email === 'string') {
+      const clean = email.split('@')[0].replace(/[^a-zA-Z]/g, '');
+      if (clean.length >= 2) {
+        return clean.substring(0, 2).toUpperCase();
+      } else if (clean.length === 1) {
+        return clean.toUpperCase();
+      }
+    }
+    return 'U';
+  }
+
   function handleLoggedIn(user) {
     showView('loggedIn');
     if (userNameEl && user) {
@@ -48,12 +70,25 @@ document.addEventListener('DOMContentLoaded', async () => {
       userEmailEl.textContent = user.email || 'Connected Account';
     }
     if (userAvatarEl && user) {
-      const pic = user.avatarUrl || user.picture;
-      if (pic) {
-        userAvatarEl.innerHTML = `<img src="${pic}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" />`;
+      const initials = computeInitials(user.name, user.email);
+      const photoUrl = user.avatarUrl || user.avatar_url || user.picture || user.photo;
+
+      if (photoUrl && typeof photoUrl === 'string' && (photoUrl.startsWith('http://') || photoUrl.startsWith('https://'))) {
+        userAvatarEl.innerHTML = '';
+        const img = document.createElement('img');
+        img.referrerPolicy = 'no-referrer';
+        img.alt = user.name || 'Profile';
+        img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;';
+        img.onload = () => {
+          userAvatarEl.innerHTML = '';
+          userAvatarEl.appendChild(img);
+        };
+        img.onerror = () => {
+          userAvatarEl.textContent = initials;
+        };
+        img.src = photoUrl;
       } else {
-        const initial = ((user.name || user.email || 'N')[0]).toUpperCase();
-        userAvatarEl.textContent = initial;
+        userAvatarEl.textContent = initials;
       }
     }
   }
@@ -64,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       logoutBtn.disabled = false;
       logoutBtn.style.opacity = '1';
       logoutBtn.innerHTML = `
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
           <polyline points="16 17 21 12 16 7"></polyline>
           <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -153,12 +188,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 4. Action Button Handlers
+  // 4. On click on Setting: Open the Dashboard!
   if (settingsBtn) {
     settingsBtn.onclick = async () => {
       const sUrl = await getServerUrl();
-      chrome.tabs.create({ url: `${sUrl}/` });
-      window.close();
+      chrome.runtime.sendMessage({ action: 'REDIRECT_DASHBOARD' }, (res) => {
+        if (chrome.runtime.lastError || !res) {
+          chrome.tabs.create({ url: `${sUrl}/` });
+        }
+        window.close();
+      });
     };
   }
 
@@ -173,18 +212,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       const sUrl = await getServerUrl();
       chrome.tabs.create({ url: `${sUrl}/login` });
       window.close();
-    };
-  }
-
-  if (openDashboardBtn) {
-    openDashboardBtn.onclick = async () => {
-      const sUrl = await getServerUrl();
-      chrome.runtime.sendMessage({ action: 'REDIRECT_DASHBOARD' }, (res) => {
-        if (chrome.runtime.lastError || !res) {
-          chrome.tabs.create({ url: `${sUrl}/` });
-        }
-        window.close();
-      });
     };
   }
 
