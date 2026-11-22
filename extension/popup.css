@@ -40,12 +40,14 @@ body {
   width: 34px;
   height: 34px;
   flex-shrink: 0;
-  border-radius: 9px;
-  background: #047857;
+  border-radius: 8px;
+  overflow: hidden;
   box-shadow: 0 3px 8px rgba(4, 120, 87, 0.22);
 }
 
 .brand-badge-icon svg {
+  width: 34px;
+  height: 34px;
   display: block;
 }
 
