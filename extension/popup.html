@@ -38,8 +38,13 @@
         <div class="login-desc">Connect your account to start tracking email opens, link clicks, and double checkmarks in Gmail.</div>
         
         <button class="btn-login" id="loginBtn">
-          <span>Log In to Mail Track</span>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Log In with Google</span>
         </button>
 
         <div class="login-features">
@@ -59,25 +64,68 @@
       </div>
     </div>
 
-    <!-- 2. LOGGED IN VIEW (Redirecting to Dashboard) -->
+    <!-- 2. LOGGED IN VIEW (Profile, Dashboard & Logout) -->
     <div id="loggedInView" class="view-panel" style="display: none;">
-      <div class="redirect-card">
-        <div class="user-info-row">
+      <div class="profile-card">
+        <div class="profile-header">
           <div class="avatar" id="userAvatar">U</div>
-          <div class="user-meta">
-            <div class="user-email" id="userEmail">Loading...</div>
-            <div class="user-badge">● Account Connected</div>
+          <div class="profile-meta">
+            <div class="profile-name" id="userName">Connected Account</div>
+            <div class="profile-email" id="userEmail">Loading...</div>
+          </div>
+          <span class="user-status-chip">
+            <span class="status-dot"></span> Active
+          </span>
+        </div>
+
+        <div class="status-summary-box">
+          <div class="status-summary-item">
+            <div class="status-summary-icon">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </div>
+            <div class="status-summary-text">
+              <span class="status-title">Email Tracking Active</span>
+              <span class="status-sub">Live opens & link tracking enabled</span>
+            </div>
           </div>
         </div>
 
-        <div class="redirect-msg">
-          <div class="spinner"></div>
-          <span>Redirecting to Dashboard...</span>
-        </div>
+        <div class="profile-actions">
+          <button class="btn-primary-action" id="openDashboardBtn" title="Open Mail Track Dashboard">
+            <div class="btn-action-left">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="9"></rect>
+                <rect x="14" y="3" width="7" height="5"></rect>
+                <rect x="14" y="12" width="7" height="9"></rect>
+                <rect x="3" y="16" width="7" height="5"></rect>
+              </svg>
+              <span>View Dashboard</span>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7"></line>
+              <polyline points="7 7 17 7 17 17"></polyline>
+            </svg>
+          </button>
 
-        <button class="btn-dash" id="openDashboardBtn">
-          Open Dashboard Now ↗
-        </button>
+          <button class="btn-secondary-action" id="openGmailBtn" title="Go to Gmail">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <span>Open Gmail</span>
+          </button>
+
+          <button class="btn-logout" id="logoutBtn" title="Log out of Mail Track">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Log Out</span>
+          </button>
+        </div>
       </div>
     </div>
 

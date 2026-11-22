@@ -111,16 +111,15 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onInstalle
   });
 }
 
-// Dynamic Extension Action behavior:
-// - If user is logged in: clicking the extension redirects immediately to dashboard.
-// - If user is NOT logged in: clicking the extension shows popup with "Log In".
+// Extension Action behavior:
+// Always keep popup set to popup.html so clicking the toolbar icon opens the popup options
+// (Login option if not logged in; Profile, View Dashboard, and Logout if logged in).
 function updateActionBehavior(isLoggedIn) {
   if (typeof chrome === 'undefined' || !chrome.action) return;
-  if (isLoggedIn) {
-    chrome.action.setPopup({ popup: '' });
-    chrome.action.setTitle({ title: 'Mail Track — Open Dashboard' });
+  chrome.action.setPopup({ popup: 'popup.html' });
+  if (isLoggedIn && currentUser && currentUser.email) {
+    chrome.action.setTitle({ title: `Mail Track — ${currentUser.email}` });
   } else {
-    chrome.action.setPopup({ popup: 'popup.html' });
     chrome.action.setTitle({ title: 'Mail Track — Log In' });
   }
 }
@@ -147,20 +146,12 @@ function openOrFocusDashboard() {
   });
 }
 
-// When popup is disabled (user is logged in), clicking the toolbar extension icon fires this event
+// Fallback listener for extension action clicks
 if (typeof chrome !== 'undefined' && chrome.action && chrome.action.onClicked) {
   chrome.action.onClicked.addListener((tab) => {
-    if (currentUser && currentUser.email) {
-      openOrFocusDashboard();
-    } else {
-      chrome.action.setPopup({ popup: 'popup.html' });
-      if (chrome.action.openPopup) {
-        chrome.action.openPopup().catch(() => {
-          chrome.tabs.create({ url: `${activeServerUrl}/login` });
-        });
-      } else {
-        chrome.tabs.create({ url: `${activeServerUrl}/login` });
-      }
+    chrome.action.setPopup({ popup: 'popup.html' });
+    if (chrome.action.openPopup) {
+      chrome.action.openPopup().catch(() => {});
     }
   });
 }
@@ -566,6 +557,46 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     const sUrl = activeServerUrl || PROD_SERVER_URL;
     chrome.tabs.create({ url: `${sUrl}/login` });
     sendResponse({ success: true });
+    return true;
+  }
+
+  if (request.action === 'LOGOUT') {
+    (async () => {
+      try {
+        await fetch(`${activeServerUrl}/auth/logout`, {
+          method: 'POST',
+          credentials: 'include'
+        }).catch(() => {});
+      } catch {}
+
+      currentUser = null;
+      cachedApiKey = null;
+
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        await chrome.storage.local.remove(['mt_user', 'mt_api_key']);
+      }
+
+      if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.remove) {
+        try {
+          await chrome.cookies.remove({ url: activeServerUrl, name: 'mt_token' }).catch(() => {});
+          await chrome.cookies.remove({ url: PROD_SERVER_URL, name: 'mt_token' }).catch(() => {});
+        } catch {}
+      }
+
+      if (ws) {
+        try { ws.close(); } catch {}
+        ws = null;
+      }
+
+      broadcastToGmailTabs({
+        type: 'AUTH_STATUS_CHANGED',
+        authenticated: false,
+        user: null
+      });
+
+      updateActionBehavior(false);
+      sendResponse({ success: true });
+    })();
     return true;
   }
 
