@@ -182,12 +182,17 @@
     const host = document.createElement('mailtrack-prompt-container');
     host.style.cssText = [
       'position: fixed !important',
+      'inset: 0 !important',
       'top: 0 !important',
       'left: 0 !important',
+      'right: 0 !important',
+      'bottom: 0 !important',
       'width: 100vw !important',
       'height: 100vh !important',
       'z-index: 2147483647 !important',
-      'display: block !important',
+      'display: flex !important',
+      'align-items: center !important',
+      'justify-content: center !important',
       'visibility: visible !important',
       'opacity: 1 !important',
       'pointer-events: auto !important',
@@ -202,15 +207,22 @@
     const style = document.createElement('style');
     style.textContent = `
       :host {
-        all: initial !important;
         position: fixed !important;
+        inset: 0 !important;
         top: 0 !important;
         left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
         z-index: 2147483647 !important;
-        display: block !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         pointer-events: auto !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
       }
       * {
         box-sizing: border-box !important;
@@ -220,22 +232,23 @@
       }
       .backdrop {
         position: fixed !important;
+        inset: 0 !important;
         top: 0 !important;
         left: 0 !important;
         right: 0 !important;
         bottom: 0 !important;
         width: 100vw !important;
         height: 100vh !important;
-        background: rgba(15, 23, 42, 0.65) !important;
-        backdrop-filter: blur(4px) !important;
-        -webkit-backdrop-filter: blur(4px) !important;
+        background: rgba(15, 23, 42, 0.72) !important;
+        backdrop-filter: blur(6px) !important;
+        -webkit-backdrop-filter: blur(6px) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 16px !important;
+        padding: 24px !important;
         box-sizing: border-box !important;
         z-index: 2147483647 !important;
-        animation: mtBackdropFade 0.18s ease-out !important;
+        animation: mtBackdropFade 0.2s ease-out !important;
       }
       @keyframes mtBackdropFade {
         from { opacity: 0; }
@@ -243,11 +256,12 @@
       }
       .card {
         position: relative !important;
+        margin: auto !important;
         width: 440px !important;
         max-width: 95vw !important;
         background: #ffffff !important;
         border-radius: 20px !important;
-        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
         padding: 32px 28px 24px 28px !important;
         text-align: center !important;
         color: #0f172a !important;
@@ -472,7 +486,7 @@
     };
     window.addEventListener('keydown', handleKeydown);
 
-    document.body.appendChild(host);
+    (document.documentElement || document.body).appendChild(host);
   }
 
   function checkAndShowAuthPrompt() {
@@ -781,7 +795,7 @@
         if (!isAlive() || chrome.runtime.lastError) return;
         if (res && res.success) {
           if (res.config && res.config.publicUrl) publicTrackingUrl = res.config.publicUrl;
-          if (res.user) currentAuthUser = res.user;
+          if (res.user && isUserAuthenticated()) currentAuthUser = res.user;
           if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
             renderNotificationsDropdown();
           }
@@ -795,6 +809,14 @@
   let lastFetchEmailsTime = 0;
 
   function fetchAllTrackedEmails(force = false) {
+    if (!isUserAuthenticated()) {
+      isFetchingEmails = false;
+      trackedEmails = [];
+      updateAllRows();
+      updateOpenThreadHeader();
+      return;
+    }
+
     const now = Date.now();
     if (isFetchingEmails && !force) return;
     if (!force && now - lastFetchEmailsTime < 1800) return;
@@ -806,14 +828,14 @@
 
     function applyEmailsData(data) {
       isFetchingEmails = false;
+      if (!isUserAuthenticated()) {
+        trackedEmails = [];
+        updateAllRows();
+        updateOpenThreadHeader();
+        return;
+      }
       if (data && data.success && data.emails) {
         trackedEmails = data.emails;
-        if (data.user) {
-          currentAuthUser = data.user;
-          if (ws && ws.readyState === WebSocket.OPEN && currentAuthUser.apiKey) {
-            try { ws.send(JSON.stringify({ type: 'AUTH', token: currentAuthUser.apiKey })); } catch { }
-          }
-        }
 
         // Calculate unread count for activity that happened since last seen
         try {
@@ -848,6 +870,10 @@
     }
 
     function fetchDirect() {
+      if (!isUserAuthenticated()) {
+        isFetchingEmails = false;
+        return;
+      }
       const q = activeEmail ? `?email=${encodeURIComponent(activeEmail)}` : '';
       fetch(`${getServerUrl()}/api/emails${q}`)
         .then(r => r.json())
@@ -860,14 +886,20 @@
         chrome.runtime.sendMessage({ action: 'GET_TRACKED_EMAILS', email: activeEmail }, (res) => {
           if (!chrome.runtime.lastError && res && res.success) {
             applyEmailsData(res);
-          } else {
+          } else if (isUserAuthenticated()) {
             fetchDirect();
+          } else {
+            isFetchingEmails = false;
           }
         });
         return;
       } catch { }
     }
-    fetchDirect();
+    if (isUserAuthenticated()) {
+      fetchDirect();
+    } else {
+      isFetchingEmails = false;
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -875,6 +907,7 @@
   // -------------------------------------------------------------------------
   let wsConnecting = false;
   async function initDirectWebSocket() {
+    if (!isUserAuthenticated()) return;
     if (wsConnecting) return;
     if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
       return;
@@ -2280,6 +2313,7 @@
   let isPulsing = false;
 
   function runSubSecondPulse() {
+    if (!isUserAuthenticated()) return;
     if (!isAlive() || document.hidden || isPulsing) return;
     const activeEmail = getCurrentGmailUser() || (currentAuthUser && currentAuthUser.email) || null;
     const q = activeEmail 

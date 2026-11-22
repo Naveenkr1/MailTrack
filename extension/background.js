@@ -277,15 +277,15 @@ if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.onChanged)
         console.log('[MailTrack BG] Auth token cookie change detected on', domain, 'removed:', changeInfo.removed);
         clearTimeout(cookieDebounce);
         cookieDebounce = setTimeout(async () => {
-          if (!changeInfo.removed && changeInfo.cookie.value) {
-            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-              await chrome.storage.local.remove(['mt_is_logged_out']);
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            const stored = await chrome.storage.local.get(['mt_is_logged_out']);
+            if (stored && stored.mt_is_logged_out) {
+              // User explicitly logged out; do NOT auto-login from cookies!
+              return;
             }
-            syncAuth(true);
-          } else if (changeInfo.removed) {
-            syncAuth();
           }
-        }, 300);
+          syncAuth();
+        }, 500);
       }
     }
   });
@@ -691,15 +691,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         const stored = await chrome.storage.local.get(['mt_is_logged_out']);
         if (stored && stored.mt_is_logged_out) {
-          const token = await getAuthTokenCookie();
-          if (!token) {
-            currentUser = null;
-            cachedApiKey = null;
-            updateActionBehavior(false);
-            sendResponse({ authenticated: false, user: null, apiKey: null, activeServerUrl });
-            return;
-          }
-          await chrome.storage.local.remove(['mt_is_logged_out']);
+          currentUser = null;
+          cachedApiKey = null;
+          updateActionBehavior(false);
+          sendResponse({ authenticated: false, user: null, apiKey: null, activeServerUrl });
+          return;
         }
       }
       syncAuth().then((isAuth) => {
@@ -794,6 +790,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'GET_TRACKED_EMAILS') {
     (async () => {
+      // 0. If explicitly logged out, don't fetch or resurrect
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        const stored = await new Promise(r => chrome.storage.local.get(['mt_is_logged_out'], r));
+        if (stored && stored.mt_is_logged_out) {
+          sendResponse({ success: false, emails: [], loggedOut: true });
+          return;
+        }
+      }
+
       await getActiveServerUrl();
 
       // 1. If cachedApiKey not in memory, await storage
@@ -805,6 +810,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             resolve();
           });
         });
+      }
+
+      // If no authenticated session or API key, return unauthenticated without backend querying
+      if (!cachedApiKey && !currentUser) {
+        sendResponse({ success: false, emails: [], unauthenticated: true });
+        return;
       }
 
       // 2. Prepare headers & query
@@ -822,8 +833,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       try {
         const res = await fetch(url, { headers });
         const data = await res.json();
-        if (data && data.success && data.user) {
-          cachedApiKey = data.user.apiKey;
+        if (data && data.success && data.user && currentUser) {
+          cachedApiKey = data.user.apiKey || cachedApiKey;
           currentUser = data.user;
           if (typeof chrome !== 'undefined' && chrome.storage?.local) {
             chrome.storage.local.set({ mt_user: data.user, mt_api_key: data.user.apiKey });

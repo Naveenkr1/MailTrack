@@ -1053,17 +1053,15 @@ app.get('/api/emails', optionalAuth, async (req, res) => {
   let user = req.user;
   const userEmail = (req.query.email || req.headers['x-mailtrack-user-email'] || '').trim().toLowerCase();
 
-  // If a specific user email is requested by the active tab or client, resolve to that exact user
-  if (userEmail && userEmail.includes('@')) {
-    if (!user || user.email.toLowerCase() !== userEmail) {
-      user = await db.findUserByEmail(userEmail);
-      if (!user) {
-        user = await db.createOrUpdateUser({ email: userEmail, name: userEmail.split('@')[0] });
+  // If a specific user email is requested by the active tab or client, ONLY resolve if authenticated or API key matched
+  if (!user && userEmail && userEmail.includes('@')) {
+    const apiKey = req.headers['x-api-key'];
+    if (apiKey) {
+      const apiKeyUser = await db.findUserByApiKey(apiKey);
+      if (apiKeyUser && apiKeyUser.email.toLowerCase() === userEmail) {
+        user = apiKeyUser;
       }
     }
-  }
-  if (!user) {
-    user = (await db.findUserByEmail('nnaveen.8527@gmail.com')) || (await db.findUserById('usr_default'));
   }
   if (!user) {
     return res.status(401).json({ success: false, error: 'Unauthorized: Please log in to view tracked emails.' });
@@ -1083,7 +1081,8 @@ app.get('/api/emails', optionalAuth, async (req, res) => {
     count: emails.length,
     emails,
     publicUrl: effectiveBaseUrl,
-    user: { id: user.id, email: user.email, name: user.name, apiKey: user.api_key }
+    // Only return user credentials if the request was authenticated via session cookie or bearer token
+    user: req.user ? { id: user.id, email: user.email, name: user.name, apiKey: user.api_key } : null
   });
 });
 
@@ -1092,16 +1091,17 @@ app.get('/api/emails/pulse', optionalAuth, async (req, res) => {
   let user = req.user;
   const userEmail = (req.query.email || req.headers['x-mailtrack-user-email'] || '').trim().toLowerCase();
 
-  if (userEmail && userEmail.includes('@')) {
-    if (!user || user.email.toLowerCase() !== userEmail) {
-      user = await db.findUserByEmail(userEmail);
+  if (!user && userEmail && userEmail.includes('@')) {
+    const apiKey = req.headers['x-api-key'];
+    if (apiKey) {
+      const apiKeyUser = await db.findUserByApiKey(apiKey);
+      if (apiKeyUser && apiKeyUser.email.toLowerCase() === userEmail) {
+        user = apiKeyUser;
+      }
     }
   }
   if (!user) {
-    user = (await db.findUserByEmail('nnaveen.8527@gmail.com')) || (await db.findUserById('usr_default'));
-  }
-  if (!user) {
-    return res.json({ success: true, updated: false, emails: [] });
+    return res.status(401).json({ success: false, error: 'Unauthorized.' });
   }
 
   const since = req.query.since || new Date(Date.now() - 30000).toISOString();
