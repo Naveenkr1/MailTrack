@@ -180,23 +180,19 @@
     const host = document.createElement('mailtrack-prompt-container');
     host.style.cssText = [
       'position: fixed !important',
-      'inset: 0 !important',
+      'top: 0 !important',
+      'left: 0 !important',
       'width: 100vw !important',
       'height: 100vh !important',
       'z-index: 2147483647 !important',
-      'display: flex !important',
-      'align-items: center !important',
-      'justify-content: center !important',
+      'display: block !important',
       'visibility: visible !important',
       'opacity: 1 !important',
       'pointer-events: auto !important',
       'margin: 0 !important',
-      'padding: 16px !important',
+      'padding: 0 !important',
       'border: none !important',
-      'box-sizing: border-box !important',
-      'background: rgba(15, 23, 42, 0.6) !important',
-      'backdrop-filter: blur(4px) !important',
-      '-webkit-backdrop-filter: blur(4px) !important'
+      'background: transparent !important'
     ].join('; ');
 
     const shadow = host.attachShadow({ mode: 'open' });
@@ -205,6 +201,14 @@
     style.textContent = `
       :host {
         all: initial !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 2147483647 !important;
+        display: block !important;
+        pointer-events: auto !important;
       }
       * {
         box-sizing: border-box !important;
@@ -212,13 +216,36 @@
         padding: 0;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
       }
+      .backdrop {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        background: rgba(15, 23, 42, 0.65) !important;
+        backdrop-filter: blur(4px) !important;
+        -webkit-backdrop-filter: blur(4px) !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 16px !important;
+        box-sizing: border-box !important;
+        z-index: 2147483647 !important;
+        animation: mtBackdropFade 0.18s ease-out !important;
+      }
+      @keyframes mtBackdropFade {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
       .card {
         position: relative !important;
         width: 440px !important;
         max-width: 95vw !important;
         background: #ffffff !important;
         border-radius: 20px !important;
-        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.4), 0 0 0 1px rgba(0, 0, 0, 0.08) !important;
         padding: 32px 28px 24px 28px !important;
         text-align: center !important;
         color: #0f172a !important;
@@ -350,6 +377,9 @@
       }
     `;
 
+    const backdrop = document.createElement('div');
+    backdrop.className = 'backdrop';
+
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `
@@ -393,8 +423,9 @@
       </p>
     `;
 
+    backdrop.appendChild(card);
     shadow.appendChild(style);
-    shadow.appendChild(card);
+    shadow.appendChild(backdrop);
 
     function closePrompt(sessionDismiss = true) {
       if (sessionDismiss) {
@@ -417,13 +448,16 @@
       if (typeof chrome !== 'undefined' && chrome.storage?.local) {
         chrome.storage.local.remove(['mt_is_logged_out']);
       }
+      try {
+        chrome.runtime.sendMessage({ action: 'CLEAR_LOGGED_OUT_STATE' });
+      } catch {}
       setTimeout(() => {
         closePrompt(false);
       }, 500);
     };
 
-    host.onclick = (e) => {
-      if (e.target === host) {
+    backdrop.onclick = (e) => {
+      if (e.target === backdrop) {
         closePrompt(true);
       }
     };
@@ -2753,6 +2787,12 @@
     const connectBtn = topNavDropdownEl.querySelector('#mtDropdownConnectBtn');
     if (connectBtn) {
       connectBtn.onclick = () => {
+        if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+          chrome.storage.local.remove(['mt_is_logged_out']);
+        }
+        try {
+          chrome.runtime.sendMessage({ action: 'CLEAR_LOGGED_OUT_STATE' });
+        } catch {}
         setTimeout(closeTopNavDropdown, 400);
       };
     }

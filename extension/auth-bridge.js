@@ -15,8 +15,30 @@
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', announceExtension);
   }
+  window.addEventListener('load', announceExtension);
 
-  // 2. Listen for messages from dashboard (pings, auth tokens, etc.)
+  function forwardAuth(data) {
+    if (!data) return;
+    const apiKey = data.apiKey || data.api_key;
+    const email = data.email;
+    const name = data.name;
+    const token = data.token;
+    if (!apiKey && !token && !email) return;
+
+    try {
+      chrome.runtime.sendMessage({
+        action: 'AUTH_SUCCESS_BRIDGE',
+        apiKey: apiKey,
+        email: email,
+        name: name,
+        token: token
+      }, () => {
+        if (chrome.runtime.lastError) {}
+      });
+    } catch (e) {}
+  }
+
+  // 2. Listen for window messages (from /auth/extension-success or dashboard)
   window.addEventListener('message', (event) => {
     if (!event.data) return;
 
@@ -25,28 +47,33 @@
     }
 
     if (event.data.type === 'MAILTRACK_AUTH_SUCCESS' || event.data.type === 'MAILTRACK_TOKEN_SYNC') {
-      try {
-        chrome.runtime.sendMessage({
-          action: 'AUTH_SUCCESS_BRIDGE',
-          apiKey: event.data.apiKey,
-          email: event.data.email,
-          name: event.data.name,
-          token: event.data.token
-        });
-      } catch (e) {}
+      forwardAuth(event.data);
     }
   });
 
   // 3. Check if page has meta tags or window globals with credentials
-  try {
-    const metaApiKey = document.querySelector('meta[name="mailtrack-api-key"]')?.content;
-    const metaEmail = document.querySelector('meta[name="mailtrack-user-email"]')?.content;
-    if (metaApiKey && metaEmail) {
-      chrome.runtime.sendMessage({
-        action: 'AUTH_SUCCESS_BRIDGE',
-        apiKey: metaApiKey,
-        email: metaEmail
-      });
-    }
-  } catch (e) {}
+  function checkMetaAndGlobals() {
+    try {
+      const metaApiKey = document.querySelector('meta[name="mailtrack-api-key"]')?.content;
+      const metaEmail = document.querySelector('meta[name="mailtrack-user-email"]')?.content;
+      const metaName = document.querySelector('meta[name="mailtrack-user-name"]')?.content;
+      if (metaApiKey || metaEmail) {
+        forwardAuth({ apiKey: metaApiKey, email: metaEmail, name: metaName });
+      }
+    } catch (e) {}
+
+    try {
+      if (window.__MAILTRACK_AUTH__) {
+        forwardAuth(window.__MAILTRACK_AUTH__);
+      }
+    } catch (e) {}
+  }
+
+  checkMetaAndGlobals();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkMetaAndGlobals);
+  }
+  window.addEventListener('load', checkMetaAndGlobals);
+  setTimeout(checkMetaAndGlobals, 300);
+  setTimeout(checkMetaAndGlobals, 1000);
 })();

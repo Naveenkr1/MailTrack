@@ -414,6 +414,9 @@ router.get('/extension-success', (req, res) => {
       <meta charset="UTF-8">
       <title>Mail Track — Account Connected!</title>
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <meta name="mailtrack-api-key" content="${apiKey || ''}">
+      <meta name="mailtrack-user-email" content="${email || ''}">
+      <meta name="mailtrack-user-name" content="${name || ''}">
       <style>
         body {
           margin: 0;
@@ -431,7 +434,7 @@ router.get('/extension-success', (req, res) => {
           border: 1px solid #1f2937;
           border-radius: 16px;
           padding: 36px 32px;
-          max-width: 420px;
+          max-width: 440px;
           text-align: center;
           box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
@@ -460,18 +463,30 @@ router.get('/extension-success', (req, res) => {
           font-weight: 600;
           margin-bottom: 24px;
         }
+        .btn-row {
+          display: flex;
+          gap: 12px;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
         .btn {
           display: inline-block;
           background: #10b981;
           color: #fff;
           font-weight: 600;
-          padding: 11px 22px;
+          padding: 11px 20px;
           border-radius: 8px;
           text-decoration: none;
           font-size: 0.9rem;
           transition: background 0.15s;
         }
         .btn:hover { background: #059669; }
+        .btn-sec {
+          background: #1f2937;
+          color: #e2e8f0;
+          border: 1px solid #374151;
+        }
+        .btn-sec:hover { background: #374151; }
       </style>
     </head>
     <body>
@@ -480,28 +495,35 @@ router.get('/extension-success', (req, res) => {
           <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </div>
         <h2>Gmail Account Linked!</h2>
-        <p>Mail Track is now securely authenticated. Emails sent from your Gmail account will be monitored and synced automatically in real time.</p>
+        <p>Mail Track extension has been successfully connected. Live email read receipts and double checkmarks are now fully active.</p>
         <div class="user-pill">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
           <span>${email || 'Connected Account'}</span>
         </div>
-        <br/>
-        <a href="/" class="btn">Open Analytics Dashboard</a>
+        <div class="btn-row">
+          <a href="https://mail.google.com/" class="btn">Open Gmail</a>
+          <a href="/" class="btn btn-sec">Analytics Dashboard</a>
+        </div>
       </div>
       <script>
-        // Broadcast auth credentials to Chrome extension if listening
-        try {
-          const authData = {
-            type: 'MAILTRACK_AUTH_SUCCESS',
-            apiKey: '${apiKey || ''}',
-            email: '${email || ''}',
-            name: '${name || ''}'
-          };
-          window.postMessage(authData, '*');
-          if (window.chrome && chrome.runtime && chrome.runtime.sendMessage) {
-            chrome.runtime.sendMessage(authData).catch(() => {});
-          }
-        } catch (e) {}
+        const authData = {
+          type: 'MAILTRACK_AUTH_SUCCESS',
+          apiKey: '${apiKey || ''}',
+          email: '${email || ''}',
+          name: '${name || ''}'
+        };
+        window.__MAILTRACK_AUTH__ = authData;
+
+        function broadcastAuth() {
+          try {
+            window.postMessage(authData, '*');
+          } catch (e) {}
+        }
+        broadcastAuth();
+        setTimeout(broadcastAuth, 100);
+        setTimeout(broadcastAuth, 300);
+        setTimeout(broadcastAuth, 700);
+        setTimeout(broadcastAuth, 1500);
       </script>
     </body>
     </html>

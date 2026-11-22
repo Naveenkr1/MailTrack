@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         handleLoggedOut();
         return;
       }
-      if (items.mt_user && items.mt_user.email) {
+      if (items && items.mt_user && items.mt_user.email) {
         handleLoggedIn(items.mt_user);
       } else {
         showView('loading');
@@ -84,74 +84,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 2. Fetch fresh auth status from tracking server
+  // 2. Fetch fresh auth status via background service worker (handles cookies, tokens, and storage)
   try {
-    const stored = (typeof chrome !== 'undefined' && chrome.storage?.local)
-      ? await chrome.storage.local.get(['mt_is_logged_out'])
-      : null;
-    if (stored && stored.mt_is_logged_out) {
-      handleLoggedOut();
-      return;
-    }
-
-    const sUrl = await getServerUrl();
-    const res = await fetch(`${sUrl}/auth/me`, { 
-      credentials: 'include' 
-    });
-
-    if (res.status === 429) {
-      chrome.storage.local.get(['mt_user', 'mt_is_logged_out'], (items) => {
-        if (items && items.mt_is_logged_out) {
-          handleLoggedOut();
-        } else if (items.mt_user && items.mt_user.email) {
-          handleLoggedIn(items.mt_user);
-        } else {
-          handleLoggedOut();
-        }
-      });
-      return;
-    }
-
-    if (res.ok) {
-      const auth = await res.json();
-      if (auth.authenticated && auth.user) {
-        chrome.storage.local.set({ mt_user: auth.user, mt_api_key: auth.user.apiKey });
-        chrome.storage.local.remove(['mt_is_logged_out']);
-        handleLoggedIn(auth.user);
-      } else if (auth.authenticated === false) {
-        chrome.storage.local.remove(['mt_user', 'mt_api_key']);
-        handleLoggedOut();
-      }
-    } else {
-      chrome.storage.local.get(['mt_user', 'mt_is_logged_out'], (items) => {
-        if (items && items.mt_is_logged_out) {
-          handleLoggedOut();
-        } else if (items.mt_user && items.mt_user.email) {
-          handleLoggedIn(items.mt_user);
-        } else {
-          handleLoggedOut();
-        }
-      });
-    }
-  } catch (err) {
-    chrome.storage.local.get(['mt_user', 'mt_is_logged_out'], (items) => {
-      if (items && items.mt_is_logged_out) {
-        handleLoggedOut();
-      } else if (items.mt_user && items.mt_user.email) {
-        handleLoggedIn(items.mt_user);
-      } else {
+    chrome.runtime.sendMessage({ action: 'GET_AUTH_STATUS' }, (res) => {
+      if (chrome.runtime.lastError || !res) return;
+      if (res.authenticated && res.user) {
+        handleLoggedIn(res.user);
+      } else if (res.authenticated === false) {
         handleLoggedOut();
       }
     });
-  }
+  } catch (err) {}
 
   // 3. Listen for storage changes in real time
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && changes.mt_user) {
-        if (changes.mt_user.newValue) {
+      if (area === 'local') {
+        if (changes.mt_is_logged_out?.newValue) {
+          handleLoggedOut();
+        } else if (changes.mt_user?.newValue) {
           handleLoggedIn(changes.mt_user.newValue);
-        } else {
+        } else if (changes.mt_user && !changes.mt_user.newValue) {
           handleLoggedOut();
         }
       }
@@ -164,6 +117,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (typeof chrome !== 'undefined' && chrome.storage?.local) {
         await chrome.storage.local.remove(['mt_is_logged_out']);
       }
+      try {
+        chrome.runtime.sendMessage({ action: 'CLEAR_LOGGED_OUT_STATE' });
+      } catch {}
       const sUrl = await getServerUrl();
       chrome.tabs.create({ url: `${sUrl}/auth/google?flow_src=extension` });
       window.close();

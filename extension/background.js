@@ -180,17 +180,21 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
 let lastSyncAuthTime = 0;
 let syncAuthPromise = null;
 
-async function syncAuth() {
+async function syncAuth(force = false) {
   const now = Date.now();
-  if (syncAuthPromise) return syncAuthPromise;
-  if (now - lastSyncAuthTime < 2500) {
-    return !!cachedApiKey;
+  if (force) {
+    syncAuthPromise = null;
+  } else {
+    if (syncAuthPromise) return syncAuthPromise;
+    if (now - lastSyncAuthTime < 2500) {
+      return !!cachedApiKey;
+    }
   }
   lastSyncAuthTime = now;
 
   syncAuthPromise = (async () => {
     try {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (!force && typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         const stored = await chrome.storage.local.get(['mt_is_logged_out']);
         if (stored && stored.mt_is_logged_out) {
           currentUser = null;
@@ -227,7 +231,10 @@ async function syncAuth() {
       if (data && data.authenticated && data.user) {
         cachedApiKey = data.user.apiKey;
         currentUser = data.user;
-        chrome.storage.local.set({ mt_user: data.user, mt_api_key: data.user.apiKey });
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          await chrome.storage.local.remove(['mt_is_logged_out']);
+          await chrome.storage.local.set({ mt_user: data.user, mt_api_key: data.user.apiKey });
+        }
         console.log('[MailTrack BG] Authenticated as:', currentUser.email);
         updateActionBehavior(true);
         if (ws && ws.readyState === WebSocket.OPEN && cachedApiKey) {
@@ -239,11 +246,14 @@ async function syncAuth() {
         return true;
       } else if (data && data.authenticated === false) {
         console.log('[MailTrack BG] Not authenticated on server');
-        cachedApiKey = null;
-        currentUser = null;
-        chrome.storage.local.remove(['mt_user', 'mt_api_key']);
-        updateActionBehavior(false);
-        broadcastToGmailTabs({ type: 'AUTH_UPDATED', user: null });
+        if (!cachedApiKey) {
+          currentUser = null;
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.remove(['mt_user', 'mt_api_key']);
+          }
+          updateActionBehavior(false);
+          broadcastToGmailTabs({ type: 'AUTH_UPDATED', user: null });
+        }
         return false;
       }
       return !!cachedApiKey;
@@ -266,9 +276,16 @@ if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.onChanged)
       if (domain.includes('mailtrack.in') || domain.includes('vercel.app') || domain.includes('localhost')) {
         console.log('[MailTrack BG] Auth token cookie change detected on', domain, 'removed:', changeInfo.removed);
         clearTimeout(cookieDebounce);
-        cookieDebounce = setTimeout(() => {
-          syncAuth();
-        }, 500);
+        cookieDebounce = setTimeout(async () => {
+          if (!changeInfo.removed && changeInfo.cookie.value) {
+            if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+              await chrome.storage.local.remove(['mt_is_logged_out']);
+            }
+            syncAuth(true);
+          } else if (changeInfo.removed) {
+            syncAuth();
+          }
+        }, 300);
       }
     }
   });
@@ -498,8 +515,26 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessageE
   chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
     if (message && (message.type === 'MAILTRACK_AUTH_SUCCESS' || message.action === 'AUTH_SUCCESS_BRIDGE')) {
       console.log('[MailTrack BG] External auth received for:', message.email);
-      if (message.apiKey) cachedApiKey = message.apiKey;
-      syncAuth().then((isAuth) => sendResponse({ success: true, authenticated: isAuth }));
+      (async () => {
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          await chrome.storage.local.remove(['mt_is_logged_out']);
+        }
+        if (message.apiKey) cachedApiKey = message.apiKey;
+        if (message.email) {
+          currentUser = {
+            email: message.email,
+            name: message.name || message.email.split('@')[0],
+            apiKey: message.apiKey || cachedApiKey
+          };
+          if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            await chrome.storage.local.set({ mt_user: currentUser, mt_api_key: cachedApiKey });
+          }
+          updateActionBehavior(true);
+          broadcastToGmailTabs({ type: 'AUTH_UPDATED', user: currentUser });
+        }
+        const isAuth = await syncAuth(true);
+        sendResponse({ success: true, authenticated: isAuth });
+      })();
       return true;
     }
   });
@@ -515,13 +550,37 @@ probeAndSetActiveServer().then(() => {
 // 3. Message listener for content scripts & popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'AUTH_SUCCESS_BRIDGE' || request.action === 'AUTH_SUCCESS') {
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-      chrome.storage.local.remove(['mt_is_logged_out']);
-    }
-    if (request.apiKey) cachedApiKey = request.apiKey;
-    syncAuth().then((isAuth) => {
-      sendResponse({ success: true, authenticated: isAuth });
-    });
+    (async () => {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        await chrome.storage.local.remove(['mt_is_logged_out']);
+      }
+      if (request.apiKey) cachedApiKey = request.apiKey;
+      if (request.email) {
+        currentUser = {
+          email: request.email,
+          name: request.name || (request.email ? request.email.split('@')[0] : 'User'),
+          apiKey: request.apiKey || cachedApiKey
+        };
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+          await chrome.storage.local.set({ mt_user: currentUser, mt_api_key: cachedApiKey });
+        }
+        updateActionBehavior(true);
+        broadcastToGmailTabs({ type: 'AUTH_UPDATED', user: currentUser });
+      }
+      const isAuth = await syncAuth(true);
+      sendResponse({ success: true, authenticated: isAuth, user: currentUser });
+    })();
+    return true;
+  }
+
+  if (request.action === 'CLEAR_LOGGED_OUT_STATE') {
+    (async () => {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        await chrome.storage.local.remove(['mt_is_logged_out']);
+      }
+      syncAuth(true);
+      sendResponse({ success: true });
+    })();
     return true;
   }
 
@@ -549,7 +608,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       activeServerUrl
     });
 
-    syncAuth().then((isAuth) => {
+    syncAuth(true).then((isAuth) => {
       sendResponse({ success: true, mode: newMode, activeServerUrl, authenticated: isAuth });
     });
     return true;
@@ -632,11 +691,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         const stored = await chrome.storage.local.get(['mt_is_logged_out']);
         if (stored && stored.mt_is_logged_out) {
-          currentUser = null;
-          cachedApiKey = null;
-          updateActionBehavior(false);
-          sendResponse({ authenticated: false, user: null, apiKey: null, activeServerUrl });
-          return;
+          const token = await getAuthTokenCookie();
+          if (!token) {
+            currentUser = null;
+            cachedApiKey = null;
+            updateActionBehavior(false);
+            sendResponse({ authenticated: false, user: null, apiKey: null, activeServerUrl });
+            return;
+          }
+          await chrome.storage.local.remove(['mt_is_logged_out']);
         }
       }
       syncAuth().then((isAuth) => {
