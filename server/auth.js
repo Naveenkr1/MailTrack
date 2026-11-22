@@ -363,13 +363,42 @@ router.delete('/account', requireAuth, async (req, res) => {
 // -------------------------------------------------------------
 // 6. LOGOUT
 // -------------------------------------------------------------
+function clearAuthCookie(req, res) {
+  const isSecure = req.secure || req.headers['x-forwarded-proto'] === 'https';
+  const cookieDomains = [
+    undefined,
+    'mailtrack.in',
+    '.mailtrack.in',
+    'www.mailtrack.in',
+    'localhost'
+  ];
+
+  cookieDomains.forEach(domain => {
+    const opts = { path: '/' };
+    if (domain) opts.domain = domain;
+    try {
+      res.clearCookie('mt_token', opts);
+      res.clearCookie('mt_token', { ...opts, httpOnly: true, secure: isSecure, sameSite: 'lax' });
+      res.clearCookie('mt_token', { ...opts, httpOnly: true, secure: false, sameSite: 'lax' });
+      res.cookie('mt_token', '', {
+        ...opts,
+        httpOnly: true,
+        secure: isSecure,
+        sameSite: 'lax',
+        expires: new Date(0),
+        maxAge: 0
+      });
+    } catch {}
+  });
+}
+
 router.post('/logout', (req, res) => {
-  res.clearCookie('mt_token');
-  res.json({ success: true });
+  clearAuthCookie(req, res);
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 router.get('/logout', (req, res) => {
-  res.clearCookie('mt_token');
+  clearAuthCookie(req, res);
   res.redirect('/login');
 });
 

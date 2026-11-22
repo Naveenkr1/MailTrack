@@ -158,7 +158,13 @@ if (typeof chrome !== 'undefined' && chrome.action && chrome.action.onClicked) {
 
 // Initialize auth from persistent extension storage
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-  chrome.storage.local.get(['mt_user', 'mt_api_key'], (items) => {
+  chrome.storage.local.get(['mt_user', 'mt_api_key', 'mt_is_logged_out'], (items) => {
+    if (items && items.mt_is_logged_out) {
+      currentUser = null;
+      cachedApiKey = null;
+      updateActionBehavior(false);
+      return;
+    }
     if (items.mt_user) currentUser = items.mt_user;
     if (items.mt_api_key) cachedApiKey = items.mt_api_key;
     if (currentUser) {
@@ -184,6 +190,16 @@ async function syncAuth() {
 
   syncAuthPromise = (async () => {
     try {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        const stored = await chrome.storage.local.get(['mt_is_logged_out']);
+        if (stored && stored.mt_is_logged_out) {
+          currentUser = null;
+          cachedApiKey = null;
+          updateActionBehavior(false);
+          return false;
+        }
+      }
+
       await probeAndSetActiveServer();
       const serverUrl = activeServerUrl;
       const headers = {};
@@ -498,7 +514,10 @@ probeAndSetActiveServer().then(() => {
 
 // 3. Message listener for content scripts & popup
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'AUTH_SUCCESS_BRIDGE') {
+  if (request.action === 'AUTH_SUCCESS_BRIDGE' || request.action === 'AUTH_SUCCESS') {
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      chrome.storage.local.remove(['mt_is_logged_out']);
+    }
     if (request.apiKey) cachedApiKey = request.apiKey;
     syncAuth().then((isAuth) => {
       sendResponse({ success: true, authenticated: isAuth });
@@ -562,6 +581,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === 'LOGOUT') {
     (async () => {
+      currentUser = null;
+      cachedApiKey = null;
+
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        await chrome.storage.local.set({ mt_is_logged_out: true });
+        await chrome.storage.local.remove(['mt_user', 'mt_api_key']);
+      }
+
       try {
         await fetch(`${activeServerUrl}/auth/logout`, {
           method: 'POST',
@@ -569,17 +596,17 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         }).catch(() => {});
       } catch {}
 
-      currentUser = null;
-      cachedApiKey = null;
-
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        await chrome.storage.local.remove(['mt_user', 'mt_api_key']);
-      }
-
-      if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.remove) {
+      if (typeof chrome !== 'undefined' && chrome.cookies && chrome.cookies.getAll) {
         try {
-          await chrome.cookies.remove({ url: activeServerUrl, name: 'mt_token' }).catch(() => {});
-          await chrome.cookies.remove({ url: PROD_SERVER_URL, name: 'mt_token' }).catch(() => {});
+          const allCookies = await chrome.cookies.getAll({ name: 'mt_token' });
+          if (allCookies && allCookies.length) {
+            for (const c of allCookies) {
+              const protocol = c.secure ? 'https:' : 'http:';
+              const cleanDomain = c.domain.startsWith('.') ? c.domain.slice(1) : c.domain;
+              await chrome.cookies.remove({ url: `${protocol}//${cleanDomain}${c.path || '/'}`, name: c.name }).catch(() => {});
+              await chrome.cookies.remove({ url: `${protocol}//${c.domain}${c.path || '/'}`, name: c.name }).catch(() => {});
+            }
+          }
         } catch {}
       }
 
@@ -601,9 +628,21 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 
   if (request.action === 'GET_AUTH_STATUS' || request.action === 'SYNC_AUTH') {
-    syncAuth().then((isAuth) => {
-      sendResponse({ authenticated: isAuth, user: currentUser, apiKey: cachedApiKey, activeServerUrl });
-    });
+    (async () => {
+      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        const stored = await chrome.storage.local.get(['mt_is_logged_out']);
+        if (stored && stored.mt_is_logged_out) {
+          currentUser = null;
+          cachedApiKey = null;
+          updateActionBehavior(false);
+          sendResponse({ authenticated: false, user: null, apiKey: null, activeServerUrl });
+          return;
+        }
+      }
+      syncAuth().then((isAuth) => {
+        sendResponse({ authenticated: isAuth, user: currentUser, apiKey: cachedApiKey, activeServerUrl });
+      });
+    })();
     return true;
   }
 

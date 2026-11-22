@@ -71,7 +71,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 1. Check local extension storage first for immediate rendering
   if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['mt_user', 'mt_api_key'], (items) => {
+    chrome.storage.local.get(['mt_user', 'mt_api_key', 'mt_is_logged_out'], (items) => {
+      if (items && items.mt_is_logged_out) {
+        handleLoggedOut();
+        return;
+      }
       if (items.mt_user && items.mt_user.email) {
         handleLoggedIn(items.mt_user);
       } else {
@@ -82,14 +86,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 2. Fetch fresh auth status from tracking server
   try {
+    const stored = (typeof chrome !== 'undefined' && chrome.storage?.local)
+      ? await chrome.storage.local.get(['mt_is_logged_out'])
+      : null;
+    if (stored && stored.mt_is_logged_out) {
+      handleLoggedOut();
+      return;
+    }
+
     const sUrl = await getServerUrl();
     const res = await fetch(`${sUrl}/auth/me`, { 
       credentials: 'include' 
     });
 
     if (res.status === 429) {
-      chrome.storage.local.get(['mt_user'], (items) => {
-        if (items.mt_user && items.mt_user.email) {
+      chrome.storage.local.get(['mt_user', 'mt_is_logged_out'], (items) => {
+        if (items && items.mt_is_logged_out) {
+          handleLoggedOut();
+        } else if (items.mt_user && items.mt_user.email) {
           handleLoggedIn(items.mt_user);
         } else {
           handleLoggedOut();
@@ -102,14 +116,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       const auth = await res.json();
       if (auth.authenticated && auth.user) {
         chrome.storage.local.set({ mt_user: auth.user, mt_api_key: auth.user.apiKey });
+        chrome.storage.local.remove(['mt_is_logged_out']);
         handleLoggedIn(auth.user);
       } else if (auth.authenticated === false) {
         chrome.storage.local.remove(['mt_user', 'mt_api_key']);
         handleLoggedOut();
       }
     } else {
-      chrome.storage.local.get(['mt_user'], (items) => {
-        if (items.mt_user && items.mt_user.email) {
+      chrome.storage.local.get(['mt_user', 'mt_is_logged_out'], (items) => {
+        if (items && items.mt_is_logged_out) {
+          handleLoggedOut();
+        } else if (items.mt_user && items.mt_user.email) {
           handleLoggedIn(items.mt_user);
         } else {
           handleLoggedOut();
@@ -117,8 +134,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   } catch (err) {
-    chrome.storage.local.get(['mt_user'], (items) => {
-      if (items.mt_user && items.mt_user.email) {
+    chrome.storage.local.get(['mt_user', 'mt_is_logged_out'], (items) => {
+      if (items && items.mt_is_logged_out) {
+        handleLoggedOut();
+      } else if (items.mt_user && items.mt_user.email) {
         handleLoggedIn(items.mt_user);
       } else {
         handleLoggedOut();
@@ -142,6 +161,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 4. Action Button Handlers
   if (loginBtn) {
     loginBtn.onclick = async () => {
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        await chrome.storage.local.remove(['mt_is_logged_out']);
+      }
       const sUrl = await getServerUrl();
       chrome.tabs.create({ url: `${sUrl}/auth/google?flow_src=extension` });
       window.close();
@@ -186,6 +208,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         <span>Logging out...</span>
       `;
 
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        await chrome.storage.local.set({ mt_is_logged_out: true });
+        await chrome.storage.local.remove(['mt_user', 'mt_api_key']);
+      }
+
       const sUrl = await getServerUrl();
       try {
         await fetch(`${sUrl}/auth/logout`, {
@@ -195,13 +222,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       } catch {}
 
       chrome.runtime.sendMessage({ action: 'LOGOUT' }, () => {
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-          chrome.storage.local.remove(['mt_user', 'mt_api_key'], () => {
-            handleLoggedOut();
-          });
-        } else {
-          handleLoggedOut();
-        }
+        handleLoggedOut();
       });
     };
   }

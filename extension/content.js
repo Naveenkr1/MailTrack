@@ -75,7 +75,14 @@
 
   // Load cached auth immediately from local extension storage
   if (typeof chrome !== 'undefined' && chrome.storage?.local) {
-    chrome.storage.local.get(['mt_user', 'mt_api_key'], (items) => {
+    chrome.storage.local.get(['mt_user', 'mt_api_key', 'mt_is_logged_out'], (items) => {
+      if (items && items.mt_is_logged_out) {
+        currentAuthUser = null;
+        updateTopNavBtnAuthState();
+        updateComposeButtonsAuthState();
+        checkAndShowAuthPrompt();
+        return;
+      }
       if (items && items.mt_user) {
         currentAuthUser = items.mt_user;
         if (items.mt_api_key && !currentAuthUser.apiKey) {
@@ -90,9 +97,12 @@
   // Listen for storage changes in real time (e.g. user logged in or out in another tab)
   if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === 'local' && (changes.mt_user || changes.mt_api_key)) {
-        chrome.storage.local.get(['mt_user', 'mt_api_key'], (items) => {
-          if (items && items.mt_user) {
+      if (area === 'local' && (changes.mt_user || changes.mt_api_key || changes.mt_is_logged_out)) {
+        chrome.storage.local.get(['mt_user', 'mt_api_key', 'mt_is_logged_out'], (items) => {
+          if (items && (items.mt_is_logged_out || !items.mt_user)) {
+            currentAuthUser = null;
+            try { sessionStorage.removeItem('mt_auth_alert_dismissed'); } catch {}
+          } else if (items && items.mt_user) {
             currentAuthUser = items.mt_user;
             if (items.mt_api_key && !currentAuthUser.apiKey) {
               currentAuthUser.apiKey = items.mt_api_key;
@@ -104,6 +114,8 @@
           updateComposeButtonsAuthState();
           if (isUserAuthenticated()) {
             dismissAuthModal();
+          } else {
+            showAuthPromptModal(true);
           }
           if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
             renderNotificationsDropdown();
@@ -138,7 +150,7 @@
   }
 
   function dismissAuthModal() {
-    const existing = document.getElementById('mt-auth-prompt-modal');
+    const existing = document.querySelector('mailtrack-prompt-container');
     if (existing) {
       existing.style.opacity = '0';
       existing.style.transition = 'opacity 0.18s ease';
@@ -146,6 +158,8 @@
         if (existing.parentElement) existing.remove();
       }, 180);
     }
+    const legacy = document.getElementById('mt-auth-prompt-modal');
+    if (legacy) legacy.remove();
   }
 
   function showAuthPromptModal(force = false) {
@@ -156,57 +170,231 @@
       } catch {}
     }
 
-    if (document.getElementById('mt-auth-prompt-modal')) return;
+    if (document.querySelector('mailtrack-prompt-container') || document.getElementById('mt-auth-prompt-modal')) return;
     if (!document.body) {
-      setTimeout(() => showAuthPromptModal(force), 500);
+      setTimeout(() => showAuthPromptModal(force), 300);
       return;
     }
 
-    const modalBackdrop = document.createElement('div');
-    modalBackdrop.id = 'mt-auth-prompt-modal';
-    modalBackdrop.className = 'mt-auth-prompt-backdrop';
-    modalBackdrop.innerHTML = `
-      <div class="mt-auth-prompt-card" role="dialog" aria-modal="true" aria-labelledby="mtAuthPromptTitle">
-        <button class="mt-auth-prompt-close" id="mtAuthPromptCloseBtn" title="Close" aria-label="Close">✕</button>
-        
-        <div class="mt-auth-prompt-icon-box">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M11 12.6111L15.9231 17.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
+    // Immune to adblockers: Mount using custom element with Shadow DOM encapsulation
+    const host = document.createElement('mailtrack-prompt-container');
+    host.style.cssText = [
+      'position: fixed !important',
+      'inset: 0 !important',
+      'width: 100vw !important',
+      'height: 100vh !important',
+      'z-index: 2147483647 !important',
+      'display: flex !important',
+      'align-items: center !important',
+      'justify-content: center !important',
+      'visibility: visible !important',
+      'opacity: 1 !important',
+      'pointer-events: auto !important',
+      'margin: 0 !important',
+      'padding: 16px !important',
+      'border: none !important',
+      'box-sizing: border-box !important',
+      'background: rgba(15, 23, 42, 0.6) !important',
+      'backdrop-filter: blur(4px) !important',
+      '-webkit-backdrop-filter: blur(4px) !important'
+    ].join('; ');
 
-        <div style="display:flex; justify-content:center;">
-          <span class="mt-auth-prompt-pill">Action Required • Please Log In First</span>
-        </div>
+    const shadow = host.attachShadow({ mode: 'open' });
 
-        <h2 class="mt-auth-prompt-title" id="mtAuthPromptTitle">Please Log In to Enable Email Tracking</h2>
-        <p class="mt-auth-prompt-desc">
-          Email tracking is currently <strong>disabled</strong>. Connect your Google account to enable live email read receipts, link click notifications, and double checkmarks in Gmail.
-        </p>
-
-        <div class="mt-auth-prompt-btn-group">
-          <a href="${getServerUrl()}/auth/google?flow_src=extension" target="_blank" class="mt-auth-prompt-connect-btn" id="mtAuthPromptConnectBtn">
-            <svg width="20" height="20" viewBox="0 0 24 24">
-              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-            </svg>
-            <span>Log In with Google</span>
-          </a>
-          <button class="mt-auth-prompt-later-btn" id="mtAuthPromptLaterBtn">Remind me later</button>
-        </div>
-
-        <p class="mt-auth-prompt-footer-note">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-          </svg>
-          <span>Official Google OAuth 2.0 • Secure & Private</span>
-        </p>
-      </div>
+    const style = document.createElement('style');
+    style.textContent = `
+      :host {
+        all: initial !important;
+      }
+      * {
+        box-sizing: border-box !important;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+      }
+      .card {
+        position: relative !important;
+        width: 440px !important;
+        max-width: 95vw !important;
+        background: #ffffff !important;
+        border-radius: 20px !important;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(0, 0, 0, 0.06) !important;
+        padding: 32px 28px 24px 28px !important;
+        text-align: center !important;
+        color: #0f172a !important;
+        animation: mtScaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      }
+      @keyframes mtScaleUp {
+        0% { transform: scale(0.93); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+      }
+      .close-btn {
+        position: absolute !important;
+        top: 16px !important;
+        right: 16px !important;
+        width: 32px !important;
+        height: 32px !important;
+        border-radius: 50% !important;
+        border: none !important;
+        background: #f1f5f9 !important;
+        color: #64748b !important;
+        font-size: 15px !important;
+        line-height: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        cursor: pointer !important;
+        transition: all 0.15s ease !important;
+      }
+      .close-btn:hover {
+        background: #e2e8f0 !important;
+        color: #0f172a !important;
+        transform: scale(1.06) !important;
+      }
+      .icon-box {
+        width: 56px !important;
+        height: 56px !important;
+        background: #059669 !important;
+        border-radius: 14px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3) !important;
+        margin-bottom: 16px !important;
+      }
+      .pill {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        background: #ecfdf5 !important;
+        color: #059669 !important;
+        border: 1px solid #a7f3d0 !important;
+        font-size: 11.5px !important;
+        font-weight: 700 !important;
+        padding: 3px 12px !important;
+        border-radius: 20px !important;
+        margin-bottom: 14px !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+      }
+      .title {
+        font-size: 21px !important;
+        font-weight: 700 !important;
+        color: #0f172a !important;
+        letter-spacing: -0.4px !important;
+        line-height: 1.25 !important;
+        margin-bottom: 10px !important;
+      }
+      .desc {
+        font-size: 14px !important;
+        color: #64748b !important;
+        line-height: 1.55 !important;
+        margin-bottom: 24px !important;
+        padding: 0 8px !important;
+      }
+      .desc strong {
+        color: #dc2626 !important;
+        font-weight: 700 !important;
+      }
+      .btn-group {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 10px !important;
+        margin-bottom: 18px !important;
+      }
+      .connect-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+        width: 100% !important;
+        padding: 13px 20px !important;
+        background: #059669 !important;
+        color: #ffffff !important;
+        font-size: 15px !important;
+        font-weight: 600 !important;
+        border-radius: 10px !important;
+        text-decoration: none !important;
+        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3) !important;
+        transition: all 0.15s ease !important;
+        cursor: pointer !important;
+        border: none !important;
+      }
+      .connect-btn:hover {
+        background: #047857 !important;
+        box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4) !important;
+        transform: translateY(-1px) !important;
+      }
+      .later-btn {
+        background: none !important;
+        border: none !important;
+        color: #64748b !important;
+        font-size: 13px !important;
+        font-weight: 500 !important;
+        cursor: pointer !important;
+        padding: 6px 12px !important;
+        border-radius: 6px !important;
+        transition: color 0.15s ease !important;
+      }
+      .later-btn:hover {
+        color: #0f172a !important;
+        text-decoration: underline !important;
+      }
+      .footer-note {
+        font-size: 11.5px !important;
+        color: #94a3b8 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+      }
     `;
+
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <button class="close-btn" id="mtCloseBtn" title="Close" aria-label="Close">✕</button>
+      
+      <div class="icon-box">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4 12.6111L8.92308 17.5L20 6.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M11 12.6111L15.9231 17.5" stroke="#FFFFFF" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+
+      <div style="display:flex; justify-content:center;">
+        <span class="pill">Action Required • Please Log In</span>
+      </div>
+
+      <h2 class="title">Please Log In to Enable Email Tracking</h2>
+      <p class="desc">
+        Email tracking is currently <strong>disabled</strong> because you are logged out. Connect your Google account to enable live email read receipts, link click notifications, and double checkmarks in Gmail.
+      </p>
+
+      <div class="btn-group">
+        <a href="${getServerUrl()}/auth/google?flow_src=extension" target="_blank" class="connect-btn" id="mtConnectBtn">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          <span>Log In with Google</span>
+        </a>
+        <button class="later-btn" id="mtLaterBtn">Remind me later</button>
+      </div>
+
+      <p class="footer-note">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+        <span>Official Google OAuth 2.0 • Secure & Private</span>
+      </p>
+    `;
+
+    shadow.appendChild(style);
+    shadow.appendChild(card);
 
     function closePrompt(sessionDismiss = true) {
       if (sessionDismiss) {
@@ -215,24 +403,27 @@
       dismissAuthModal();
     }
 
-    modalBackdrop.querySelector('#mtAuthPromptCloseBtn').onclick = (e) => {
+    shadow.querySelector('#mtCloseBtn').onclick = (e) => {
       e.stopPropagation();
       closePrompt(true);
     };
 
-    modalBackdrop.querySelector('#mtAuthPromptLaterBtn').onclick = (e) => {
+    shadow.querySelector('#mtLaterBtn').onclick = (e) => {
       e.stopPropagation();
       closePrompt(true);
     };
 
-    modalBackdrop.querySelector('#mtAuthPromptConnectBtn').onclick = () => {
+    shadow.querySelector('#mtConnectBtn').onclick = () => {
+      if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        chrome.storage.local.remove(['mt_is_logged_out']);
+      }
       setTimeout(() => {
         closePrompt(false);
       }, 500);
     };
 
-    modalBackdrop.onclick = (e) => {
-      if (e.target === modalBackdrop) {
+    host.onclick = (e) => {
+      if (e.target === host) {
         closePrompt(true);
       }
     };
@@ -245,7 +436,7 @@
     };
     window.addEventListener('keydown', handleKeydown);
 
-    document.body.appendChild(modalBackdrop);
+    document.body.appendChild(host);
   }
 
   function checkAndShowAuthPrompt() {
@@ -731,8 +922,8 @@
         }
         incrementUnreadCount();
         fetchAllTrackedEmails(true);
-      } else if (message.type === 'AUTH_UPDATED') {
-        if (message.user) {
+      } else if (message.type === 'AUTH_UPDATED' || message.type === 'AUTH_STATUS_CHANGED') {
+        if (message.user && message.authenticated !== false) {
           currentAuthUser = message.user;
           if (ws && ws.readyState === WebSocket.OPEN && currentAuthUser.apiKey) {
             try {
@@ -741,11 +932,14 @@
           }
         } else {
           currentAuthUser = null;
+          try { sessionStorage.removeItem('mt_auth_alert_dismissed'); } catch {}
         }
         updateTopNavBtnAuthState();
         updateComposeButtonsAuthState();
         if (isUserAuthenticated()) {
           dismissAuthModal();
+        } else {
+          showAuthPromptModal(true);
         }
         if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
           renderNotificationsDropdown();
