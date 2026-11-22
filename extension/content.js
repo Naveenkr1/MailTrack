@@ -2348,8 +2348,9 @@
 
         const clickCount = Math.max(email.clickCount || 0, (email.clicks || []).length);
         const clickBadgeHtml = clickCount > 0 ? `
-          <span class="mt-notif-badge mt-badge-clicks" style="background:#ecfdf5;color:#059669;border:1px solid #a7f3d0;font-size:11px;font-weight:600;display:inline-flex;align-items:center;gap:3px;padding:1px 6px;border-radius:10px;">
-            🔗 ${clickCount} click${clickCount > 1 ? 's' : ''}
+          <span class="mt-notif-badge ${isUnread ? 'mt-badge-new' : 'mt-badge-gray'} mt-badge-clicks">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+            ${clickCount} click${clickCount > 1 ? 's' : ''}
           </span>
         ` : '';
 

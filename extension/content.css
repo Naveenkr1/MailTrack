@@ -901,6 +901,20 @@
   border: 1px solid #e2e8f0 !important;
 }
 
+/* Link count chip in Mail Track Activity: exact same style, font, size & colors as open count chip */
+.mt-notif-badge.mt-badge-clicks {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+}
+
+.mt-notif-badge.mt-badge-clicks svg {
+  display: inline-block !important;
+  vertical-align: middle !important;
+  flex-shrink: 0 !important;
+  color: inherit !important;
+}
+
 .mt-notif-red-dot {
   position: absolute;
   top: -3px;
