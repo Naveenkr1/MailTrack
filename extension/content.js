@@ -117,7 +117,9 @@
           } else {
             showAuthPromptModal(true);
           }
-          if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
+          if (!isUserAuthenticated()) {
+            closeTopNavDropdown();
+          } else if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
             renderNotificationsDropdown();
           }
         });
@@ -490,19 +492,24 @@
 
     if (!isAuth) {
       navBtn.classList.add('unlinked');
-      navBtn.title = 'Mail Track: Not Connected — Click to connect your Google account';
+      navBtn.title = 'Mail Track: Logged Out — Click to Log In';
       if (container) {
         container.classList.add('unlinked');
-        container.style.setProperty('background', '#94a3b8', 'important');
+        container.style.setProperty('background', '#9ca3af', 'important');
+        container.style.setProperty('filter', 'grayscale(1)', 'important');
+        container.style.setProperty('opacity', '0.85', 'important');
       }
       if (unlinkedDot) unlinkedDot.style.setProperty('display', 'block', 'important');
       updateNavBadgeCount(0);
+      closeTopNavDropdown();
     } else {
       navBtn.classList.remove('unlinked');
       navBtn.title = 'Mail Track Activity & Notifications';
       if (container) {
         container.classList.remove('unlinked');
         container.style.setProperty('background', '#059669', 'important');
+        container.style.removeProperty('filter');
+        container.style.removeProperty('opacity');
       }
       if (unlinkedDot) unlinkedDot.style.setProperty('display', 'none', 'important');
       updateNavBadgeCount(unreadNotificationsCount);
@@ -975,7 +982,9 @@
         } else {
           showAuthPromptModal(true);
         }
-        if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
+        if (!isUserAuthenticated()) {
+          closeTopNavDropdown();
+        } else if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
           renderNotificationsDropdown();
         }
         fetchAllTrackedEmails(true);
@@ -2814,6 +2823,12 @@
     const btn = document.getElementById('mt-topnav-btn');
     if (!btn) return;
 
+    if (!isUserAuthenticated()) {
+      closeTopNavDropdown();
+      showAuthPromptModal(true);
+      return;
+    }
+
     if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
       closeTopNavDropdown();
     } else {
@@ -2932,14 +2947,14 @@
     navBtn = document.createElement('div');
     navBtn.id = 'mt-topnav-btn';
     navBtn.className = `mt-topnav-btn ${isAuth ? '' : 'unlinked'}`;
-    navBtn.title = isAuth ? 'Mail Track Activity & Notifications' : 'Mail Track: Not Connected — Click to connect your Google account';
+    navBtn.title = isAuth ? 'Mail Track Activity & Notifications' : 'Mail Track: Logged Out — Click to Log In';
     navBtn.setAttribute('role', 'button');
-    navBtn.setAttribute('aria-label', isAuth ? 'Mail Track Activity & Notifications' : 'Mail Track: Not Connected — Click to connect your Google account');
+    navBtn.setAttribute('aria-label', isAuth ? 'Mail Track Activity & Notifications' : 'Mail Track: Logged Out — Click to Log In');
     navBtn.setAttribute('tabindex', '0');
     navBtn.setAttribute('data-node-id', '188:9972');
     navBtn.setAttribute('data-name', 'Track Mail Butotn');
     navBtn.innerHTML = `
-      <div class="mt-nav-container ${isAuth ? '' : 'unlinked'}" style="background: ${isAuth ? '#059669' : '#94a3b8'} !important;" data-node-id="188:9973" data-name="Container" title="${isAuth ? 'Mail Track Activity' : 'Mail Track: Not Connected'}">
+      <div class="mt-nav-container ${isAuth ? '' : 'unlinked'}" style="background: ${isAuth ? '#059669' : '#9ca3af'} !important; ${isAuth ? '' : 'filter: grayscale(1) !important; opacity: 0.85 !important;'}" data-node-id="188:9973" data-name="Container" title="${isAuth ? 'Mail Track Activity' : 'Mail Track: Logged Out — Click to Log In'}">
         <svg class="mt-nav-svg" width="18" height="18" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" data-node-id="188:9974" data-name="Frame">
           <path d="M12.5688 14.9068L14.0985 16.4364L23.2695 7.26537L24.8016 8.79743L14.0985 19.5005L7.20417 12.6062L8.73623 11.0742L11.0381 13.376L12.5688 14.9068ZM12.5707 11.8434L17.936 6.47799L19.4638 8.0058L14.0985 13.3711L12.5707 11.8434ZM9.5084 17.9698L7.97762 19.5005L1.08333 12.6062L2.61539 11.0742L4.14617 12.605L4.14488 12.6062L9.5084 17.9698Z" fill="white"/>
         </svg>
@@ -2954,12 +2969,22 @@
 
     navBtn.onclick = (e) => {
       e.stopPropagation();
+      if (!isUserAuthenticated()) {
+        closeTopNavDropdown();
+        showAuthPromptModal(true);
+        return;
+      }
       toggleTopNavDropdown();
     };
 
     navBtn.onkeydown = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
+        if (!isUserAuthenticated()) {
+          closeTopNavDropdown();
+          showAuthPromptModal(true);
+          return;
+        }
         toggleTopNavDropdown();
       }
     };

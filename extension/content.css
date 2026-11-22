@@ -1359,27 +1359,31 @@ a[title="✓"]:not(.mt-tick-container *), a[title="✓✓"]:not(.mt-tick-contain
 /* Top Nav Button Unlinked / Not Logged In: Gray squircle */
 .mt-topnav-btn.unlinked .mt-nav-container,
 .mt-nav-container.unlinked {
-  background: #94a3b8 !important; /* Neutral slate gray */
+  background: #9ca3af !important; /* Neutral gray */
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) !important;
+  filter: grayscale(1) !important;
+  opacity: 0.85 !important;
 }
 
 .mt-topnav-btn.unlinked:hover .mt-nav-container {
-  background: #64748b !important;
+  background: #6b7280 !important;
   transform: scale(1.05) !important;
+  filter: grayscale(1) !important;
+  opacity: 1 !important;
 }
 
 .mt-topnav-btn.unlinked.active .mt-nav-container {
-  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.6) !important;
+  box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.6) !important;
 }
 
-/* Subtle attention dot on top-right of unlinked topnav button */
+/* Attention dot on top-right of unlinked topnav button */
 .mt-nav-unlinked-dot {
   position: absolute !important;
   top: -2px !important;
   right: -2px !important;
   width: 8px !important;
   height: 8px !important;
-  background: #f59e0b !important;
+  background: #ef4444 !important; /* Attention red indicator */
   border: 1.5px solid #ffffff !important;
   border-radius: 50% !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25) !important;
