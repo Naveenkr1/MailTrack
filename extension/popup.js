@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loggedOutView = document.getElementById('loggedOutView');
   const loggedInView = document.getElementById('loggedInView');
   const loadingView = document.getElementById('loadingView');
-  const serverStatus = document.getElementById('serverStatus');
   const loginBtn = document.getElementById('loginBtn');
   const openDashboardBtn = document.getElementById('openDashboardBtn');
   const openGmailBtn = document.getElementById('openGmailBtn');
@@ -87,11 +86,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const res = await fetch(`${sUrl}/auth/me`, { 
       credentials: 'include' 
     });
-    
-    if (serverStatus) {
-      serverStatus.textContent = 'Online';
-      serverStatus.className = 'status-pill connected';
-    }
 
     if (res.status === 429) {
       chrome.storage.local.get(['mt_user'], (items) => {
@@ -123,10 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   } catch (err) {
-    if (serverStatus) {
-      serverStatus.textContent = 'Offline';
-      serverStatus.className = 'status-pill offline';
-    }
     chrome.storage.local.get(['mt_user'], (items) => {
       if (items.mt_user && items.mt_user.email) {
         handleLoggedIn(items.mt_user);
@@ -212,45 +202,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
           handleLoggedOut();
         }
-      });
-    };
-  }
-
-  // 5. Host Environment Switcher (Cloud vs Localhost)
-  const envProdBtn = document.getElementById('envProdBtn');
-  const envLocalBtn = document.getElementById('envLocalBtn');
-
-  function updateEnvUI(mode) {
-    if (!envProdBtn || !envLocalBtn) return;
-    if (mode === 'localhost') {
-      envLocalBtn.classList.add('active');
-      envProdBtn.classList.remove('active');
-    } else {
-      envProdBtn.classList.add('active');
-      envLocalBtn.classList.remove('active');
-    }
-  }
-
-  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['mt_server_mode'], (items) => {
-      updateEnvUI(items.mt_server_mode || 'production');
-    });
-  }
-
-  if (envProdBtn) {
-    envProdBtn.onclick = () => {
-      updateEnvUI('production');
-      chrome.runtime.sendMessage({ action: 'SET_SERVER_MODE', mode: 'production' }, () => {
-        window.location.reload();
-      });
-    };
-  }
-
-  if (envLocalBtn) {
-    envLocalBtn.onclick = () => {
-      updateEnvUI('localhost');
-      chrome.runtime.sendMessage({ action: 'SET_SERVER_MODE', mode: 'localhost' }, () => {
-        window.location.reload();
       });
     };
   }
