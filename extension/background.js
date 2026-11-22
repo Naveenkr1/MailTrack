@@ -102,10 +102,10 @@ if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onInstalle
     if (details.reason === 'install') {
       try {
         const serverUrl = await getActiveServerUrl();
-        const targetUrl = `${serverUrl || PROD_SERVER_URL}/auth/google?flow_src=extension&installed=true`;
+        const targetUrl = `${serverUrl || PROD_SERVER_URL}/login`;
         chrome.tabs.create({ url: targetUrl });
       } catch (e) {
-        chrome.tabs.create({ url: `${PROD_SERVER_URL}/auth/google?flow_src=extension&installed=true` });
+        chrome.tabs.create({ url: `${PROD_SERVER_URL}/login` });
       }
     }
   });

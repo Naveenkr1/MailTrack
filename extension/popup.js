@@ -121,7 +121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.runtime.sendMessage({ action: 'CLEAR_LOGGED_OUT_STATE' });
       } catch {}
       const sUrl = await getServerUrl();
-      chrome.tabs.create({ url: `${sUrl}/auth/google?flow_src=extension` });
+      chrome.tabs.create({ url: `${sUrl}/login` });
       window.close();
     };
   }

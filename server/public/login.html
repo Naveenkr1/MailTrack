@@ -711,11 +711,18 @@
         mobileSyncNotice.style.display = isMobile ? 'block' : 'none';
       }
       let target = isMobile ? '/auth/google?flow=mobile_sync' : '/auth/google';
-      if (flow === 'extension') {
+      const isExt = flow === 'extension' || document.documentElement.getAttribute('data-mailtrack-extension-installed') === 'true';
+      if (isExt) {
         target += (isMobile ? '&ext=1' : '?flow=extension');
       }
       if (googleBtn) googleBtn.href = target;
     }
+
+    window.addEventListener('message', (event) => {
+      if (event.data && event.data.type === 'MAILTRACK_EXTENSION_PONG') {
+        updateGoogleBtnUrl();
+      }
+    });
 
     if (mobileToggle) {
       mobileToggle.addEventListener('change', () => {
