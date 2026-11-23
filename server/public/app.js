@@ -1679,6 +1679,9 @@ document.addEventListener('DOMContentLoaded', () => {
     events.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
     if (events.length === 0) {
+      if (activityFeedList.dataset.isEmpty === 'true') return;
+      activityFeedList.dataset.isEmpty = 'true';
+      activityFeedList.dataset.renderedHtml = '';
       activityFeedList.innerHTML = `
         <div class="activity-empty-state">
           <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1691,8 +1694,9 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
       return;
     }
+    activityFeedList.dataset.isEmpty = 'false';
 
-    activityFeedList.innerHTML = events.map(evt => {
+    const renderedHtml = events.map(evt => {
       const isClick = evt.type === 'click';
       const timeStr = formatFullDateTime(evt.timestamp);
       return `
@@ -1719,6 +1723,16 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
       `;
     }).join('');
+
+    if (activityFeedList.dataset.renderedHtml === renderedHtml) {
+      return;
+    }
+    const prevScrollY = window.scrollY;
+    activityFeedList.dataset.renderedHtml = renderedHtml;
+    activityFeedList.innerHTML = renderedHtml;
+    if (prevScrollY > 0) {
+      window.scrollTo({ top: prevScrollY, behavior: 'instant' });
+    }
 
     activityFeedList.querySelectorAll('.activity-feed-item').forEach(item => {
       item.onclick = () => openEmailDetails(item.dataset.emailId);

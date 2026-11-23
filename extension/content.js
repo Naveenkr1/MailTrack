@@ -2639,7 +2639,38 @@
     topNavDropdownEl.style.setProperty('max-height', `${maxHeight}px`, 'important');
   }
 
-  function renderNotificationsDropdown() {
+  let savedDropdownScrollTop = 0;
+  let isUserInteractingWithDropdown = false;
+  let dropdownInteractionTimer = null;
+
+  function bindDropdownItemClicks() {
+    if (!topNavDropdownEl) return;
+    topNavDropdownEl.querySelectorAll('.mt-notif-item').forEach(item => {
+      item.onclick = (e) => {
+        e.stopPropagation();
+        const emailId = item.getAttribute('data-email-id');
+        if (emailId) {
+          window.open(`${getServerUrl()}/app?emailId=${encodeURIComponent(emailId)}`, '_blank');
+          closeTopNavDropdown();
+        }
+      };
+    });
+  }
+
+  function bindDropdownListScroll(listEl) {
+    if (!listEl || listEl._hasScrollBound) return;
+    listEl._hasScrollBound = true;
+    listEl.addEventListener('scroll', () => {
+      savedDropdownScrollTop = listEl.scrollTop;
+      isUserInteractingWithDropdown = true;
+      clearTimeout(dropdownInteractionTimer);
+      dropdownInteractionTimer = setTimeout(() => {
+        isUserInteractingWithDropdown = false;
+      }, 1500);
+    }, { passive: true });
+  }
+
+  function renderNotificationsDropdown(force = false) {
     if (!topNavDropdownEl) {
       topNavDropdownEl = document.createElement('div');
       topNavDropdownEl.id = 'mtTopNavDropdown';
@@ -2652,6 +2683,20 @@
       topNavDropdownEl.addEventListener('mousedown', (e) => {
         e.stopPropagation();
       });
+      topNavDropdownEl.addEventListener('mouseenter', () => {
+        isUserInteractingWithDropdown = true;
+      });
+      topNavDropdownEl.addEventListener('mouseleave', () => {
+        clearTimeout(dropdownInteractionTimer);
+        dropdownInteractionTimer = setTimeout(() => {
+          isUserInteractingWithDropdown = false;
+        }, 800);
+      });
+    }
+
+    // When dropdown is already visible, if user is actively interacting/scrolling, defer re-rendering to prevent scroll jumps
+    if (!force && isUserInteractingWithDropdown && topNavDropdownEl.classList.contains('visible')) {
+      return;
     }
 
     // Sort all tracked emails by newest activity timestamp descending
@@ -2764,6 +2809,20 @@
     const isAuth = isUserAuthenticated();
     const dropdownHeaderIconColor = isAuth ? '#059669' : '#94a3b8';
 
+    // If dropdown list element already exists and user is authenticated, update in-place preserving exact scroll offset
+    const existingList = topNavDropdownEl.querySelector('.mt-dropdown-list');
+    if (isAuth && existingList) {
+      if (existingList.innerHTML === itemsHtml) {
+        return; // Zero changes, zero DOM thrash, zero scroll jumps
+      }
+      const prevScroll = existingList.scrollTop || savedDropdownScrollTop;
+      existingList.innerHTML = itemsHtml;
+      existingList.scrollTop = prevScroll;
+      bindDropdownItemClicks();
+      bindDropdownListScroll(existingList);
+      return;
+    }
+
     let contentBodyHtml = '';
     if (!isAuth) {
       contentBodyHtml = `
@@ -2831,6 +2890,7 @@
       `;
     }
 
+    const prevScroll = savedDropdownScrollTop;
     topNavDropdownEl.innerHTML = `
       <div class="mt-dropdown-header">
         <div class="mt-dh-left">
@@ -2870,17 +2930,18 @@
       };
     }
 
-    // Clicking any activity item opens that email's detailed page in a new tab
-    topNavDropdownEl.querySelectorAll('.mt-notif-item').forEach(item => {
-      item.onclick = (e) => {
-        e.stopPropagation();
-        const emailId = item.getAttribute('data-email-id');
-        if (emailId) {
-          window.open(`${getServerUrl()}/app?emailId=${encodeURIComponent(emailId)}`, '_blank');
-          closeTopNavDropdown();
-        }
-      };
-    });
+    const listEl = topNavDropdownEl.querySelector('.mt-dropdown-list');
+    if (listEl) {
+      bindDropdownListScroll(listEl);
+      if (prevScroll > 0) {
+        listEl.scrollTop = prevScroll;
+      }
+      requestAnimationFrame(() => {
+        if (listEl && prevScroll > 0) listEl.scrollTop = prevScroll;
+      });
+    }
+
+    bindDropdownItemClicks();
   }
 
   function toggleTopNavDropdown() {
@@ -2896,7 +2957,9 @@
     if (topNavDropdownEl && topNavDropdownEl.classList.contains('visible')) {
       closeTopNavDropdown();
     } else {
-      renderNotificationsDropdown();
+      savedDropdownScrollTop = 0;
+      isUserInteractingWithDropdown = false;
+      renderNotificationsDropdown(true);
       positionDropdown(btn);
       topNavDropdownEl.classList.add('visible');
       btn.classList.add('active');
@@ -2932,6 +2995,9 @@
   }
 
   function closeTopNavDropdown() {
+    savedDropdownScrollTop = 0;
+    isUserInteractingWithDropdown = false;
+    clearTimeout(dropdownInteractionTimer);
     if (topNavDropdownEl) {
       topNavDropdownEl.classList.remove('visible');
       topNavDropdownEl.querySelectorAll('.mt-notif-badge.mt-badge-new').forEach(badge => {
